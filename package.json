@@ -1,0 +1,1 @@
+{"name":"boothill-system","private":true,"type":"module","scripts":{"test":"node --test"}}

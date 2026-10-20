@@ -1,0 +1,13 @@
+<section class="bh-page">
+<header><img src="{{actor.img}}" alt="Retrato" data-action="showPortraitArtwork"><div><p class="kicker">BOOT HILL · 3ª EDIÇÃO</p><input aria-label="Nome do personagem" name="name" value="{{actor.name}}" {{#unless editable}}disabled{{/unless}}><p>Personagem de jogador</p></div></header>
+<fieldset {{#unless editable}}disabled{{/unless}}><legend>Atributos</legend>
+<div class="attributes">{{#each attributes}}<label>{{label}}<input name="system.attributes.{{id}}" type="number" min="0" step="1" value="{{value}}"><button type="button" data-action="check" data-group="attributes" data-id="{{id}}">Testar d20</button></label>{{/each}}</div>
+<button type="button" data-action="generate">Gerar atributos · método 1</button>
+<p class="hint">Criação: Força, Coordenação e Observação 2–20; Estatura e Sorte 1–10. Experiência pode superar esses limites.</p></fieldset>
+<aside><strong>Soma: {{summary.total}}</strong> · Escolhas iniciais: {{summary.used}} / {{#if summary.budget}}{{summary.budget}}{{else}}—{{/if}} · Escolhas de armas: {{summary.weapon}}{{#each summary.warnings}}<p role="status">{{this}}</p>{{/each}}</aside>
+<p class="hint">Nível 0 = não aprendida. Cada nível de arma custa uma escolha. Avisos de criação não impedem evolução.</p>
+<div class="bh-skills">
+<fieldset {{#unless editable}}disabled{{/unless}}><legend>Perícias de armas</legend><p class="hint">Bônus ao número de acerto, começando em 1 por escolha. Ataques serão implementados na etapa de combate.</p>{{#each weapons}}<label class="row"><span>{{label}}</span><input aria-label="Nível de {{label}}" type="number" min="0" step="1" name="system.skills.{{id}}" value="{{value}}"></label>{{/each}}</fieldset>
+<fieldset {{#unless editable}}disabled{{/unless}}><legend>Perícias de trabalho</legend>{{#each work}}<div class="row"><label for="{{@root.actor.id}}-{{id}}">{{label}}</label><input id="{{@root.actor.id}}-{{id}}" type="number" min="0" step="1" name="system.skills.{{id}}" value="{{value}}"><button type="button" data-action="generateSkill" data-id="{{id}}" title="Gerar nível">2d10</button><button type="button" data-action="check" data-group="skills" data-id="{{id}}">Testar</button></div>{{/each}}</fieldset>
+</div><footer class="hint">Teste: d20 ≤ nível + modificador. Resultados extremos exigem confirmação de Sorte.</footer>
+</section>
