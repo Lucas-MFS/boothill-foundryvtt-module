@@ -18,4 +18,8 @@ PDF fornecido pelo usuário, páginas físicas 5–17. O livro anuncia 57 períc
 
 ## Verificação
 
-`npm test` executa testes de geração, escolhas iniciais e Sorte com Node.js 20+. Esta versão ainda precisa de validação visual e de persistência em um mundo de teste no Foundry 13. Nenhuma instalação remota é feita pelos arquivos do projeto.
+`npm test` executa testes de geração, escolhas iniciais e Sorte com Node.js 20+. A ficha foi conferida no mundo Boothill da VM (Foundry 13.351), com edição de identificação, atributo e perícia e testes d20 no chat. Nenhuma instalação remota é feita automaticamente pelos arquivos do projeto.
+
+## Interface 0.1.1
+
+Layout inspirado na ficha HTML fornecida pelo usuário: identificação com jogador, idade e ambidestria; atributos e armas em listas compactas; perícias de trabalho em três colunas. Clique no nome para testar e no pequeno dado para gerar um nível. As opções de criação ficam recolhidas no fim da ficha. Os campos existentes de atributos e perícias mantêm os mesmos caminhos de dados.

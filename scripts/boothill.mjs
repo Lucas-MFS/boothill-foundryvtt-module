@@ -1,18 +1,21 @@
 import {ATTRIBUTES,SKILLS,generatedScore,creationSummary,needsLuck,succeeds} from './rules.mjs';
 class CharacterData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
-    const {SchemaField,NumberField}=foundry.data.fields;
+    const {SchemaField,NumberField,StringField,BooleanField}=foundry.data.fields;
     const level=()=>new NumberField({required:true,nullable:false,integer:true,min:0,initial:0});
-    return {attributes:new SchemaField(Object.fromEntries(Object.keys(ATTRIBUTES).map(id=>[id,level()]))),skills:new SchemaField(Object.fromEntries(SKILLS.map(s=>[s.id,level()])))};
+    return {identity:new SchemaField({player:new StringField({initial:''}),age:level(),ambidextrous:new BooleanField({initial:false})}),attributes:new SchemaField(Object.fromEntries(Object.keys(ATTRIBUTES).map(id=>[id,level()]))),skills:new SchemaField(Object.fromEntries(SKILLS.map(s=>[s.id,level()])))};
   }
 }
 export class CharacterSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
-  static DEFAULT_OPTIONS={classes:['boothill'],tag:'form',position:{width:820,height:780},form:{submitOnChange:true,closeOnSubmit:false},actions:{check:CharacterSheet.check,generate:CharacterSheet.generate,generateSkill:CharacterSheet.generateSkill}};
-  static PARTS={main:{template:'systems/boothill/templates/character.hbs',scrollable:['.bh-skills']}};
+  get title() { return `Personagem: ${this.actor.name}`; }
+  static DEFAULT_OPTIONS={classes:['boothill'],tag:'form',position:{width:860,height:800},form:{submitOnChange:true,closeOnSubmit:false},actions:{check:CharacterSheet.check,generate:CharacterSheet.generate,generateSkill:CharacterSheet.generateSkill}};
+  static PARTS={main:{template:'systems/boothill/templates/character.hbs',scrollable:['.bh-body']}};
   async _prepareContext(options) {
     const context=await super._prepareContext(options),{attributes,skills}=this.actor.system;
     const rows=SKILLS.map(s=>({...s,value:skills[s.id]}));
-    return {...context,actor:this.actor,editable:this.isEditable,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,value:attributes[id]})),work:rows.filter(s=>s.kind==='work'),weapons:rows.filter(s=>s.kind==='weapon'),summary:creationSummary(attributes,skills)};
+    const icons={strength:'hand-fist',coordination:'crosshairs',observation:'eye',stature:'person',luck:'clover'};
+    const work=rows.filter(s=>s.kind==='work');
+    return {...context,actor:this.actor,editable:this.isEditable,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,icon:icons[id],value:attributes[id]})),workColumns:[work.slice(0,19),work.slice(19,38),work.slice(38)],weapons:rows.filter(s=>s.kind==='weapon'),summary:creationSummary(attributes,skills)};
   }
   static async generate() {
     if(!this.isEditable) return;

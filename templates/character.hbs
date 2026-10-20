@@ -1,13 +1,50 @@
 <section class="bh-page">
-<header><img src="{{actor.img}}" alt="Retrato" data-action="showPortraitArtwork"><div><p class="kicker">BOOT HILL · 3ª EDIÇÃO</p><input aria-label="Nome do personagem" name="name" value="{{actor.name}}" {{#unless editable}}disabled{{/unless}}><p>Personagem de jogador</p></div></header>
-<fieldset {{#unless editable}}disabled{{/unless}}><legend>Atributos</legend>
-<div class="attributes">{{#each attributes}}<label>{{label}}<input name="system.attributes.{{id}}" type="number" min="0" step="1" value="{{value}}"><button type="button" data-action="check" data-group="attributes" data-id="{{id}}">Testar d20</button></label>{{/each}}</div>
-<button type="button" data-action="generate">Gerar atributos · método 1</button>
-<p class="hint">Criação: Força, Coordenação e Observação 2–20; Estatura e Sorte 1–10. Experiência pode superar esses limites.</p></fieldset>
-<aside><strong>Soma: {{summary.total}}</strong> · Escolhas iniciais: {{summary.used}} / {{#if summary.budget}}{{summary.budget}}{{else}}—{{/if}} · Escolhas de armas: {{summary.weapon}}{{#each summary.warnings}}<p role="status">{{this}}</p>{{/each}}</aside>
-<p class="hint">Nível 0 = não aprendida. Cada nível de arma custa uma escolha. Avisos de criação não impedem evolução.</p>
-<div class="bh-skills">
-<fieldset {{#unless editable}}disabled{{/unless}}><legend>Perícias de armas</legend><p class="hint">Bônus ao número de acerto, começando em 1 por escolha. Ataques serão implementados na etapa de combate.</p>{{#each weapons}}<label class="row"><span>{{label}}</span><input aria-label="Nível de {{label}}" type="number" min="0" step="1" name="system.skills.{{id}}" value="{{value}}"></label>{{/each}}</fieldset>
-<fieldset {{#unless editable}}disabled{{/unless}}><legend>Perícias de trabalho</legend>{{#each work}}<div class="row"><label for="{{@root.actor.id}}-{{id}}">{{label}}</label><input id="{{@root.actor.id}}-{{id}}" type="number" min="0" step="1" name="system.skills.{{id}}" value="{{value}}"><button type="button" data-action="generateSkill" data-id="{{id}}" title="Gerar nível">2d10</button><button type="button" data-action="check" data-group="skills" data-id="{{id}}">Testar</button></div>{{/each}}</fieldset>
-</div><footer class="hint">Teste: d20 ≤ nível + modificador. Resultados extremos exigem confirmação de Sorte.</footer>
+  <header class="bh-header">
+    <button class="bh-portrait" type="button" data-action="showPortraitArtwork" aria-label="Ver retrato"><img src="{{actor.img}}" alt="Retrato de {{actor.name}}"></button>
+    <div class="bh-identity">
+      <div class="bh-name-line"><label class="bh-name">Nome do personagem<input name="name" value="{{actor.name}}" {{#unless editable}}disabled{{/unless}}></label><span class="bh-wordmark">BOOT HILL<small>3ª edição</small></span></div>
+      <div class="bh-personal">
+        <label>Jogador<input name="system.identity.player" value="{{actor.system.identity.player}}" {{#unless editable}}disabled{{/unless}}></label>
+        <label class="bh-age">Idade<input type="number" min="0" step="1" name="system.identity.age" value="{{actor.system.identity.age}}" {{#unless editable}}disabled{{/unless}}></label>
+        <label class="bh-handed"><input type="checkbox" name="system.identity.ambidextrous" {{checked actor.system.identity.ambidextrous}} {{#unless editable}}disabled{{/unless}}> Ambidestro</label>
+      </div>
+    </div>
+  </header>
+  <div class="bh-section-strip">Ficha de personagem <span>Atributos & perícias</span></div>
+  <div class="bh-body">
+    <div class="bh-top-grid">
+      <section class="bh-section" aria-label="Atributos">
+        <h2>Atributos <span>Nível</span></h2>
+        {{#each attributes}}
+        <div class="bh-stat-row"><button type="button" class="bh-roll-name" data-action="check" data-group="attributes" data-id="{{id}}" title="Testar {{label}} · d20" {{#unless @root.editable}}disabled{{/unless}}><i class="fas fa-{{icon}}" aria-hidden="true"></i>{{label}}</button><input aria-label="Nível de {{label}}" name="system.attributes.{{id}}" type="number" min="0" step="1" value="{{value}}" {{#unless @root.editable}}disabled{{/unless}}></div>
+        {{/each}}
+      </section>
+      <section class="bh-section" aria-label="Perícias de armas">
+        <h2>Perícias de armas <span>Nível</span></h2>
+        {{#each weapons}}
+        <label class="bh-stat-row"><span class="bh-weapon-name">{{label}}</span><input aria-label="Nível de {{label}}" name="system.skills.{{id}}" type="number" min="0" step="1" value="{{value}}" {{#unless @root.editable}}disabled{{/unless}}></label>
+        {{/each}}
+        <p class="bh-note">O nível de arma é somado ao número de acerto.</p>
+      </section>
+    </div>
+    <section class="bh-section bh-work" aria-label="Perícias de trabalho">
+      <h2>Perícias de trabalho <span>Clique no nome para testar</span></h2>
+      <div class="bh-work-grid">
+      {{#each workColumns}}<div class="bh-work-column">
+        {{#each this}}<div class="bh-skill-row {{#if value}}bh-trained{{/if}}"><button type="button" class="bh-roll-name" data-action="check" data-group="skills" data-id="{{id}}" title="Testar {{label}} · d20" {{#unless @root.editable}}disabled{{/unless}}>{{label}}</button><input aria-label="Nível de {{label}}" type="number" min="0" step="1" name="system.skills.{{id}}" value="{{value}}" {{#unless @root.editable}}disabled{{/unless}}><button type="button" class="bh-generate-skill" data-action="generateSkill" data-id="{{id}}" aria-label="Gerar nível de {{label}} com 2d10" title="Gerar nível · 2d10" {{#unless @root.editable}}disabled{{/unless}}><i class="fas fa-dice" aria-hidden="true"></i></button></div>{{/each}}
+      </div>{{/each}}
+      </div>
+      <p class="bh-note">0 = não aprendida · Testes: d20 igual ou menor que o nível, com o modificador do Juiz.</p>
+    </section>
+    <details class="bh-creation">
+      <summary>Criação do personagem <span>{{summary.used}}{{#if summary.budget}} / {{summary.budget}}{{/if}} escolhas</span></summary>
+      <div class="bh-creation-content">
+        <button type="button" class="bh-generate" data-action="generate" {{#unless editable}}disabled{{/unless}}><i class="fas fa-dice" aria-hidden="true"></i> Gerar os cinco atributos</button>
+        <p>Método 1: 2d10 com os modificadores da tabela. Estatura e Sorte são divididas por dois, arredondando para cima.</p>
+        <dl><div><dt>Soma dos atributos</dt><dd>{{summary.total}}</dd></div><div><dt>Escolhas de armas</dt><dd>{{summary.weapon}}</dd></div></dl>
+        <p>Cada perícia de trabalho custa uma escolha; cada nível de arma também. No máximo metade das escolhas iniciais pode ser de armas.</p>
+        {{#each summary.warnings}}<p class="bh-warning" role="status">{{this}}</p>{{/each}}
+      </div>
+    </details>
+  </div>
 </section>
