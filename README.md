@@ -23,3 +23,7 @@ PDF fornecido pelo usuário, páginas físicas 5–17. O livro anuncia 57 períc
 ## Interface 0.1.1
 
 Layout inspirado na ficha HTML fornecida pelo usuário: identificação com jogador, idade e ambidestria; atributos e armas em listas compactas; perícias de trabalho em três colunas. Clique no nome para testar e no pequeno dado para gerar um nível. As opções de criação ficam recolhidas no fim da ficha. Os campos existentes de atributos e perícias mantêm os mesmos caminhos de dados.
+
+## Interface 0.1.2
+
+Os cinco atributos agora aparecem lado a lado com valores maiores. A engrenagem junto ao título de perícias de trabalho alterna entre seleção de treinamento e exibição apenas das treinadas. A seleção fica salva por personagem em `system.trained`; desmarcar não apaga níveis. Fichas antigas reconhecem automaticamente como treinadas as perícias com nível acima de zero até uma seleção explícita. A contagem de escolhas e os pré-requisitos consideram essa seleção.

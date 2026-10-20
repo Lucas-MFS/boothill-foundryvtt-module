@@ -21,7 +21,15 @@
 .boothill .bh-section-strip { padding:7px 24px; border-top:1px solid var(--bh-ink); border-bottom:1px solid var(--bh-ink); display:flex; justify-content:space-between; font:bold 12px Georgia,serif; }
 .boothill .bh-section-strip span { font:11px Arial,sans-serif; color:var(--bh-muted); }
 .boothill .bh-body { overflow-y:auto; min-height:0; padding:18px 24px 24px; scrollbar-width:thin; }
-.boothill .bh-top-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-bottom:20px; }
+.boothill .bh-top-grid { display:grid; grid-template-columns:1fr; gap:20px; margin-bottom:20px; }
+.boothill .bh-attribute-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); padding-top:12px; }
+.boothill .bh-attribute { text-align:center; border-right:1px solid var(--bh-rule); padding:4px 8px 8px; }
+.boothill .bh-attribute:last-child { border-right:0; }
+.boothill .bh-attribute .bh-roll-name { justify-content:center; width:100%; font-size:14px; font-weight:bold; }
+.boothill .bh-attribute input { height:64px; width:100%; font:bold 46px/1 Georgia,serif; text-align:center; border:0; }
+.boothill .bh-weapons { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); column-gap:18px; }
+.boothill .bh-weapons h2,.boothill .bh-weapons .bh-note { grid-column:1/-1; }
+.boothill .bh-weapons h2 > span { display:none; }
 .boothill .bh-section h2 { display:flex; align-items:baseline; justify-content:space-between; gap:10px; border:0; border-bottom:2px solid var(--bh-ink); margin:0; padding:0 0 5px; font:bold 17px/1.4 Georgia,serif; color:var(--bh-ink); }
 .boothill .bh-section h2 > span { font:10px Arial,sans-serif; color:var(--bh-muted); }
 .boothill .bh-stat-row { display:flex; align-items:center; gap:8px; height:32px; border-bottom:1px solid var(--bh-rule); margin:0; }
@@ -31,6 +39,11 @@
 .boothill .bh-weapon-name { flex:1; padding-left:2px; }
 .boothill .bh-note { color:var(--bh-muted); font-size:10px; margin:7px 0 0; }
 .boothill .bh-work-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); column-gap:22px; }
+.boothill .bh-section h2 .bh-work-title { display:flex; align-items:center; gap:8px; font:inherit; color:inherit; }
+.boothill .bh-skill-settings { width:25px; height:25px; min-height:0; padding:0; border:0; background:transparent; box-shadow:none; color:var(--bh-muted); font-size:14px; cursor:pointer; }
+.boothill .bh-skill-settings.active { color:var(--bh-accent); background:#5e392b14; }
+.boothill .bh-skill-row input[type=checkbox] { flex:0 0 14px; width:14px; height:14px; }
+.boothill .bh-empty { color:var(--bh-muted); font-size:12px; margin:14px 0; }
 .boothill .bh-skill-row { display:flex; align-items:center; gap:4px; border-bottom:1px solid #d6d3c9; min-height:29px; color:#6c6a60; }
 .boothill .bh-skill-row .bh-roll-name { font-size:11px; line-height:1.3; }
 .boothill .bh-skill-row.bh-trained { color:var(--bh-ink); }

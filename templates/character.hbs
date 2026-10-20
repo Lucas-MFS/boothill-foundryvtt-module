@@ -13,13 +13,15 @@
   <div class="bh-section-strip">Ficha de personagem <span>Atributos & perícias</span></div>
   <div class="bh-body">
     <div class="bh-top-grid">
-      <section class="bh-section" aria-label="Atributos">
-        <h2>Atributos <span>Nível</span></h2>
+      <section class="bh-section bh-attributes" aria-label="Atributos">
+        <h2>Atributos</h2>
+        <div class="bh-attribute-grid">
         {{#each attributes}}
-        <div class="bh-stat-row"><button type="button" class="bh-roll-name" data-action="check" data-group="attributes" data-id="{{id}}" title="Testar {{label}} · d20" {{#unless @root.editable}}disabled{{/unless}}><i class="fas fa-{{icon}}" aria-hidden="true"></i>{{label}}</button><input aria-label="Nível de {{label}}" name="system.attributes.{{id}}" type="number" min="0" step="1" value="{{value}}" {{#unless @root.editable}}disabled{{/unless}}></div>
+        <div class="bh-attribute"><button type="button" class="bh-roll-name" data-action="check" data-group="attributes" data-id="{{id}}" title="Testar {{label}} · d20" {{#unless @root.editable}}disabled{{/unless}}><i class="fas fa-{{icon}}" aria-hidden="true"></i>{{label}}</button><input aria-label="Nível de {{label}}" name="system.attributes.{{id}}" type="number" min="0" step="1" value="{{value}}" {{#unless @root.editable}}disabled{{/unless}}></div>
         {{/each}}
+        </div>
       </section>
-      <section class="bh-section" aria-label="Perícias de armas">
+      <section class="bh-section bh-weapons" aria-label="Perícias de armas">
         <h2>Perícias de armas <span>Nível</span></h2>
         {{#each weapons}}
         <label class="bh-stat-row"><span class="bh-weapon-name">{{label}}</span><input aria-label="Nível de {{label}}" name="system.skills.{{id}}" type="number" min="0" step="1" value="{{value}}" {{#unless @root.editable}}disabled{{/unless}}></label>
@@ -28,13 +30,14 @@
       </section>
     </div>
     <section class="bh-section bh-work" aria-label="Perícias de trabalho">
-      <h2>Perícias de trabalho <span>Clique no nome para testar</span></h2>
+      <h2><span class="bh-work-title">Perícias de trabalho <button type="button" class="bh-skill-settings {{#if editingSkills}}active{{/if}}" data-action="toggleSkills" aria-label="{{#if editingSkills}}Mostrar apenas perícias treinadas{{else}}Configurar perícias treinadas{{/if}}" aria-pressed="{{#if editingSkills}}true{{else}}false{{/if}}" title="{{#if editingSkills}}Concluir seleção{{else}}Selecionar perícias treinadas{{/if}}" {{#unless editable}}disabled{{/unless}}><i class="fas fa-gear" aria-hidden="true"></i></button></span><span>{{#if editingSkills}}Marque as perícias treinadas{{else}}Clique no nome para testar{{/if}}</span></h2>
       <div class="bh-work-grid">
       {{#each workColumns}}<div class="bh-work-column">
-        {{#each this}}<div class="bh-skill-row {{#if value}}bh-trained{{/if}}"><button type="button" class="bh-roll-name" data-action="check" data-group="skills" data-id="{{id}}" title="Testar {{label}} · d20" {{#unless @root.editable}}disabled{{/unless}}>{{label}}</button><input aria-label="Nível de {{label}}" type="number" min="0" step="1" name="system.skills.{{id}}" value="{{value}}" {{#unless @root.editable}}disabled{{/unless}}><button type="button" class="bh-generate-skill" data-action="generateSkill" data-id="{{id}}" aria-label="Gerar nível de {{label}} com 2d10" title="Gerar nível · 2d10" {{#unless @root.editable}}disabled{{/unless}}><i class="fas fa-dice" aria-hidden="true"></i></button></div>{{/each}}
+        {{#each this}}<div class="bh-skill-row {{#if trained}}bh-trained{{/if}}">{{#if @root.editingSkills}}<input type="checkbox" name="system.trained.{{id}}" aria-label="Treinada em {{label}}" {{checked trained}}>{{/if}}<button type="button" class="bh-roll-name" data-action="check" data-group="skills" data-id="{{id}}" title="Testar {{label}} · d20" {{#unless @root.editable}}disabled{{/unless}}>{{label}}</button><input aria-label="Nível de {{label}}" type="number" min="0" step="1" name="system.skills.{{id}}" value="{{value}}" {{#unless @root.editable}}disabled{{/unless}}><button type="button" class="bh-generate-skill" data-action="generateSkill" data-id="{{id}}" aria-label="Gerar nível de {{label}} com 2d10" title="Gerar nível · 2d10" {{#unless @root.editable}}disabled{{/unless}}><i class="fas fa-dice" aria-hidden="true"></i></button></div>{{/each}}
       </div>{{/each}}
       </div>
-      <p class="bh-note">0 = não aprendida · Testes: d20 igual ou menor que o nível, com o modificador do Juiz.</p>
+      {{#unless hasWork}}<p class="bh-empty">Nenhuma perícia de trabalho selecionada. Use a engrenagem para marcar as treinadas.</p>{{/unless}}
+      <p class="bh-note">{{#if editingSkills}}Desmarcar uma perícia oculta seu nome sem apagar o nível.{{else}}Testes: d20 igual ou menor que o nível, com o modificador do Juiz.{{/if}}</p>
     </section>
     <details class="bh-creation">
       <summary>Criação do personagem <span>{{summary.used}}{{#if summary.budget}} / {{summary.budget}}{{/if}} escolhas</span></summary>
