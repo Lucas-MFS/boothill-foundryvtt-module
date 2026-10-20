@@ -26,7 +26,7 @@
 .boothill .bh-attribute { text-align:center; border-right:1px solid var(--bh-rule); padding:4px 8px 8px; }
 .boothill .bh-attribute:last-child { border-right:0; }
 .boothill .bh-attribute .bh-roll-name { justify-content:center; width:100%; font-size:14px; font-weight:bold; }
-.boothill .bh-attribute input { height:64px; width:100%; font:bold 46px/1 Georgia,serif; text-align:center; border:0; }
+.boothill .bh-attribute input { height:48px; width:100%; font:bold 32px/1 Georgia,serif; text-align:center; border:0; }
 .boothill .bh-weapons { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); column-gap:18px; }
 .boothill .bh-weapons h2,.boothill .bh-weapons .bh-note { grid-column:1/-1; }
 .boothill .bh-weapons h2 > span { display:none; }
@@ -67,3 +67,37 @@
 .boothill .bh-page input[type=number] { appearance:textfield; -moz-appearance:textfield; }
 .boothill .bh-page input::-webkit-inner-spin-button,.boothill .bh-page input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
 @media(max-width:700px) { .boothill .bh-work-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .boothill .bh-wordmark { font-size:17px; } .boothill .bh-top-grid { gap:20px; } }
+
+/* Native checkbox replaces the Foundry theme's layered icon appearance. */
+.boothill .bh-handed input[type=checkbox] { appearance:none; -webkit-appearance:none; position:relative; display:inline-block; flex:0 0 15px; width:15px; height:15px; border:1px solid #8b887c; border-radius:2px; background:#f8f7f2; cursor:pointer; }
+.boothill .bh-handed input[type=checkbox]::before { content:none; }
+.boothill .bh-handed input[type=checkbox]::after { content:none; }
+.boothill .bh-handed input[type=checkbox]:checked { background:var(--bh-accent); border-color:var(--bh-accent); }
+.boothill .bh-handed input[type=checkbox]:checked::after { content:''; position:absolute; left:4px; top:1px; width:4px; height:8px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
+.boothill .bh-armament { margin-top:24px; }
+.boothill .bh-add-weapon,.boothill .bh-equip-weapon { min-height:0; width:auto; height:auto; padding:3px 7px; font:11px Arial,sans-serif; color:var(--bh-ink); border:1px solid var(--bh-rule); border-radius:2px; background:transparent; }
+.boothill .bh-armament-table { width:100%; margin:0; border:0; background:transparent; font-size:12px; }
+.boothill .bh-armament-table thead { background:transparent; color:var(--bh-muted); text-shadow:none; border:0; }
+.boothill .bh-armament-table th { font-size:10px; font-weight:normal; text-align:left; padding:8px 4px; }
+.boothill .bh-armament-table td { border-bottom:1px solid var(--bh-rule); padding:6px 4px; }
+.boothill .bh-armament-table tr { background:transparent; }
+.boothill .bh-armament-table small { color:var(--bh-muted); font-size:10px; }
+.boothill .bh-equip-weapon[aria-pressed=true] { background:#5e392b12; color:var(--bh-accent); }
+.boothill .bh-weapon-fields { border:0; margin:0; padding:0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 24px; }
+.boothill .bh-weapon-fields label { display:block; color:var(--bh-muted); font-size:11px; }
+.boothill .bh-weapon-fields label.bh-handed { display:flex; gap:8px; align-items:center; color:var(--bh-ink); }
+.boothill .bh-wide { grid-column:1/-1; }
+.boothill .bh-weapon-fields input,.boothill .bh-weapon-fields select,.boothill .bh-weapon-fields textarea { display:block; width:100%; font:13px Arial,sans-serif; color:var(--bh-ink); }
+.boothill .bh-weapon-fields select { border:0; border-bottom:1px solid var(--bh-rule); border-radius:0; background:transparent; height:32px; }
+.boothill .bh-weapon-fields textarea { border:1px solid var(--bh-rule); background:#ffffff33; border-radius:2px; padding:7px; margin-top:5px; resize:vertical; }
+.boothill .bh-reload-summary { border-top:1px solid var(--bh-rule); border-bottom:1px solid var(--bh-rule); padding:10px 0; }
+.boothill .bh-reload-summary strong { display:block; font:bold 17px Georgia,serif; }
+.boothill .bh-reload-summary span { display:block; margin-top:4px; font-size:10px; color:var(--bh-muted); }
+.boothill .bh-weapon-actions { display:flex; align-items:center; gap:10px; }
+.boothill .bh-weapon-actions button { min-height:0; width:auto; padding:6px 9px; background:transparent; border:1px solid var(--bh-rule); border-radius:2px; color:var(--bh-ink); font:11px Arial,sans-serif; }
+.boothill .bh-weapon-actions span { color:var(--bh-muted); font-size:10px; }
+.boothill .bh-weapon-ballistics { margin:20px 0; }
+.boothill .bh-ranges { grid-template-columns:repeat(3,minmax(0,1fr)); padding-top:10px; }
+.boothill .bh-attach-weapon { display:flex; align-items:center; gap:10px; margin-top:10px; }
+.boothill .bh-attach-weapon select { flex:1; min-width:0; color:var(--bh-ink); background:transparent; border:1px solid var(--bh-rule); }
+.boothill .bh-attach-weapon button { width:auto; min-height:0; padding:6px 10px; background:transparent; border:1px solid var(--bh-rule); color:var(--bh-ink); font:12px Arial,sans-serif; }

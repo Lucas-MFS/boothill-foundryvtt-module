@@ -1,0 +1,27 @@
+<section class="bh-page">
+  <header class="bh-header"><div class="bh-identity"><div class="bh-name-line"><label class="bh-name">Nome da arma<input name="name" value="{{item.name}}" {{#unless editable}}disabled{{/unless}}></label><span class="bh-wordmark">BOOT HILL<small>Armamento</small></span></div></div></header>
+  <div class="bh-section-strip">{{category}} <span>Perícia: {{skill}}</span></div>
+  <div class="bh-body">
+    <fieldset class="bh-weapon-fields" {{#unless editable}}disabled{{/unless}}>
+      <label class="bh-wide">Modelo de referência<select name="system.model">{{#each models}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+      <p class="bh-note bh-wide">Trocar o modelo aplica capacidade, recarga, alcances e modificadores da tabela. Ajuste os valores abaixo para a arma específica.</p>
+      <label class="bh-wide">Calibre / munição<input name="system.caliber" value="{{system.caliber}}" placeholder="Ex.: .45 Colt"></label>
+      <label>Capacidade máxima<input type="number" name="system.capacity" value="{{system.capacity}}" min="1" step="1"></label>
+      <label>Munição carregada<input type="number" name="system.ammo" value="{{system.ammo}}" min="0" max="{{system.capacity}}" step="1"></label>
+      <label>Balas por etapa de recarga<input type="number" name="system.roundsPerLoad" value="{{system.roundsPerLoad}}" min="1" step="1"></label>
+      <label>Turnos por etapa<input type="number" name="system.turnsPerLoad" value="{{system.turnsPerLoad}}" min="1" step="1"></label>
+      <div class="bh-reload-summary bh-wide"><strong>Recarga completa: {{fullTurns}} turno(s)</strong><span>De vazia até a capacidade máxima · {{remainingTurns}} turno(s) para completar a carga atual</span></div>
+      <div class="bh-weapon-actions bh-wide"><button type="button" data-action="reload"><i class="fas fa-rotate" aria-hidden="true"></i> Recarregar 1 turno</button><button type="button" data-action="spend">Gastar 1 disparo</button><span>Etapa atual: {{system.reloadProgress}} / {{system.turnsPerLoad}}</span></div>
+      <p class="bh-note bh-wide">Um turno de combate equivale a 6 segundos ou 6 turnos consecutivos de tiroteio. A recarga é controlada manualmente por estes botões; não avança com o rastreador de combate.</p>
+    </fieldset>
+    <section class="bh-section bh-weapon-ballistics"><h2>Alcances & modificadores</h2>
+      <fieldset class="bh-weapon-fields bh-ranges" {{#unless editable}}disabled{{/unless}}>
+        <label>Curto (m)<input type="number" name="system.short" value="{{system.short}}" min="0" step="1"></label><label>Longo (m)<input type="number" name="system.long" value="{{system.long}}" min="0" step="1"></label><label>Extremo (m)<input type="number" name="system.extreme" value="{{system.extreme}}" min="0" step="1"></label>
+        <label>Rapidez<input type="number" name="system.speed" value="{{system.speed}}" min="-2" max="2" step="1"></label><label>Ferimento<input type="number" name="system.wound" value="{{system.wound}}" min="-10" step="1"></label>
+      </fieldset>
+    </section>
+    <fieldset class="bh-weapon-fields" {{#unless editable}}disabled{{/unless}}><label class="bh-handed bh-wide"><input type="checkbox" name="system.equipped" {{checked system.equipped}}> Equipada</label><label class="bh-wide">Observações<textarea name="system.notes" rows="3">{{system.notes}}</textarea></label></fieldset>
+    {{#if standalone}}<section class="bh-section bh-weapon-ballistics"><h2>Adicionar ao personagem</h2><div class="bh-attach-weapon"><select data-field="targetActor" aria-label="Personagem para receber a arma"><option value="">Selecione um personagem</option>{{#each characters}}<option value="{{id}}">{{name}}</option>{{/each}}</select><button type="button" data-action="addToActor" {{#unless editable}}disabled{{/unless}}>Adicionar arma</button></div></section>{{/if}}
+    <p class="bh-note">Também é possível arrastar o item da aba Itens para a ficha do personagem. A cópia do personagem mantém sua própria munição.</p>
+  </div>
+</section>

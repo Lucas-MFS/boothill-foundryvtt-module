@@ -1,4 +1,6 @@
 import {ATTRIBUTES,SKILLS,generatedScore,creationSummary,needsLuck,succeeds,isWorkTrained} from './rules.mjs';
+import {WeaponData,WeaponSheet} from './weapon.mjs';
+import {weaponSummary} from './weapon-rules.mjs';
 class CharacterData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const {SchemaField,NumberField,StringField,BooleanField}=foundry.data.fields;
@@ -9,7 +11,7 @@ class CharacterData extends foundry.abstract.TypeDataModel {
 export class CharacterSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
   get title() { return `Personagem: ${this.actor.name}`; }
   _editingSkills=false;
-  static DEFAULT_OPTIONS={classes:['boothill'],tag:'form',position:{width:860,height:800},form:{submitOnChange:true,closeOnSubmit:false},actions:{check:CharacterSheet.check,generate:CharacterSheet.generate,generateSkill:CharacterSheet.generateSkill,toggleSkills:CharacterSheet.toggleSkills}};
+  static DEFAULT_OPTIONS={classes:['boothill'],tag:'form',position:{width:860,height:800},form:{submitOnChange:true,closeOnSubmit:false},actions:{check:CharacterSheet.check,generate:CharacterSheet.generate,generateSkill:CharacterSheet.generateSkill,toggleSkills:CharacterSheet.toggleSkills,openWeapon:CharacterSheet.openWeapon,toggleWeapon:CharacterSheet.toggleWeapon,createWeapon:CharacterSheet.createWeapon}};
   static PARTS={main:{template:'systems/boothill/templates/character.hbs',scrollable:['.bh-body']}};
   async _prepareContext(options) {
     const context=await super._prepareContext(options),{attributes,skills,trained}=this.actor.system;
@@ -17,7 +19,19 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     const icons={strength:'hand-fist',coordination:'crosshairs',observation:'eye',stature:'person',luck:'clover'};
     const work=rows.filter(s=>s.kind==='work'&&(this._editingSkills||s.trained));
     const size=Math.max(1,Math.ceil(work.length/3));
-    return {...context,actor:this.actor,editable:this.isEditable,editingSkills:this._editingSkills,hasWork:work.length>0,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,icon:icons[id],value:attributes[id]})),workColumns:[work.slice(0,size),work.slice(size,size*2),work.slice(size*2)],weapons:rows.filter(s=>s.kind==='weapon'),summary:creationSummary(attributes,skills,trained)};
+    const armament=this.actor.items.filter(i=>i.type==='weapon').map(i=>({id:i.id,name:i.name,system:i.system,...weaponSummary(i.system)}));
+    return {...context,actor:this.actor,editable:this.isEditable,editingSkills:this._editingSkills,hasWork:work.length>0,armament,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,icon:icons[id],value:attributes[id]})),workColumns:[work.slice(0,size),work.slice(size,size*2),work.slice(size*2)],weapons:rows.filter(s=>s.kind==='weapon'),summary:creationSummary(attributes,skills,trained)};
+  }
+  static async openWeapon(event,button) { this.actor.items.get(button.dataset.id)?.sheet.render(true); }
+  static async toggleWeapon(event,button) {
+    if(!this.isEditable) return;
+    const item=this.actor.items.get(button.dataset.id);
+    if(item?.type==='weapon') await item.update({'system.equipped':!item.system.equipped});
+  }
+  static async createWeapon() {
+    if(!this.isEditable) return;
+    const [item]=await this.actor.createEmbeddedDocuments('Item',[{name:'Nova arma',type:'weapon',img:'icons/svg/sword.svg'}]);
+    item.sheet.render(true);
   }
   static async toggleSkills() {
     if(!this.isEditable) return;
@@ -63,5 +77,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
 }
 Hooks.once('init',()=>{
   CONFIG.Actor.dataModels.character=CharacterData;
+  CONFIG.Item.dataModels.weapon=WeaponData;
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item,'boothill',WeaponSheet,{types:['weapon'],makeDefault:true,label:'Boot Hill — Arma'});
   foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',CharacterSheet,{types:['character'],makeDefault:true,label:'Boot Hill — Personagem de jogador'});
 });

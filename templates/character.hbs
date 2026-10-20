@@ -39,6 +39,12 @@
       {{#unless hasWork}}<p class="bh-empty">Nenhuma perícia de trabalho selecionada. Use a engrenagem para marcar as treinadas.</p>{{/unless}}
       <p class="bh-note">{{#if editingSkills}}Desmarcar uma perícia oculta seu nome sem apagar o nível.{{else}}Testes: d20 igual ou menor que o nível, com o modificador do Juiz.{{/if}}</p>
     </section>
+    <section class="bh-section bh-armament" aria-label="Armamento">
+      <h2><span class="bh-work-title">Armamento</span><button type="button" class="bh-add-weapon" data-action="createWeapon" {{#unless editable}}disabled{{/unless}}><i class="fas fa-plus" aria-hidden="true"></i> Nova arma</button></h2>
+      {{#if armament}}<table class="bh-armament-table"><thead><tr><th>Arma</th><th>Munição</th><th>Recarga completa</th><th>Equipada</th></tr></thead><tbody>
+        {{#each armament}}<tr data-item-id="{{id}}"><td><button type="button" class="bh-roll-name" data-action="openWeapon" data-id="{{id}}">{{name}}</button><small>{{category}} · {{skill}}</small></td><td>{{system.ammo}} / {{system.capacity}}</td><td>{{fullTurns}} turno(s)</td><td><button type="button" class="bh-equip-weapon" data-action="toggleWeapon" data-id="{{id}}" aria-label="Equipar {{name}}" aria-pressed="{{#if system.equipped}}true{{else}}false{{/if}}" {{#unless @root.editable}}disabled{{/unless}}>{{#if system.equipped}}Sim{{else}}Não{{/if}}</button></td></tr>{{/each}}
+      </tbody></table>{{else}}<p class="bh-empty">Arraste uma arma da aba Itens para esta ficha ou crie uma em “Nova arma”.</p>{{/if}}
+    </section>
     <details class="bh-creation">
       <summary>Criação do personagem <span>{{summary.used}}{{#if summary.budget}} / {{summary.budget}}{{/if}} escolhas</span></summary>
       <div class="bh-creation-content">
