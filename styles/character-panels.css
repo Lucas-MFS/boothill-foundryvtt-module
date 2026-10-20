@@ -1,0 +1,52 @@
+.boothill .bh-character-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:20px 16px; align-content:start; align-items:start; }
+.boothill .bh-character-grid > .bh-attributes { grid-column:1/4; grid-row:1; }
+.boothill .bh-character-grid > .bh-weapons { grid-column:4/6; grid-row:1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 16px; }
+.boothill .bh-character-grid > .bh-armament { grid-column:1/4; grid-row:2; margin:0; }
+.boothill .bh-character-grid > .bh-health { grid-column:4; grid-row:2/4; }
+.boothill .bh-character-grid > .bh-work { grid-column:5; grid-row:2/5; }
+.boothill .bh-character-grid > .bh-creation { grid-column:1/4; grid-row:3; margin-top:0; }
+.boothill .bh-character-grid .bh-section h2 { font-size:16px; }
+.boothill .bh-character-grid .bh-work-title { gap:3px; font-size:14px; }
+.boothill .bh-character-grid .bh-work .bh-skill-row { min-height:31px; }
+.boothill .bh-character-grid .bh-attribute { padding-inline:4px; }
+.boothill .bh-character-grid .bh-attribute .bh-roll-name { font-size:12px; gap:5px; }
+.boothill .bh-character-grid .bh-weapons .bh-stat-row { height:27px; font-size:12px; }
+.boothill .bh-character-grid .bh-weapons input { width:35px; flex-basis:35px; }
+.boothill .bh-shoot-controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:12px 0; font-size:11px; }
+.boothill .bh-shoot-controls > label:first-child { display:flex; align-items:center; gap:7px; }
+.boothill .bh-shoot-controls select { width:145px; height:27px; border:1px solid var(--bh-rule); border-radius:2px; color:var(--bh-ink); background:transparent; font:11px Arial,sans-serif; }
+.boothill .bh-shoot-controls .bh-handed { display:flex; align-items:center; gap:5px; }
+.boothill .bh-held-weapons { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.boothill .bh-held { border:1px solid var(--bh-rule); padding:10px; }
+.boothill .bh-held > header { border-bottom:1px solid var(--bh-rule); padding-bottom:7px; margin-bottom:8px; }
+.boothill .bh-held > header small { display:block; font-size:10px; color:var(--bh-muted); }
+.boothill .bh-held > header button { font-weight:bold; font-size:12px; }
+.boothill .bh-shot-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+.boothill .bh-shot-grid button { display:flex; justify-content:space-between; gap:5px; align-items:center; min-height:0; height:35px; padding:5px 7px; border:1px solid var(--bh-rule); border-radius:2px; background:transparent; color:var(--bh-ink); font:10px Arial,sans-serif; }
+.boothill .bh-shot-grid strong { font:bold 18px Georgia,serif; }
+.boothill .bh-shot-grid button:disabled { opacity:.4; cursor:default; }
+.boothill .bh-health h2 > span { font-size:9px; }
+.boothill .bh-body-map { height:390px; position:relative; margin-top:8px; }
+.boothill .bh-body-map > img { position:absolute; width:140px; height:350px; left:50%; top:30px; transform:translateX(-50%); opacity:.25; border:0; object-fit:contain; }
+.boothill .bh-location { position:absolute; width:74px; text-align:center; }
+.boothill .bh-location > span { display:block; font-size:9px; font-weight:bold; line-height:1.2; margin-bottom:2px; }
+.boothill .bh-location > div { display:flex; justify-content:center; gap:3px; }
+.boothill .bh-location label { display:flex; align-items:center; gap:1px; font-size:8px; color:var(--bh-muted); }
+.boothill .bh-location input { width:24px; height:23px; text-align:center; padding:0; border:1px solid var(--bh-rule); border-radius:2px; background:#f5f3ecee; font-size:11px; color:var(--bh-ink); }
+.boothill .bh-location-head { top:0; left:50%; transform:translateX(-50%); }
+.boothill .bh-location-leftShoulder { top:65px; right:0; }
+.boothill .bh-location-rightShoulder { top:65px; left:0; }
+.boothill .bh-location-leftArm { top:130px; right:0; }
+.boothill .bh-location-rightArm { top:130px; left:0; }
+.boothill .bh-location-chest { top:185px; left:50%; transform:translateX(-50%); }
+.boothill .bh-location-abdomen { top:240px; left:50%; transform:translateX(-50%); }
+.boothill .bh-location-leftLeg { top:320px; right:0; }
+.boothill .bh-location-rightLeg { top:320px; left:0; }
+.boothill .bh-health-points { display:flex; gap:8px; border-top:1px solid var(--bh-rule); padding-top:8px; }
+.boothill .bh-health-points label { flex:1; min-width:0; font-size:10px; color:var(--bh-muted); }
+.boothill .bh-health-points input { text-align:center; font-weight:bold; }
+.boothill .bh-health-total { text-align:center; margin:10px 0; padding:8px; border-block:1px solid var(--bh-rule); }
+.boothill .bh-health-total strong { display:block; font:bold 25px Georgia,serif; }
+.boothill .bh-health-total span { display:block; font-size:10px; color:var(--bh-muted); }
+.boothill .bh-danger { color:#8b3025; background:#8b302511; }
+@media(max-width:1050px) { .boothill .bh-character-grid { column-gap:10px; padding-inline:14px; } .boothill .bh-character-grid .bh-attribute .bh-roll-name { font-size:10px; } .boothill .bh-character-grid .bh-work-title { font-size:12px; } }

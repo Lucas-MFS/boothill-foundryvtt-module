@@ -1,26 +1,86 @@
 import {ATTRIBUTES,SKILLS,generatedScore,creationSummary,needsLuck,succeeds,isWorkTrained} from './rules.mjs';
 import {WeaponData,WeaponSheet} from './weapon.mjs';
 import {weaponSummary} from './weapon-rules.mjs';
+import {LOCATIONS,SHOTS,handsRequired,canHold,healthSummary,shotTarget} from './combat-rules.mjs';
 class CharacterData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const {SchemaField,NumberField,StringField,BooleanField}=foundry.data.fields;
     const level=()=>new NumberField({required:true,nullable:false,integer:true,min:0,initial:0});
-    return {identity:new SchemaField({player:new StringField({initial:''}),age:level(),ambidextrous:new BooleanField({initial:false})}),attributes:new SchemaField(Object.fromEntries(Object.keys(ATTRIBUTES).map(id=>[id,level()]))),skills:new SchemaField(Object.fromEntries(SKILLS.map(s=>[s.id,level()]))),trained:new SchemaField(Object.fromEntries(SKILLS.filter(s=>s.kind==='work').map(s=>[s.id,new BooleanField({nullable:true,initial:null})])))};
+    const health=new SchemaField({points:level(),temporary:level(),locations:new SchemaField(Object.fromEntries(Object.keys(LOCATIONS).map(id=>[id,new SchemaField({light:level(),serious:level()})])))});
+    const combat=new SchemaField({primaryWeapon:new StringField({initial:''}),dualFire:new BooleanField({initial:true}),range:new StringField({initial:'short',choices:['close','short','long','extreme']})});
+    return {health,combat,identity:new SchemaField({player:new StringField({initial:''}),age:level(),ambidextrous:new BooleanField({initial:false})}),attributes:new SchemaField(Object.fromEntries(Object.keys(ATTRIBUTES).map(id=>[id,level()]))),skills:new SchemaField(Object.fromEntries(SKILLS.map(s=>[s.id,level()]))),trained:new SchemaField(Object.fromEntries(SKILLS.filter(s=>s.kind==='work').map(s=>[s.id,new BooleanField({nullable:true,initial:null})])))};
   }
 }
 export class CharacterSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
   get title() { return `Personagem: ${this.actor.name}`; }
   _editingSkills=false;
-  static DEFAULT_OPTIONS={classes:['boothill'],tag:'form',position:{width:860,height:800},form:{submitOnChange:true,closeOnSubmit:false},actions:{check:CharacterSheet.check,generate:CharacterSheet.generate,generateSkill:CharacterSheet.generateSkill,toggleSkills:CharacterSheet.toggleSkills,openWeapon:CharacterSheet.openWeapon,toggleWeapon:CharacterSheet.toggleWeapon,createWeapon:CharacterSheet.createWeapon}};
+  static DEFAULT_OPTIONS={classes:['boothill'],tag:'form',position:{width:1140,height:960},form:{submitOnChange:true,closeOnSubmit:false},actions:{check:CharacterSheet.check,generate:CharacterSheet.generate,generateSkill:CharacterSheet.generateSkill,toggleSkills:CharacterSheet.toggleSkills,openWeapon:CharacterSheet.openWeapon,toggleWeapon:CharacterSheet.toggleWeapon,createWeapon:CharacterSheet.createWeapon,shoot:CharacterSheet.shoot,swapHands:CharacterSheet.swapHands}};
   static PARTS={main:{template:'systems/boothill/templates/character.hbs',scrollable:['.bh-body']}};
+  async _onRender(context,options) {
+    await super._onRender(context,options);
+    if(!this.isEditable) return;
+    this._healthChanges??={};
+    this._saveHealth??=foundry.utils.debounce(async()=>{
+      const changes=this._healthChanges;this._healthChanges={};
+      if(Object.keys(changes).length) await this.actor.update(changes);
+    },300);
+    for(const input of this.element.querySelectorAll('.bh-health input[type="number"]')) input.addEventListener('input',()=>{
+      const value=input.valueAsNumber;
+      if(!Number.isInteger(value)||value<0) return;
+      this._healthChanges[input.name]=value;this._saveHealth();
+    });
+  }
   async _prepareContext(options) {
     const context=await super._prepareContext(options),{attributes,skills,trained}=this.actor.system;
     const rows=SKILLS.map(s=>({...s,value:skills[s.id],trained:isWorkTrained(s.id,skills,trained)}));
     const icons={strength:'hand-fist',coordination:'crosshairs',observation:'eye',stature:'person',luck:'clover'};
     const work=rows.filter(s=>s.kind==='work'&&(this._editingSkills||s.trained));
-    const size=Math.max(1,Math.ceil(work.length/3));
-    const armament=this.actor.items.filter(i=>i.type==='weapon').map(i=>({id:i.id,name:i.name,system:i.system,...weaponSummary(i.system)}));
-    return {...context,actor:this.actor,editable:this.isEditable,editingSkills:this._editingSkills,hasWork:work.length>0,armament,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,icon:icons[id],value:attributes[id]})),workColumns:[work.slice(0,size),work.slice(size,size*2),work.slice(size*2)],weapons:rows.filter(s=>s.kind==='weapon'),summary:creationSummary(attributes,skills,trained)};
+    const health=healthSummary(this.actor.system.health,attributes.strength);
+    const equipped=this.heldWeapons();
+    const armament=this.actor.items.filter(i=>i.type==='weapon').map(i=>({id:i.id,name:i.name,system:i.system,hands:handsRequired(i.system),...weaponSummary(i.system)}));
+    const held=equipped.map((i,index)=>({...armament.find(a=>a.id===i.id),hand:handsRequired(i.system)===2?'Duas mãos':index===0?'Mão principal':'Mão secundária',shots:Object.entries(SHOTS).map(([mode,shot])=>{
+      const chance=this.chanceFor(i,mode);
+      return {mode,...shot,chance:chance?.total,supported:chance!==null,available:chance!==null&&!health.unconscious&&i.system.ammo>0};
+    })}));
+    const ranges={close:'Próximo (até 2 m)',short:'Curto',long:'Longo',extreme:'Extremo'};
+    return {...context,actor:this.actor,editable:this.isEditable,editingSkills:this._editingSkills,hasWork:work.length>0,work,held,hasTwo:held.length===2,health,locations:Object.entries(LOCATIONS).map(([id,label])=>({id,label,...this.actor.system.health.locations[id]})),ranges:Object.entries(ranges).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range})),armament,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,icon:icons[id],value:attributes[id]})),weapons:rows.filter(s=>s.kind==='weapon'),summary:creationSummary(attributes,skills,trained)};
+  }
+  heldWeapons() {
+    return this.actor.items.filter(i=>i.type==='weapon'&&i.system.equipped).sort((a,b)=>Number(b.id===this.actor.system.combat.primaryWeapon)-Number(a.id===this.actor.system.combat.primaryWeapon)||a.sort-b.sort||a.id.localeCompare(b.id));
+  }
+  chanceFor(item,mode) {
+    const held=this.heldWeapons(),index=held.findIndex(i=>i.id===item.id),{attributes,skills,identity,combat,health}=this.actor.system;
+    if(index<0||held.reduce((n,i)=>n+handsRequired(i.system),0)>2) return null;
+    return shotTarget({coordination:attributes.coordination,skill:skills[weaponSummary(item.system).skill==='Rifle'?'rifle':'pistola'],mode,weapon:item.system,secondary:index===1,dual:held.length===2&&combat.dualFire,ambidextrous:identity.ambidextrous,woundPenalty:healthSummary(health,attributes.strength).penalty,range:combat.range});
+  }
+  static async swapHands() {
+    if(!this.isEditable) return;
+    const held=this.heldWeapons();
+    if(held.length===2) await this.actor.update({'system.combat.primaryWeapon':held[1].id});
+  }
+  static async shoot(event,button) {
+    if(!this.isEditable||this._firing) return;
+    this._firing=true;
+    try {
+      await this.submit();
+      const item=this.actor.items.get(button.dataset.id),mode=button.dataset.mode;
+      if(item?.type!=='weapon'||!Object.hasOwn(SHOTS,mode)) return;
+      if(healthSummary(this.actor.system.health,this.actor.system.attributes.strength).unconscious) return ui.notifications.warn('O personagem atingiu o limite de ferimentos e está desmaiado.');
+      const chance=this.chanceFor(item,mode);
+      if(!chance) return ui.notifications.warn('Empunhadura inválida ou tipo de tiro indisponível para esta arma.');
+      if(!item.system.ammo) return ui.notifications.warn('A arma está descarregada.');
+      const modifier=await foundry.applications.api.DialogV2.prompt({window:{title:`${SHOTS[mode].label} — ${item.name}`},content:`<p>Chance ${chance.total}. Um clique dispara uma bala. Informe ajustes de movimento, alvo, proteção ou outras condições.</p><label>Modificador do Juiz <input name="modifier" type="number" step="1" value="0"></label>`,ok:{label:'Atirar',callback:(e,b,d)=>Number(d.element.querySelector('[name="modifier"]').value)},rejectClose:false});
+      if(modifier===null||modifier===undefined||!Number.isInteger(modifier)) return;
+      if(!item.system.ammo||!item.system.equipped) return;
+      const current=this.chanceFor(item,mode);
+      if(!current||healthSummary(this.actor.system.health,this.actor.system.attributes.strength).unconscious) return;
+      const target=current.total+modifier,roll=await new Roll('1d20').evaluate();
+      const luck=needsLuck(roll.total,target)?await new Roll('1d20').evaluate():null;
+      const hit=succeeds(roll.total,target,luck?.total,this.actor.system.attributes.luck);
+      await item.update({'system.ammo':item.system.ammo-1,'system.reloadProgress':0});
+      const escape=foundry.utils.escapeHTML;
+      await ChatMessage.create({speaker:ChatMessage.getSpeaker({actor:this.actor}),style:CONST.CHAT_MESSAGE_STYLES.ROLL,rolls:luck?[roll,luck]:[roll],flavor:`${escape(item.name)} · ${SHOTS[mode].label} | Chance ${target}: ${hit?'Acerto':'Erro'}<br>Base ${current.base}, perícia +${current.training}, duas armas ${current.twoWeapons}, mão ${current.offhand}, ferimentos ${current.woundPenalty}, alcance ${current.distance}, dispersão +${current.spread}, Juiz ${modifier}.${luck?` Sorte: ${luck.total}/${this.actor.system.attributes.luck}.`:''}${roll.total===20?' 20 natural: verificar defeito da arma; acerto, se houver, fica pendente desta verificação.':''} Ferimentos ainda não resolvidos.`});
+    } finally {this._firing=false;}
   }
   static async openWeapon(event,button) { this.actor.items.get(button.dataset.id)?.sheet.render(true); }
   static async toggleWeapon(event,button) {
@@ -80,4 +140,14 @@ Hooks.once('init',()=>{
   CONFIG.Item.dataModels.weapon=WeaponData;
   foundry.applications.apps.DocumentSheetConfig.registerSheet(Item,'boothill',WeaponSheet,{types:['weapon'],makeDefault:true,label:'Boot Hill — Arma'});
   foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',CharacterSheet,{types:['character'],makeDefault:true,label:'Boot Hill — Personagem de jogador'});
+});
+
+// Keep hand limits consistent for both the actor sheet and the embedded item sheet.
+Hooks.on('preUpdateItem',(item,changes)=>{
+  if(item.type!=='weapon'||!item.parent) return;
+  const data=foundry.utils.mergeObject(item.system.toObject(),foundry.utils.expandObject(changes).system??{},{inplace:false});
+  if(!canHold(item.parent.items.filter(i=>i.type==='weapon'),data,item.id)) {ui.notifications.warn('As mãos já estão ocupadas: use até duas armas de uma mão ou uma de duas mãos.');item.sheet.render({force:true});return false;}
+});
+Hooks.on('preCreateItem',(item)=>{
+  if(item.type==='weapon'&&item.parent&&!canHold(item.parent.items.filter(i=>i.type==='weapon'),item.system,item.id)) item.updateSource({'system.equipped':false});
 });

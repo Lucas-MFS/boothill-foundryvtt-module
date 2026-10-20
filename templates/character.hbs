@@ -1,59 +1,33 @@
 <section class="bh-page">
   <header class="bh-header">
     <button class="bh-portrait" type="button" data-action="showPortraitArtwork" aria-label="Ver retrato"><img src="{{actor.img}}" alt="Retrato de {{actor.name}}"></button>
-    <div class="bh-identity">
-      <div class="bh-name-line"><label class="bh-name">Nome do personagem<input name="name" value="{{actor.name}}" {{#unless editable}}disabled{{/unless}}></label><span class="bh-wordmark">BOOT HILL<small>3ª edição</small></span></div>
-      <div class="bh-personal">
-        <label>Jogador<input name="system.identity.player" value="{{actor.system.identity.player}}" {{#unless editable}}disabled{{/unless}}></label>
-        <label class="bh-age">Idade<input type="number" min="0" step="1" name="system.identity.age" value="{{actor.system.identity.age}}" {{#unless editable}}disabled{{/unless}}></label>
-        <label class="bh-handed"><input type="checkbox" name="system.identity.ambidextrous" {{checked actor.system.identity.ambidextrous}} {{#unless editable}}disabled{{/unless}}> Ambidestro</label>
-      </div>
-    </div>
+    <div class="bh-identity"><div class="bh-name-line"><label class="bh-name">Nome do personagem<input name="name" value="{{actor.name}}" {{#unless editable}}disabled{{/unless}}></label><span class="bh-wordmark">BOOT HILL<small>3ª edição</small></span></div><div class="bh-personal">
+      <label>Jogador<input name="system.identity.player" value="{{actor.system.identity.player}}" {{#unless editable}}disabled{{/unless}}></label><label class="bh-age">Idade<input type="number" min="0" step="1" name="system.identity.age" value="{{actor.system.identity.age}}" {{#unless editable}}disabled{{/unless}}></label><label class="bh-handed"><input type="checkbox" name="system.identity.ambidextrous" {{checked actor.system.identity.ambidextrous}} {{#unless editable}}disabled{{/unless}}> Ambidestro</label>
+    </div></div>
   </header>
-  <div class="bh-section-strip">Ficha de personagem <span>Atributos & perícias</span></div>
-  <div class="bh-body">
-    <div class="bh-top-grid">
-      <section class="bh-section bh-attributes" aria-label="Atributos">
-        <h2>Atributos</h2>
-        <div class="bh-attribute-grid">
-        {{#each attributes}}
-        <div class="bh-attribute"><button type="button" class="bh-roll-name" data-action="check" data-group="attributes" data-id="{{id}}" title="Testar {{label}} · d20" {{#unless @root.editable}}disabled{{/unless}}><i class="fas fa-{{icon}}" aria-hidden="true"></i>{{label}}</button><input aria-label="Nível de {{label}}" name="system.attributes.{{id}}" type="number" min="0" step="1" value="{{value}}" {{#unless @root.editable}}disabled{{/unless}}></div>
-        {{/each}}
-        </div>
-      </section>
-      <section class="bh-section bh-weapons" aria-label="Perícias de armas">
-        <h2>Perícias de armas <span>Nível</span></h2>
-        {{#each weapons}}
-        <label class="bh-stat-row"><span class="bh-weapon-name">{{label}}</span><input aria-label="Nível de {{label}}" name="system.skills.{{id}}" type="number" min="0" step="1" value="{{value}}" {{#unless @root.editable}}disabled{{/unless}}></label>
-        {{/each}}
-        <p class="bh-note">O nível de arma é somado ao número de acerto.</p>
-      </section>
-    </div>
-    <section class="bh-section bh-work" aria-label="Perícias de trabalho">
-      <h2><span class="bh-work-title">Perícias de trabalho <button type="button" class="bh-skill-settings {{#if editingSkills}}active{{/if}}" data-action="toggleSkills" aria-label="{{#if editingSkills}}Mostrar apenas perícias treinadas{{else}}Configurar perícias treinadas{{/if}}" aria-pressed="{{#if editingSkills}}true{{else}}false{{/if}}" title="{{#if editingSkills}}Concluir seleção{{else}}Selecionar perícias treinadas{{/if}}" {{#unless editable}}disabled{{/unless}}><i class="fas fa-gear" aria-hidden="true"></i></button></span><span>{{#if editingSkills}}Marque as perícias treinadas{{else}}Clique no nome para testar{{/if}}</span></h2>
-      <div class="bh-work-grid">
-      {{#each workColumns}}<div class="bh-work-column">
-        {{#each this}}<div class="bh-skill-row {{#if trained}}bh-trained{{/if}}">{{#if @root.editingSkills}}<input type="checkbox" name="system.trained.{{id}}" aria-label="Treinada em {{label}}" {{checked trained}}>{{/if}}<button type="button" class="bh-roll-name" data-action="check" data-group="skills" data-id="{{id}}" title="Testar {{label}} · d20" {{#unless @root.editable}}disabled{{/unless}}>{{label}}</button><input aria-label="Nível de {{label}}" type="number" min="0" step="1" name="system.skills.{{id}}" value="{{value}}" {{#unless @root.editable}}disabled{{/unless}}><button type="button" class="bh-generate-skill" data-action="generateSkill" data-id="{{id}}" aria-label="Gerar nível de {{label}} com 2d10" title="Gerar nível · 2d10" {{#unless @root.editable}}disabled{{/unless}}><i class="fas fa-dice" aria-hidden="true"></i></button></div>{{/each}}
-      </div>{{/each}}
-      </div>
-      {{#unless hasWork}}<p class="bh-empty">Nenhuma perícia de trabalho selecionada. Use a engrenagem para marcar as treinadas.</p>{{/unless}}
-      <p class="bh-note">{{#if editingSkills}}Desmarcar uma perícia oculta seu nome sem apagar o nível.{{else}}Testes: d20 igual ou menor que o nível, com o modificador do Juiz.{{/if}}</p>
-    </section>
+  <div class="bh-section-strip">Ficha de personagem <span>Boot Hill</span></div>
+  <div class="bh-body bh-character-grid">
+    <section class="bh-section bh-attributes" aria-label="Atributos"><h2>Atributos</h2><div class="bh-attribute-grid">
+      {{#each attributes}}<div class="bh-attribute"><button type="button" class="bh-roll-name" data-action="check" data-group="attributes" data-id="{{id}}" title="Testar {{label}} · d20" {{#unless @root.editable}}disabled{{/unless}}><i class="fas fa-{{icon}}" aria-hidden="true"></i>{{label}}</button><input aria-label="Nível de {{label}}" name="system.attributes.{{id}}" type="number" min="0" step="1" value="{{value}}" {{#unless @root.editable}}disabled{{/unless}}></div>{{/each}}
+    </div></section>
+    <section class="bh-section bh-weapons" aria-label="Perícias de armas"><h2>Perícias de armas</h2>{{#each weapons}}<label class="bh-stat-row"><span class="bh-weapon-name">{{label}}</span><input aria-label="Nível de {{label}}" name="system.skills.{{id}}" type="number" min="0" step="1" value="{{value}}" {{#unless @root.editable}}disabled{{/unless}}></label>{{/each}}</section>
     <section class="bh-section bh-armament" aria-label="Armamento">
-      <h2><span class="bh-work-title">Armamento</span><button type="button" class="bh-add-weapon" data-action="createWeapon" {{#unless editable}}disabled{{/unless}}><i class="fas fa-plus" aria-hidden="true"></i> Nova arma</button></h2>
-      {{#if armament}}<table class="bh-armament-table"><thead><tr><th>Arma</th><th>Munição</th><th>Recarga completa</th><th>Equipada</th></tr></thead><tbody>
-        {{#each armament}}<tr data-item-id="{{id}}"><td><button type="button" class="bh-roll-name" data-action="openWeapon" data-id="{{id}}">{{name}}</button><small>{{category}} · {{skill}}</small></td><td>{{system.ammo}} / {{system.capacity}}</td><td>{{fullTurns}} turno(s)</td><td><button type="button" class="bh-equip-weapon" data-action="toggleWeapon" data-id="{{id}}" aria-label="Equipar {{name}}" aria-pressed="{{#if system.equipped}}true{{else}}false{{/if}}" {{#unless @root.editable}}disabled{{/unless}}>{{#if system.equipped}}Sim{{else}}Não{{/if}}</button></td></tr>{{/each}}
-      </tbody></table>{{else}}<p class="bh-empty">Arraste uma arma da aba Itens para esta ficha ou crie uma em “Nova arma”.</p>{{/if}}
+      <h2>Armamento <button type="button" class="bh-add-weapon" data-action="createWeapon" {{#unless editable}}disabled{{/unless}}><i class="fas fa-plus" aria-hidden="true"></i> Nova arma</button></h2>
+      {{#if armament}}<table class="bh-armament-table"><thead><tr><th>Arma</th><th>Balas</th><th>Mãos</th><th>Empunhar</th></tr></thead><tbody>{{#each armament}}<tr class="draggable" draggable="true" data-item-id="{{id}}"><td><button type="button" class="bh-roll-name" data-action="openWeapon" data-id="{{id}}">{{name}}</button><small>{{category}}</small></td><td>{{system.ammo}} / {{system.capacity}}</td><td>{{hands}}</td><td><button type="button" class="bh-equip-weapon" data-action="toggleWeapon" data-id="{{id}}" aria-label="Empunhar {{name}}" aria-pressed="{{#if system.equipped}}true{{else}}false{{/if}}" {{#unless @root.editable}}disabled{{/unless}}>{{#if system.equipped}}Sim{{else}}Não{{/if}}</button></td></tr>{{/each}}</tbody></table>{{else}}<p class="bh-empty">Arraste armas da aba Itens para o inventário.</p>{{/if}}
+      {{#if held}}<div class="bh-shoot-controls"><label>Alcance<select name="system.combat.range" {{#unless editable}}disabled{{/unless}}>{{#each ranges}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>{{#if hasTwo}}<label class="bh-handed"><input type="checkbox" name="system.combat.dualFire" {{checked actor.system.combat.dualFire}} {{#unless editable}}disabled{{/unless}}> Usar duas armas (−6 em ambas)</label><button type="button" class="bh-add-weapon" data-action="swapHands" {{#unless editable}}disabled{{/unless}}>Trocar mãos</button>{{/if}}</div>{{/if}}
+      <div class="bh-held-weapons">{{#each held}}<article class="bh-held"><header><button type="button" class="bh-roll-name" data-action="openWeapon" data-id="{{id}}">{{name}}</button><small>{{hand}} · {{system.ammo}}/{{system.capacity}}</small></header><div class="bh-shot-grid">{{#each shots}}<button type="button" data-action="shoot" data-id="{{../id}}" data-mode="{{mode}}" title="Um clique = uma bala · {{beats}} lance(s)" {{#unless available}}disabled{{/unless}} {{#unless @root.editable}}disabled{{/unless}}><span>{{label}}</span><strong>{{#if supported}}{{chance}}{{else}}—{{/if}}</strong></button>{{/each}}</div></article>{{/each}}</div>
+      {{#if held}}<p class="bh-note">Chance de acerto no d20 · Cada clique dispara uma bala. Ajustes adicionais são pedidos antes da rolagem.</p>{{/if}}
     </section>
-    <details class="bh-creation">
-      <summary>Criação do personagem <span>{{summary.used}}{{#if summary.budget}} / {{summary.budget}}{{/if}} escolhas</span></summary>
-      <div class="bh-creation-content">
-        <button type="button" class="bh-generate" data-action="generate" {{#unless editable}}disabled{{/unless}}><i class="fas fa-dice" aria-hidden="true"></i> Gerar os cinco atributos</button>
-        <p>Método 1: 2d10 com os modificadores da tabela. Estatura e Sorte são divididas por dois, arredondando para cima.</p>
-        <dl><div><dt>Soma dos atributos</dt><dd>{{summary.total}}</dd></div><div><dt>Escolhas de armas</dt><dd>{{summary.weapon}}</dd></div></dl>
-        <p>Cada perícia de trabalho custa uma escolha; cada nível de arma também. No máximo metade das escolhas iniciais pode ser de armas.</p>
-        {{#each summary.warnings}}<p class="bh-warning" role="status">{{this}}</p>{{/each}}
-      </div>
-    </details>
+    <section class="bh-section bh-health" aria-label="Saúde"><h2>Saúde <span>Leves / Sérios</span></h2>
+      <div class="bh-body-map"><img src="systems/boothill/assets/cowboy.svg" alt="Silhueta de cowboy com regiões do corpo"><div class="bh-health-regions">{{#each locations}}<div class="bh-location bh-location-{{id}}"><span>{{label}}</span><div><label><span>L</span><input type="number" name="system.health.locations.{{id}}.light" aria-label="Ferimentos leves: {{label}}" value="{{light}}" min="0" step="1" {{#unless @root.editable}}disabled{{/unless}}></label><label><span>S</span><input type="number" name="system.health.locations.{{id}}.serious" aria-label="Ferimentos sérios: {{label}}" value="{{serious}}" min="0" step="1" {{#unless @root.editable}}disabled{{/unless}}></label></div></div>{{/each}}</div></div>
+      <div class="bh-health-points"><label>Pontos de ferimento<input type="number" name="system.health.points" value="{{actor.system.health.points}}" min="0" step="1" {{#unless editable}}disabled{{/unless}}></label><label>Pontos temporários<input type="number" name="system.health.temporary" value="{{actor.system.health.temporary}}" min="0" step="1" {{#unless editable}}disabled{{/unless}}></label></div>
+      <div class="bh-health-total {{#if health.unconscious}}bh-danger{{/if}}"><strong>{{health.total}} / {{actor.system.attributes.strength}}</strong><span>{{#if health.unconscious}}Desmaiado{{else}}Ferimentos / Força{{/if}}</span></div>
+      <p class="bh-note">{{health.light}} leves · {{health.serious}} sérios · Precisão {{health.penalty}}. Pontos de dano são registrados separadamente da quantidade de feridas; temporários também contam para o desmaio.</p>
+    </section>
+    <section class="bh-section bh-work" aria-label="Perícias de trabalho"><h2><span class="bh-work-title">Perícias de trabalho <button type="button" class="bh-skill-settings {{#if editingSkills}}active{{/if}}" data-action="toggleSkills" aria-label="{{#if editingSkills}}Mostrar apenas perícias treinadas{{else}}Configurar perícias treinadas{{/if}}" aria-pressed="{{#if editingSkills}}true{{else}}false{{/if}}" {{#unless editable}}disabled{{/unless}}><i class="fas fa-gear" aria-hidden="true"></i></button></span></h2>
+      {{#each work}}<div class="bh-skill-row {{#if trained}}bh-trained{{/if}}">{{#if @root.editingSkills}}<input type="checkbox" name="system.trained.{{id}}" aria-label="Treinada em {{label}}" {{checked trained}}>{{/if}}<button type="button" class="bh-roll-name" data-action="check" data-group="skills" data-id="{{id}}" {{#unless @root.editable}}disabled{{/unless}}>{{label}}</button><input aria-label="Nível de {{label}}" type="number" min="0" step="1" name="system.skills.{{id}}" value="{{value}}" {{#unless @root.editable}}disabled{{/unless}}><button type="button" class="bh-generate-skill" data-action="generateSkill" data-id="{{id}}" aria-label="Gerar nível de {{label}} com 2d10" {{#unless @root.editable}}disabled{{/unless}}><i class="fas fa-dice" aria-hidden="true"></i></button></div>{{/each}}
+      {{#unless hasWork}}<p class="bh-empty">Use a engrenagem para selecionar as treinadas.</p>{{/unless}}
+    </section>
+    <details class="bh-creation"><summary>Criação do personagem <span>{{summary.used}}{{#if summary.budget}} / {{summary.budget}}{{/if}} escolhas</span></summary><div class="bh-creation-content"><button type="button" class="bh-generate" data-action="generate" {{#unless editable}}disabled{{/unless}}>Gerar os cinco atributos</button><p>Método 1 · 2d10 com modificadores. Soma dos atributos: {{summary.total}}.</p>{{#each summary.warnings}}<p class="bh-warning" role="status">{{this}}</p>{{/each}}</div></details>
   </div>
 </section>

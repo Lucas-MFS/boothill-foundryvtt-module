@@ -1,5 +1,5 @@
 // Table 14, Portuguese reference PDF, physical pages 40–41.
-const model=(label,category,capacity,roundsPerLoad,turnsPerLoad,short,long,extreme,speed=0,wound=0)=>({label,category,capacity,roundsPerLoad,turnsPerLoad,short,long,extreme,speed,wound});
+const model=(label,category,capacity,roundsPerLoad,turnsPerLoad,short,long,extreme,speed=0,wound=0)=>({label,category,capacity,roundsPerLoad,turnsPerLoad,short,long,extreme,speed,wound,hands:['rifle','shotgun'].includes(category)?2:1});
 export const WEAPON_MODELS={
   singleAction:model('Revólver de ação simples','revolver',6,3,1,10,20,55,1),
   doubleAction:model('Revólver de ação dupla','revolver',6,3,1,10,20,55),

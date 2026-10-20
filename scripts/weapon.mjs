@@ -1,11 +1,12 @@
 import {WEAPON_MODELS,weaponSummary,advanceReload} from './weapon-rules.mjs';
+import {handsRequired} from './combat-rules.mjs';
 
 export class WeaponData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const {StringField,NumberField,BooleanField}=foundry.data.fields;
     const number=(initial,min=0)=>new NumberField({required:true,nullable:false,integer:true,min,initial});
     return {model:new StringField({required:true,choices:Object.keys(WEAPON_MODELS),initial:'singleAction'}),
-      capacity:number(6,1),ammo:number(0),roundsPerLoad:number(3,1),turnsPerLoad:number(1,1),reloadProgress:number(0),
+      hands:new NumberField({integer:true,nullable:true,initial:null,choices:[1,2]}),capacity:number(6,1),ammo:number(0),roundsPerLoad:number(3,1),turnsPerLoad:number(1,1),reloadProgress:number(0),
       short:number(10),long:number(20),extreme:number(55),speed:number(1,-2),wound:number(0,-10),
       caliber:new StringField({initial:''}),notes:new StringField({initial:''}),equipped:new BooleanField({initial:false})};
   }
@@ -18,24 +19,13 @@ export class WeaponData extends foundry.abstract.TypeDataModel {
 
 export class WeaponSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ItemSheetV2) {
   get title() { return `Arma: ${this.document.name}`; }
-  static DEFAULT_OPTIONS={classes:['boothill','bh-weapon-sheet'],tag:'form',position:{width:660,height:700},form:{submitOnChange:true,closeOnSubmit:false},actions:{reload:WeaponSheet.reload,spend:WeaponSheet.spend,addToActor:WeaponSheet.addToActor}};
+  static DEFAULT_OPTIONS={classes:['boothill','bh-weapon-sheet'],tag:'form',position:{width:540,height:520},form:{submitOnChange:true,closeOnSubmit:false},actions:{reload:WeaponSheet.reload,spend:WeaponSheet.spend}};
   static PARTS={main:{template:'systems/boothill/templates/weapon.hbs',scrollable:['.bh-body']}};
   async _prepareContext(options) {
-    return {...await super._prepareContext(options),item:this.document,system:this.document.system,editable:this.isEditable,standalone:!this.document.parent,
-      characters:game.actors.filter(a=>a.type==='character'&&a.isOwner).map(a=>({id:a.id,name:a.name})),
+    return {...await super._prepareContext(options),item:this.document,system:this.document.system,editable:this.isEditable,
       models:Object.entries(WEAPON_MODELS).map(([id,m])=>({id,label:m.label,selected:id===this.document.system.model})),
+      grips:[{id:1,label:'Uma mão',selected:handsRequired(this.document.system)===1},{id:2,label:'Duas mãos',selected:handsRequired(this.document.system)===2}].filter(g=>!['rifle','shotgun'].includes(WEAPON_MODELS[this.document.system.model].category)||g.id===2),
       ...weaponSummary(this.document.system)};
-  }
-  static async addToActor() {
-    if(!this.isEditable||this.document.parent) return;
-    await this.submit();
-    const actor=game.actors.get(this.element.querySelector('[data-field="targetActor"]').value);
-    if(!actor?.isOwner||actor.type!=='character') return ui.notifications.warn('Selecione um personagem que você possa editar.');
-    const data=this.document.toObject();
-    delete data._id;
-    await actor.createEmbeddedDocuments('Item',[data]);
-    ui.notifications.info(`Arma adicionada a ${actor.name}.`);
-    actor.sheet.render(true);
   }
   _processFormData(event,form,formData) {
     const data=super._processFormData(event,form,formData);

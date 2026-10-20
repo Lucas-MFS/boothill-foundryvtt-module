@@ -34,6 +34,22 @@ Na aba Itens, crie um item do tipo `weapon`. A ficha segue o estilo do personage
 
 A recarga completa é calculada por `ceil(capacidade / balas por etapa) × turnos por etapa`. Exemplos: revólver comum, 2 turnos; cápsula embutida, 18; rifle de manivela de 15 tiros, 8; escopeta de dois tiros, 1. Cada avanço manual de recarga representa um turno de combate (6 segundos). O progresso de recargas lentas fica salvo. O botão de gastar disparo só consome munição; não resolve ataques. Não há avanço automático pelo combate nem controle de munição de reserva nesta etapa.
 
-Para vincular, selecione o personagem na própria ficha da arma e clique em **Adicionar arma**, ou arraste o item para a ficha do personagem. A seção **Armamento** permite abrir a cópia e equipá-la; **Nova arma** cria diretamente no personagem. As cópias têm munição independente do item original. O teste no Foundry confirmou criação pelo diretório, troca de modelos, recarga lenta, inclusão no personagem e munição independente. O Foundry criou um backup do mundo Boothill antes de abrir a versão 0.2.0.
+Arraste o item do diretório para a ficha do personagem para criar uma cópia em `actor.items`, pelo comportamento nativo de `ActorSheetV2`. Um modelo pode ser usado por vários personagens, cada um com sua munição independente. A seção **Armamento** permite abrir a cópia e empunhá-la; **Nova arma** cria diretamente no personagem. Não existe campo de proprietário nem seletor para associar uma arma a um único personagem. O Foundry criou um backup do mundo Boothill antes de abrir a versão 0.2.0.
 
 Os atributos foram reduzidos de 46 para 32 px, e o checkbox de ambidestria tem um desenho próprio para não herdar os ícones sobrepostos do tema.
+
+## Ficha compacta de arma — 0.2.1
+
+Janela de 540 × 520, imagem quadrada de 64 × 64 ao lado do título, campos numéricos de 54 px e observações recolhíveis. Clique na imagem para usar o seletor nativo `editImage` do Foundry, que grava em `Item.img`. O seletor de personagem foi removido. Referência do comportamento nativo de inventário: https://foundryvtt.com/article/items/ e API v13 de ActorSheetV2. Itens podem ser arrastados do diretório para o personagem, e as linhas do inventário também usam `toDragData` pelo manipulador herdado.
+
+## Empunhadura, saúde e tiros — 0.3.0
+
+O corpo usa uma grade de cinco colunas: atributos nas três primeiras, perícias de armas nas duas restantes acima; armamento abaixo dos atributos, saúde na quarta coluna e trabalho na quinta. A seleção de trabalho continua disponível pela engrenagem.
+
+Armas têm empunhadura de uma ou duas mãos. Rifles, carabinas, espingardas e escopetas exigem duas; revólveres e pistolas admitem uma (ou duas, se configuradas). Os hooks de criação/atualização de itens impedem exceder duas mãos, inclusive pela ficha do item. Itens recebidos no inventário quando não há mãos livres entram guardados. Armas antigas deduzem a empunhadura pelo modelo até serem editadas.
+
+A saúde mantém quantidades de ferimentos leves e sérios em nove regiões (com silhueta vetorial própria), separadas dos pontos reais e temporários de dano. Os pontos somam para o limite de Força; atingir o limite exibe **Desmaiado** e bloqueia disparos. Cada ferimento leve aplica −1 à precisão; cada sério, −4. A recuperação, mortalidade e restrições específicas por membro serão tratadas na etapa de resolução de ferimentos. Temporários de briga não foram distribuídos por região, pois as regras os tratam como uma reserva de pontos; seus efeitos após a briga ficam a cargo do Juiz por enquanto.
+
+Cada arma empunhada oferece tiros Mirado, Firme, de Saque e Seguido (este último apenas para revólveres). As bases são Coordenação, teto(Coordenação/2), piso(Coordenação/4) e máximo(1, Pistola); a perícia é somada aos três primeiros. **Usar duas armas** aplica −6 a ambas, conforme escolha expressa do usuário e PDF; a mão secundária sofre −2 adicional salvo ambidestria. **Trocar mãos** muda a principal. Segurar duas armas com a opção desmarcada permite atirar com uma de cada vez, sem a penalidade de disparo duplo.
+
+O alcance selecionado aplica os modificadores tabelados e espingardas/escopetas recebem +2/+4. O diálogo do Juiz recebe os ajustes adicionais. Cada clique rola um único d20 e consome uma bala, registra a decomposição da chance no chat e confirma Sorte nos extremos. Os lances aparecem nas dicas dos botões; o sistema ainda não impõe cadência no rastreador. Um 20 natural lembra de verificar defeito; não automatizamos a tabela de defeitos, localização, gravidade ou dano nesta etapa. Nenhum alvo é ferido automaticamente. Referência: PDF fornecido, páginas físicas 23–25, 38, 42 e 68–69.
