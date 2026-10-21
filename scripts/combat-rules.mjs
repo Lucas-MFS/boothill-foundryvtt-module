@@ -1,7 +1,7 @@
 import {WEAPON_MODELS} from './weapon-rules.mjs';
 export const LOCATIONS={head:'Cabeça',leftShoulder:'Ombro esq.',rightShoulder:'Ombro dir.',leftArm:'Braço esq.',rightArm:'Braço dir.',chest:'Peito',abdomen:'Abdômen',leftLeg:'Perna esq.',rightLeg:'Perna dir.'};
 export const SHOTS={aimed:{label:'Tiro Mirado',beats:6},steady:{label:'Tiro Firme',beats:3},draw:{label:'Tiro de Saque',beats:2},fan:{label:'Tiro Seguido',beats:1}};
-export const MOVEMENTS={still:'Parado',walk:'Andando a pé',dodge:'Esquivando',run:'Correndo',horseWalk:'Montaria: andando',trot:'Montaria: trotando',gallop:'Montaria: galopando'};
+export const MOVEMENTS={crawl:'Rastejando',still:'Parado',walk:'Andando a pé',dodge:'Esquivando',run:'Correndo',horseWalk:'Montaria: andando',trot:'Montaria: trotando',gallop:'Montaria: galopando'};
 export function movementDistances(health) {
   const {leftLeg,rightLeg}=health.locations;
   const legWounds=leftLeg.light+rightLeg.light+leftLeg.serious+rightLeg.serious;

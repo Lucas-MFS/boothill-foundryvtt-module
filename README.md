@@ -70,3 +70,13 @@ O armamento mostra `Item.img` em miniaturas quadradas, no inventário e nas arma
 Sorte deixa de ser automática. Conforme as páginas físicas 10 e 25 do PDF, 1 natural com chance abaixo de 1 ou 20 natural com chance de 20 ou mais deixa o resultado pendente. **Rolar Sorte** resolve o d20 no mesmo cartão, usando a Sorte registrada no momento do teste. O autor da mensagem ou um GM pode concluir o teste; o botão desaparece ao resolver, inclusive após recarregar a página. Não há novo consumo de munição. O d20 original e o teste de Sorte permanecem nos dados de rolagem da mensagem. Mensagens com conteúdo oculto não recebem o cartão visível.
 
 Validação: 17 testes, incluindo estados pendentes, resolução única, permissão e privacidade; verificação no navegador com sucesso, falha, ajuste manual, tiro e resolução de Sorte após um 20 natural.
+
+## Ficha compacta e inventário — 0.4.0
+
+Largura inicial de 912 px (redução de 20%). Saúde no topo da lateral direita, seguida de perícias de armas e trabalho. XP no cabeçalho. Clique na linha da arma ou use Enter/Espaço para expandir rapidez e tiros; botões e miniatura abrem/operam o item sem alternar a linha. Empunhadura usa ícone de punho.
+
+Deslocamentos publicam a ação no chat e aplicam o movimento à precisão/rapidez. Em combate, o efeito termina ao mudar de rodada; fora dele, permanece até usar Encerrar movimento. O mesmo botão permite dispensa manual durante a rodada.
+
+Inventário inclui todas as armas incorporadas ao ator e itens avulsos com quantidade e peso unitário em kg. Peso da arma é editado na ficha do item (inicial 0, deve ser preenchido). Total soma quantidade × peso; limite de carga é manual, pois não foi localizada uma fórmula explícita no PDF. Itens avulsos podem ser removidos e adicionados novamente para corrigir valores. Não automatiza penalidades de sobrecarga.
+
+Os testes existentes passaram. Validação visual desta versão pendente: ferramenta do navegador indisponível durante esta atualização.

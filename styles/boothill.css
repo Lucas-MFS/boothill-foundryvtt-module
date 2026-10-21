@@ -155,3 +155,29 @@
 .bh-roll-card [data-bh-luck] span { border-left:1px solid #b5ac99; padding-left:8px; }
 .bh-roll-card .bh-luck-result { border-top:1px solid #b5ac99; margin-top:12px; padding-top:9px; font:11px Arial,sans-serif; }
 .bh-roll-card .bh-rapidity-score { font:bold 38px Georgia,serif; padding-top:12px; }
+.boothill .bh-character-grid {display:grid;grid-template-columns:3fr 2fr;padding-right:20px;grid-template-rows:auto auto auto auto;}
+.boothill .bh-character-grid > .bh-section,.boothill .bh-character-grid > .bh-creation {float:none;width:auto;margin-right:0;grid-row:auto;grid-column:1;}
+.boothill .bh-character-grid > .bh-attributes {grid-column:1;grid-row:1;}
+.boothill .bh-character-grid > .bh-armament {grid-column:1;grid-row:2/5;}
+.boothill .bh-character-grid > .bh-health {grid-column:2;grid-row:1/3;}
+.boothill .bh-character-grid > .bh-weapons {grid-column:2;grid-row:3;}
+.boothill .bh-character-grid > .bh-work {grid-column:2;grid-row:4/8;}
+.boothill .bh-character-grid > .bh-inventory {grid-column:1;grid-row:5;}
+.boothill .bh-character-grid > .bh-creation {grid-column:1;grid-row:6;}
+.boothill .bh-character-grid .bh-attribute .bh-roll-name {font-size:10px;gap:2px;}
+.boothill .bh-weapon-details td {background:#302b201a;padding:10px;}
+.boothill .bh-weapon-details .bh-shot-grid {margin-top:8px;grid-template-columns:repeat(4,minmax(0,1fr));}
+.boothill tr[data-action=toggleDetails] {cursor:pointer;}
+.boothill .bh-personal > label:first-child {flex:1;min-width:60px;}
+.boothill .bh-personal .bh-age {flex:0 0 55px;}
+.boothill .bh-inventory table {width:100%;background:transparent;border:0;font-size:12px;}
+.boothill .bh-inventory thead {background:transparent;color:var(--bh-muted);text-shadow:none;}
+.boothill .bh-inventory td,.boothill .bh-inventory th {padding:5px;text-align:left;}
+.boothill .bh-load {display:flex;align-items:center;gap:6px;font-size:12px;}
+.boothill .bh-load label {display:flex;gap:5px;align-items:center;}
+.boothill .bh-load input {width:60px;}
+.boothill .bh-add-gear {display:grid;grid-template-columns:40px 1fr 55px 65px;gap:5px;}
+.boothill .bh-add-gear input,.boothill .bh-add-gear button {min-width:0;font-size:11px;}
+.boothill .bh-remove-gear {display:inline;width:18px;height:18px;padding:0;border:0;background:transparent;}
+.boothill .bh-character-grid > .bh-weapons {display:block;}
+.boothill .bh-weapon-details .bh-shot-grid {grid-template-columns:repeat(2,minmax(0,1fr));}

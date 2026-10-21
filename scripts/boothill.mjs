@@ -9,21 +9,25 @@ async function judgeModifier(event,title) {
 }
 class CharacterData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
-    const {SchemaField,NumberField,StringField,BooleanField}=foundry.data.fields;
+    const {SchemaField,NumberField,StringField,BooleanField,ArrayField}=foundry.data.fields;
     const level=()=>new NumberField({required:true,nullable:false,integer:true,min:0,initial:0});
     const health=new SchemaField({points:level(),temporary:level(),locations:new SchemaField(Object.fromEntries(Object.keys(LOCATIONS).map(id=>[id,new SchemaField({light:level(),serious:level()})])))});
-    const combat=new SchemaField({movement:new StringField({initial:'still',choices:Object.keys(MOVEMENTS)}),primaryWeapon:new StringField({initial:''}),dualFire:new BooleanField({initial:true}),range:new StringField({initial:'short',choices:['close','short','long','extreme']})});
-    return {health,combat,identity:new SchemaField({player:new StringField({initial:''}),age:level(),ambidextrous:new BooleanField({initial:false})}),attributes:new SchemaField(Object.fromEntries(Object.keys(ATTRIBUTES).map(id=>[id,level()]))),skills:new SchemaField(Object.fromEntries(SKILLS.map(s=>[s.id,level()]))),trained:new SchemaField(Object.fromEntries(SKILLS.filter(s=>s.kind==='work').map(s=>[s.id,new BooleanField({nullable:true,initial:null})])))};
+    const combat=new SchemaField({movement:new StringField({initial:'still',choices:Object.keys(MOVEMENTS)}),movementRound:new NumberField({nullable:true,initial:null}),movementCombat:new StringField({initial:''}),primaryWeapon:new StringField({initial:''}),dualFire:new BooleanField({initial:true}),range:new StringField({initial:'short',choices:['close','short','long','extreme']})});
+    return {health,combat,inventory:new ArrayField(new SchemaField({id:new StringField(),name:new StringField(),quantity:new NumberField({min:1,integer:true,initial:1}),weight:new NumberField({min:0,initial:0})}),{initial:[]}),carryCapacity:new NumberField({min:0,initial:0}),identity:new SchemaField({player:new StringField({initial:''}),age:level(),xp:level(),ambidextrous:new BooleanField({initial:false})}),attributes:new SchemaField(Object.fromEntries(Object.keys(ATTRIBUTES).map(id=>[id,level()]))),skills:new SchemaField(Object.fromEntries(SKILLS.map(s=>[s.id,level()]))),trained:new SchemaField(Object.fromEntries(SKILLS.filter(s=>s.kind==='work').map(s=>[s.id,new BooleanField({nullable:true,initial:null})])))};
   }
 }
 export class CharacterSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
   get title() { return `Personagem: ${this.actor.name}`; }
   _editingSkills=false;
-  static DEFAULT_OPTIONS={classes:['boothill'],tag:'form',position:{width:1140,height:960},form:{submitOnChange:true,closeOnSubmit:false},actions:{check:CharacterSheet.check,generate:CharacterSheet.generate,generateSkill:CharacterSheet.generateSkill,toggleSkills:CharacterSheet.toggleSkills,openWeapon:CharacterSheet.openWeapon,toggleWeapon:CharacterSheet.toggleWeapon,createWeapon:CharacterSheet.createWeapon,shoot:CharacterSheet.shoot,swapHands:CharacterSheet.swapHands,reloadWeapon:CharacterSheet.reloadWeapon,reportRapidity:CharacterSheet.reportRapidity}};
+  _expandedWeapons=new Set();
+  static DEFAULT_OPTIONS={classes:['boothill'],tag:'form',position:{width:912,height:960},form:{submitOnChange:true,closeOnSubmit:false},actions:{check:CharacterSheet.check,generate:CharacterSheet.generate,generateSkill:CharacterSheet.generateSkill,toggleSkills:CharacterSheet.toggleSkills,openWeapon:CharacterSheet.openWeapon,toggleWeapon:CharacterSheet.toggleWeapon,createWeapon:CharacterSheet.createWeapon,shoot:CharacterSheet.shoot,swapHands:CharacterSheet.swapHands,reloadWeapon:CharacterSheet.reloadWeapon,reportRapidity:CharacterSheet.reportRapidity,toggleDetails:CharacterSheet.toggleDetails,move:CharacterSheet.move,clearMovement:CharacterSheet.clearMovement,addGear:CharacterSheet.addGear,removeGear:CharacterSheet.removeGear}};
   static PARTS={main:{template:'systems/boothill/templates/character.hbs',scrollable:['.bh-body']}};
   async _onRender(context,options) {
     await super._onRender(context,options);
     if(!this.isEditable) return;
+    for(const row of this.element.querySelectorAll('tr[data-action="toggleDetails"]')) row.addEventListener('keydown',event=>{
+      if(event.target===row&&['Enter',' '].includes(event.key)) {event.preventDefault();CharacterSheet.toggleDetails.call(this,event,row);}
+    });
     this._ammoChanges??={};
     this._saveAmmo??=foundry.utils.debounce(async()=>{
       const changes=this._ammoChanges;this._ammoChanges={};
@@ -57,8 +61,11 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       const chance=this.chanceFor(i,mode);
       return {mode,...shot,chance:chance?.total,supported:chance!==null,available:chance!==null&&!health.unconscious&&i.system.ammo>0};
     })}));
+    for(const row of armament) {row.expanded=this._expandedWeapons.has(row.id);row.held=held.find(h=>h.id===row.id);}
+    const gear=[...this.actor.items.filter(i=>i.type==='weapon').map(i=>({id:i.id,name:i.name,img:i.img,weapon:true,quantity:1,weight:i.system.weight??0})),...this.actor.system.inventory];
+    const totalWeight=gear.reduce((n,i)=>n+i.quantity*i.weight,0);
     const ranges={close:'Próximo (até 2 m)',short:'Curto',long:'Longo',extreme:'Extremo'};
-    return {...context,movements:Object.entries(MOVEMENTS).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.movement})),distances:movementDistances(this.actor.system.health).map(r=>({...r,combat:r.combat?`${r.combat.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—',firefight:r.firefight?`${r.firefight.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—'})),actor:this.actor,editable:this.isEditable,editingSkills:this._editingSkills,hasWork:work.length>0,work,held,hasTwo:held.length===2,health,locations:Object.entries(LOCATIONS).map(([id,label])=>({id,label,...this.actor.system.health.locations[id]})),ranges:Object.entries(ranges).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range})),armament,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,icon:icons[id],value:attributes[id]})),weapons:rows.filter(s=>s.kind==='weapon'),summary:creationSummary(attributes,skills,trained)};
+    return {...context,gear,totalWeight:Math.round(totalWeight*1000)/1000,movementActive:this.actor.system.combat.movement!=='still',movements:Object.entries(MOVEMENTS).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.movement})),distances:movementDistances(this.actor.system.health).map((r,index)=>({...r,id:['crawl','walk','dodge','run','horseWalk','trot','gallop'][index],combat:r.combat?`${r.combat.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—',firefight:r.firefight?`${r.firefight.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—'})),actor:this.actor,editable:this.isEditable,editingSkills:this._editingSkills,hasWork:work.length>0,work,held,hasTwo:held.length===2,health,locations:Object.entries(LOCATIONS).map(([id,label])=>({id,label,...this.actor.system.health.locations[id]})),ranges:Object.entries(ranges).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range})),armament,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,icon:icons[id],value:attributes[id]})),weapons:rows.filter(s=>s.kind==='weapon'),summary:creationSummary(attributes,skills,trained)};
   }
   heldWeapons() {
     return this.actor.items.filter(i=>i.type==='weapon'&&i.system.equipped).sort((a,b)=>Number(b.id===this.actor.system.combat.primaryWeapon)-Number(a.id===this.actor.system.combat.primaryWeapon)||a.sort-b.sort||a.id.localeCompare(b.id));
@@ -68,6 +75,29 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     if(combat.movement==='dodge'||index<0||held.reduce((n,i)=>n+handsRequired(i.system),0)>2) return null;
     return shotTarget({coordination:attributes.coordination,skill:skills[weaponSummary(item.system).skill==='Rifle'?'rifle':'pistola'],mode,weapon:item.system,secondary:index===1,dual:held.length===2&&combat.dualFire,ambidextrous:identity.ambidextrous,woundPenalty:healthSummary(health,attributes.strength).penalty,range:combat.range,movementPenalty:['run','trot'].includes(combat.movement)?-2:combat.movement==='gallop'?-4:0});
   }
+  static async toggleDetails(event,button) {
+    if(event.target.closest('button,input,img,a,select')) return;
+    const id=button.dataset.id;
+    if(this._expandedWeapons.has(id)) this._expandedWeapons.delete(id);else this._expandedWeapons.add(id);
+    this.render();
+  }
+  static async move(event,button) {
+    if(!this.isEditable) return;
+    const id=button.dataset.id;
+    if(!Object.hasOwn(MOVEMENTS,id)) return;
+    const combat=game.combat;
+    await this.actor.update({'system.combat.movement':id,'system.combat.movementRound':combat?.round??null,'system.combat.movementCombat':combat?.id??''});
+    const verb={crawl:'rastejando',walk:'andando',dodge:'esquivando',run:'correndo',horseWalk:'andando a cavalo',trot:'trotando',gallop:'galopando'}[id];
+    await ChatMessage.create({speaker:ChatMessage.getSpeaker({actor:this.actor}),content:`${foundry.utils.escapeHTML(this.actor.name)} está ${verb}.`});
+  }
+  static async clearMovement() {if(this.isEditable) await this.actor.update({'system.combat.movement':'still','system.combat.movementRound':null,'system.combat.movementCombat':''});}
+  static async addGear() {
+    if(!this.isEditable) return;
+    const name=this.element.querySelector('[data-gear-name]').value.trim(),weight=Number(this.element.querySelector('[data-gear-weight]').value),quantity=Number(this.element.querySelector('[data-gear-quantity]').value);
+    if(!name||!Number.isFinite(weight)||weight<0||!Number.isInteger(quantity)||quantity<1) return ui.notifications.warn('Preencha nome, quantidade e peso válidos.');
+    await this.actor.update({'system.inventory':[...this.actor.system.inventory,{id:foundry.utils.randomID(),name,weight,quantity}]});
+  }
+  static async removeGear(event,button) {if(this.isEditable) await this.actor.update({'system.inventory':this.actor.system.inventory.filter(i=>i.id!==button.dataset.id)});}
   static async swapHands() {
     if(!this.isEditable) return;
     const held=this.heldWeapons();
@@ -189,4 +219,14 @@ Hooks.on('preUpdateItem',(item,changes)=>{
 });
 Hooks.on('preCreateItem',(item)=>{
   if(item.type==='weapon'&&item.parent&&!canHold(item.parent.items.filter(i=>i.type==='weapon'),item.system,item.id)) item.updateSource({'system.equipped':false});
+});
+
+Hooks.on('updateCombat',async(combat,changes)=>{
+  if(!game.user.isGM||game.users.activeGM?.id!==game.user.id||!('round' in changes)&&!('active' in changes)) return;
+  const actors=new Map([...game.actors,...combat.combatants.map(c=>c.actor).filter(Boolean)].map(a=>[a.uuid,a]));
+  for(const actor of actors.values()) if(actor.type==='character'&&actor.system.combat.movementCombat===combat.id&&(actor.system.combat.movementRound!==combat.round||!combat.active)) await actor.update({'system.combat.movement':'still','system.combat.movementRound':null,'system.combat.movementCombat':''});
+});
+Hooks.on('deleteCombat',async combat=>{
+ if(!game.user.isGM||game.users.activeGM?.id!==game.user.id) return;
+ for(const actor of game.actors) if(actor.type==='character'&&actor.system.combat.movementCombat===combat.id) await actor.update({'system.combat.movement':'still','system.combat.movementRound':null,'system.combat.movementCombat':''});
 });

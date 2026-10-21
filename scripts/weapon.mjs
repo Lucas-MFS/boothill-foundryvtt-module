@@ -5,7 +5,7 @@ export class WeaponData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const {StringField,NumberField,BooleanField}=foundry.data.fields;
     const number=(initial,min=0)=>new NumberField({required:true,nullable:false,integer:true,min,initial});
-    return {model:new StringField({required:true,choices:Object.keys(WEAPON_MODELS),initial:'singleAction'}),
+    return {weight:new NumberField({min:0,initial:0}),model:new StringField({required:true,choices:Object.keys(WEAPON_MODELS),initial:'singleAction'}),
       hands:new NumberField({integer:true,nullable:true,initial:null,choices:[1,2]}),capacity:number(6,1),ammo:number(0),roundsPerLoad:number(3,1),turnsPerLoad:number(1,1),reloadProgress:number(0),
       short:number(10),long:number(20),extreme:number(55),speed:number(1,-2),wound:number(0,-10),
       caliber:new StringField({initial:''}),notes:new StringField({initial:''}),equipped:new BooleanField({initial:false})};

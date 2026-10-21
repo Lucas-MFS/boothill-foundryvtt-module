@@ -6,7 +6,7 @@
   <div class="bh-body bh-compact-weapon">
     <fieldset class="bh-weapon-fields bh-weapon-model" {{#unless editable}}disabled{{/unless}}>
       <label>Modelo<select name="system.model" title="Trocar o modelo aplica os valores da tabela de armas.">{{#each models}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
-      <label>Calibre<input name="system.caliber" value="{{system.caliber}}" placeholder="Ex.: .45 Colt"></label>
+      <label>Peso (kg)<input type="number" min="0" step="0.01" name="system.weight" value="{{system.weight}}"></label><label>Calibre<input name="system.caliber" value="{{system.caliber}}" placeholder="Ex.: .45 Colt"></label>
       <label>Empunhadura<select name="system.hands">{{#each grips}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
     </fieldset>
     <section class="bh-section bh-weapon-section"><h2>Munição & recarga</h2>
