@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {handsRequired,canHold,healthSummary,shotTarget,LOCATIONS} from '../scripts/combat-rules.mjs';
+import {handsRequired,canHold,healthSummary,shotTarget,LOCATIONS,movementDistances,rapidity} from '../scripts/combat-rules.mjs';
 test('duas pistolas cabem; rifle exclui outra arma',()=>{
  const pistol={model:'singleAction',equipped:true,hands:1},rifle={model:'leverRifle',equipped:true,hands:1};
  assert.equal(handsRequired(rifle),2);
@@ -27,4 +27,21 @@ test('temporários somam ao desmaio sem virar contagem de feridas',()=>{
  health.locations.head.light=1;health.locations.leftArm.serious=1;
  const s=healthSummary(health,10);assert.equal(s.total,10);assert.equal(s.unconscious,true);assert.equal(s.penalty,-5);
  assert.equal(healthSummary(health,11).unconscious,false);
+});
+
+test('deslocamento acumula ferimentos e preserva rastejar e montaria',()=>{
+ const h={locations:Object.fromEntries(Object.keys(LOCATIONS).map(k=>[k,{light:0,serious:0}]))};
+ h.locations.leftLeg.serious=1;h.locations.rightLeg.light=2;
+ let rows=movementDistances(h);
+ assert.equal(rows[1].combat,.75);assert.equal(rows[2].combat,0);assert.equal(rows[3].combat,0);
+ assert.equal(rows[0].combat,2);assert.equal(rows[4].combat,8);
+ h.locations.rightLeg.serious=1;assert.equal(movementDistances(h)[1].combat,0);
+ h.locations.leftLeg.serious=0;h.locations.rightLeg={light:0,serious:0};h.locations.chest.serious=1;
+ rows=movementDistances(h);assert.equal(rows[1].combat,6);assert.equal(rows[3].combat,12);
+});
+test('rapidez considera arma, duas armas, movimento e ferimentos',()=>{
+ const r=rapidity({coordination:18,weapon:{speed:1},dual:true,movement:'run',woundPenalty:-5});
+ assert.equal(r.total,9);assert.equal(r.motion,-3);assert.equal(r.dual,-2);
+ assert.equal(rapidity({coordination:18,weapon:{speed:-2}}).total,16);
+ assert.equal(shotTarget({coordination:18,skill:2,mode:'aimed',weapon:{model:'singleAction'},movementPenalty:-2}).total,18);
 });

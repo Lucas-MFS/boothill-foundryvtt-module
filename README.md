@@ -53,3 +53,13 @@ A saúde mantém quantidades de ferimentos leves e sérios em nove regiões (com
 Cada arma empunhada oferece tiros Mirado, Firme, de Saque e Seguido (este último apenas para revólveres). As bases são Coordenação, teto(Coordenação/2), piso(Coordenação/4) e máximo(1, Pistola); a perícia é somada aos três primeiros. **Usar duas armas** aplica −6 a ambas, conforme escolha expressa do usuário e PDF; a mão secundária sofre −2 adicional salvo ambidestria. **Trocar mãos** muda a principal. Segurar duas armas com a opção desmarcada permite atirar com uma de cada vez, sem a penalidade de disparo duplo.
 
 O alcance selecionado aplica os modificadores tabelados e espingardas/escopetas recebem +2/+4. O diálogo do Juiz recebe os ajustes adicionais. Cada clique rola um único d20 e consome uma bala, registra a decomposição da chance no chat e confirma Sorte nos extremos. Os lances aparecem nas dicas dos botões; o sistema ainda não impõe cadência no rastreador. Um 20 natural lembra de verificar defeito; não automatizamos a tabela de defeitos, localização, gravidade ou dano nesta etapa. Nenhum alvo é ferido automaticamente. Referência: PDF fornecido, páginas físicas 23–25, 38, 42 e 68–69.
+
+## Ajustes de uso — 0.3.1
+
+As listas de perícias e tabelas têm linhas alternadas. A seleção de treinamento usa checkboxes próprios com espaço reservado; o dado junto ao nome testa a perícia. Gerar um novo nível fica disponível apenas com a engrenagem aberta.
+
+No personagem, a coluna Mãos deu lugar à recarga. A munição pode ser editada diretamente, limitada pela capacidade; editar reinicia o progresso de recarga. O botão de recarga avança um turno e mostra quantos faltam, preservando o mecanismo e o progresso de cada arma. A ficha do item continua contendo empunhadura.
+
+Clique normal em atributo, perícia ou tiro resolve imediatamente; Shift+clique abre o modificador do Juiz. A decomposição da conta aparece em texto pequeno e suave no chat. Rapidez por arma publica o valor calculado, sem dado aleatório: Coordenação + arma + ferimentos + movimento −2 ao usar duas armas. Shift também permite ajustá-la. Não substitui a regra especial de saque rápido.
+
+A seleção de movimento modifica rapidez (andar/trotar −1; correr/galopar −3) e tiro (correr/trotar −2; galopar −4; não se atira esquivando). O deslocamento mostra metros por turno de combate (6 s) e por lance de tiroteio (1 s). Cada ferimento na perna reduz distâncias a pé pela metade; sério na perna impede correr/esquivar, nas duas pernas permite apenas rastejar. Sérios em outras regiões reduzem correr/esquivar pela metade. Rastejar e os valores de uma montaria saudável permanecem como tabelados. Terreno e ferimentos do animal são manuais. Referência: PDF fornecido, páginas físicas 28–30 e 33–35.

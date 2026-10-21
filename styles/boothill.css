@@ -70,11 +70,11 @@
 @media(max-width:700px) { .boothill .bh-work-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .boothill .bh-wordmark { font-size:17px; } .boothill .bh-top-grid { gap:20px; } }
 
 /* Native checkbox replaces the Foundry theme's layered icon appearance. */
-.boothill .bh-handed input[type=checkbox] { appearance:none; -webkit-appearance:none; position:relative; display:inline-block; flex:0 0 15px; width:15px; height:15px; border:1px solid #8b887c; border-radius:2px; background:#f8f7f2; cursor:pointer; }
-.boothill .bh-handed input[type=checkbox]::before { content:none; }
-.boothill .bh-handed input[type=checkbox]::after { content:none; }
-.boothill .bh-handed input[type=checkbox]:checked { background:var(--bh-accent); border-color:var(--bh-accent); }
-.boothill .bh-handed input[type=checkbox]:checked::after { content:''; position:absolute; left:4px; top:1px; width:4px; height:8px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
+.boothill :is(.bh-handed,.bh-skill-row) input[type=checkbox] { appearance:none; -webkit-appearance:none; position:relative; display:inline-block; flex:0 0 15px; width:15px; height:15px; border:1px solid #8b887c; border-radius:2px; background:#f8f7f2; cursor:pointer; }
+.boothill :is(.bh-handed,.bh-skill-row) input[type=checkbox]::before { content:none; }
+.boothill :is(.bh-handed,.bh-skill-row) input[type=checkbox]::after { content:none; }
+.boothill :is(.bh-handed,.bh-skill-row) input[type=checkbox]:checked { background:var(--bh-accent); border-color:var(--bh-accent); }
+.boothill :is(.bh-handed,.bh-skill-row) input[type=checkbox]:checked::after { content:''; position:absolute; left:4px; top:1px; width:4px; height:8px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
 .boothill .bh-armament { margin-top:24px; }
 .boothill .bh-add-weapon,.boothill .bh-equip-weapon { min-height:0; width:auto; height:auto; padding:3px 7px; font:11px Arial,sans-serif; color:var(--bh-ink); border:1px solid var(--bh-rule); border-radius:2px; background:transparent; }
 .boothill .bh-armament-table { width:100%; margin:0; border:0; background:transparent; font-size:12px; }
@@ -115,3 +115,23 @@
 .boothill .bh-weapon-notes { margin-top:14px; border-top:1px solid var(--bh-rule); padding-top:8px; color:var(--bh-muted); font-size:11px; }
 .boothill .bh-weapon-notes summary { cursor:pointer; }
 .boothill .bh-weapon-notes textarea { width:100%; margin-top:6px; padding:6px; border:1px solid var(--bh-rule); border-radius:2px; background:#ffffff33; color:var(--bh-ink); font:12px Arial,sans-serif; resize:vertical; }
+
+.boothill table tbody tr:nth-child(even),.boothill .bh-work .bh-skill-row:nth-of-type(even),.boothill .bh-weapons .bh-stat-row:nth-of-type(even) { background:#302b2010; }
+.boothill .bh-character-grid .bh-work .bh-skill-row { display:grid; grid-template-columns:minmax(0,1fr) 29px; gap:6px; padding:3px; }
+.boothill .bh-character-grid .bh-work .bh-skill-row.bh-editing { grid-template-columns:15px minmax(0,1fr) 29px 17px; gap:5px; }
+.boothill .bh-work .bh-roll-name { gap:5px; }
+.boothill .bh-work .bh-roll-name i { flex:0 0 12px; width:12px; font-size:11px; }
+.boothill .bh-work .bh-roll-name span { overflow-wrap:anywhere; }
+.boothill .bh-work .bh-generate-skill { width:17px; opacity:.65; padding:0; }
+.boothill .bh-ammo { white-space:nowrap; }
+.boothill .bh-ammo input { display:inline-block; width:34px; height:26px; text-align:center; font-size:12px; padding:0; }
+.boothill .bh-reload,.boothill .bh-rapidity { width:auto; min-height:0; height:26px; padding:3px 7px; margin:0; border:1px solid var(--bh-rule); border-radius:2px; color:var(--bh-ink); background:transparent; font:11px Arial,sans-serif; }
+.boothill .bh-held > header .bh-rapidity { margin-top:6px; font-size:11px; font-weight:normal; }
+.boothill .bh-rapidity strong { margin-left:8px; font-size:15px; }
+.boothill .bh-shoot-controls > label { display:flex; align-items:center; gap:6px; }
+.boothill .bh-movement { margin-top:18px; }
+.boothill .bh-movement h3 { font:bold 14px Georgia,serif; border-bottom:1px solid var(--bh-rule); padding-bottom:5px; }
+.boothill .bh-movement table { background:transparent; border:0; font-size:11px; }
+.boothill .bh-movement thead { background:transparent; text-shadow:none; color:var(--bh-muted); border:0; }
+.boothill .bh-movement th,.boothill .bh-movement td { text-align:left; padding:5px 7px; }
+.bh-roll-modifiers { display:block; font-size:11px; line-height:1.4; color:var(--color-text-secondary,#777); font-weight:normal; margin-top:4px; }
