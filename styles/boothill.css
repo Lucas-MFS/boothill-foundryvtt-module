@@ -195,7 +195,7 @@
 .boothill .bh-details-inner select option {background:#f6f3ec;color:#302b24;}
 .bh-roll-card [data-bh-injury] {height:auto;min-height:30px;padding:5px;background:#f6f3ec;color:#302b24;border:1px solid #b5ac99;border-radius:2px;font:11px Arial,sans-serif;margin-top:10px;}
 .bh-choice-map {position:relative;height:350px;margin-top:10px;}
-.bh-choice-map img {position:absolute;height:330px;width:150px;left:50%;transform:translateX(-50%);border:0;opacity:.22;}
+.bh-choice-map img {position:absolute;height:330px;width:120px;object-fit:contain;left:50%;transform:translateX(-50%);border:0;opacity:.22;}
 .bh-choice-map button {position:absolute;width:42%;margin:0;}
 .bh-choice-map button:disabled {opacity:.25;cursor:default;}
 .bh-choice-map button small {display:block;}
