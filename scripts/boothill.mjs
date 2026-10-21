@@ -1,4 +1,5 @@
-import {ATTRIBUTES,SKILLS,generatedScore,creationSummary,needsLuck,succeeds,isWorkTrained} from './rules.mjs';
+import {postCheck,modifierText,registerChatCards} from './chat.mjs';
+import {ATTRIBUTES,SKILLS,generatedScore,creationSummary,isWorkTrained} from './rules.mjs';
 import {WeaponData,WeaponSheet} from './weapon.mjs';
 import {weaponSummary,advanceReload} from './weapon-rules.mjs';
 import {LOCATIONS,SHOTS,MOVEMENTS,movementDistances,rapidity,handsRequired,canHold,healthSummary,shotTarget} from './combat-rules.mjs';
@@ -51,7 +52,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     const work=rows.filter(s=>s.kind==='work'&&(this._editingSkills||s.trained));
     const health=healthSummary(this.actor.system.health,attributes.strength);
     const equipped=this.heldWeapons();
-    const armament=this.actor.items.filter(i=>i.type==='weapon').map(i=>({id:i.id,name:i.name,system:i.system,hands:handsRequired(i.system),...weaponSummary(i.system)}));
+    const armament=this.actor.items.filter(i=>i.type==='weapon').map(i=>({id:i.id,name:i.name,img:i.img,system:i.system,hands:handsRequired(i.system),...weaponSummary(i.system)}));
     const held=equipped.map((i,index)=>({...armament.find(a=>a.id===i.id),rapidity:this.rapidityFor(i).total,hand:handsRequired(i.system)===2?'Duas mãos':index===0?'Mão principal':'Mão secundária',shots:Object.entries(SHOTS).map(([mode,shot])=>{
       const chance=this.chanceFor(i,mode);
       return {mode,...shot,chance:chance?.total,supported:chance!==null,available:chance!==null&&!health.unconscious&&i.system.ammo>0};
@@ -89,11 +90,10 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       const current=this.chanceFor(item,mode);
       if(!current||healthSummary(this.actor.system.health,this.actor.system.attributes.strength).unconscious) return;
       const target=current.total+modifier,roll=await new Roll('1d20').evaluate();
-      const luck=needsLuck(roll.total,target)?await new Roll('1d20').evaluate():null;
-      const hit=succeeds(roll.total,target,luck?.total,this.actor.system.attributes.luck);
       await item.update({'system.ammo':item.system.ammo-1,'system.reloadProgress':0});
-      const escape=foundry.utils.escapeHTML;
-      await ChatMessage.create({speaker:ChatMessage.getSpeaker({actor:this.actor}),style:CONST.CHAT_MESSAGE_STYLES.ROLL,rolls:luck?[roll,luck]:[roll],flavor:`${escape(item.name)} · ${SHOTS[mode].label} | Chance ${target}: ${hit?'Acerto':'Erro'}<small class="bh-roll-modifiers">Base ${current.base}, perícia +${current.training}, duas armas ${current.twoWeapons}, mão ${current.offhand}, ferimentos ${current.woundPenalty}, alcance ${current.distance}, dispersão +${current.spread}, movimento ${current.movementPenalty}, Juiz ${modifier}.</small>${luck?` Sorte: ${luck.total}/${this.actor.system.attributes.luck}.`:''}${roll.total===20?' 20 natural: verificar defeito da arma; acerto, se houver, fica pendente desta verificação.':''} Ferimentos ainda não resolvidos.`});
+      await postCheck(this.actor,{title:`${item.name} · ${SHOTS[mode].label}`,target,roll,
+        modifiers:[['Perícia',current.training],['Duas armas',current.twoWeapons],['Mão inábil',current.offhand],['Ferimentos',current.woundPenalty],['Alcance',current.distance],['Dispersão',current.spread],['Movimento',current.movementPenalty],['Juiz',modifier]],
+        note:roll.total===20?'20 natural: verificar defeito da arma. Ferimentos ainda não resolvidos.':'Ferimentos ainda não resolvidos.'});
     } finally {this._firing=false;}
   }
   rapidityFor(item) {
@@ -108,7 +108,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     const modifier=await judgeModifier(event,'Rapidez — modificador do Juiz');
     if(!Number.isInteger(modifier)) return;
     const r=this.rapidityFor(item);
-    await ChatMessage.create({speaker:ChatMessage.getSpeaker({actor:this.actor}),content:`<strong>Rapidez: ${r.total+modifier}</strong> · ${foundry.utils.escapeHTML(item.name)}<small class="bh-roll-modifiers">Coordenação ${r.base} · Arma ${r.weapon} · Ferimentos ${r.wounds} · Movimento ${r.motion} · Duas armas ${r.dual} · Juiz ${modifier}</small>`});
+    await ChatMessage.create({speaker:ChatMessage.getSpeaker({actor:this.actor}),content:`<article class="bh-roll-card"><header><span>BOOT HILL</span><h3>Rapidez · ${foundry.utils.escapeHTML(item.name)}</h3></header><div class="bh-rapidity-score">${r.total+modifier}</div>${modifierText([['Arma',r.weapon],['Ferimentos',r.wounds],['Movimento',r.motion],['Duas armas',r.dual],['Juiz',modifier]])}</article>`});
   }
   static async reloadWeapon(event,button) {
     if(!this.isEditable||this._reloading) return;
@@ -170,11 +170,10 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     if(modifier===null||modifier===undefined||!Number.isInteger(modifier)) return;
     target+=modifier;
     const roll=await new Roll('1d20').evaluate();
-    const luckRoll=needsLuck(roll.total,target)?await new Roll('1d20').evaluate():null;
-    const success=succeeds(roll.total,target,luckRoll?.total,this.actor.system.attributes.luck);
-    await ChatMessage.create({speaker:ChatMessage.getSpeaker({actor:this.actor}),style:CONST.CHAT_MESSAGE_STYLES.ROLL,rolls:luckRoll?[roll,luckRoll]:[roll],flavor:`${group==='attributes'?ATTRIBUTES[id]:skill.label} | Alvo ${target}: ${success?'Sucesso':'Falha'}<small class="bh-roll-modifiers">Base ${target-modifier} · Juiz ${modifier}</small>${luckRoll?` | Sorte ${luckRoll.total} / ${this.actor.system.attributes.luck}`:''}`});
+    await postCheck(this.actor,{title:group==='attributes'?ATTRIBUTES[id]:skill.label,target,roll,modifiers:[['Juiz',modifier]]});
   }
 }
+registerChatCards();
 Hooks.once('init',()=>{
   CONFIG.Actor.dataModels.character=CharacterData;
   CONFIG.Item.dataModels.weapon=WeaponData;
