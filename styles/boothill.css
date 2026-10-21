@@ -181,3 +181,12 @@
 .boothill .bh-remove-gear {display:inline;width:18px;height:18px;padding:0;border:0;background:transparent;}
 .boothill .bh-character-grid > .bh-weapons {display:block;}
 .boothill .bh-weapon-details .bh-shot-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
+.boothill .bh-inventory td:first-child,.boothill .bh-inventory th:first-child {width:46px;text-align:center;}
+.boothill .bh-inventory td:first-child img {display:block;margin:auto;}
+.boothill .bh-inventory td:last-child,.boothill .bh-inventory th:last-child {width:60px;}
+.boothill .bh-inventory td input {width:100%;text-align:center;}
+.boothill .bh-weapon-details[hidden] {display:none;}
+.boothill .bh-weapon-details td {padding:0;}
+.boothill .bh-details-inner {overflow:hidden;padding:10px;}
+.boothill .bh-weapon-details button {background:#f6f3ec;}
+.boothill .bh-details-inner select {width:190px;font-size:11px;}

@@ -28,6 +28,13 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     for(const row of this.element.querySelectorAll('tr[data-action="toggleDetails"]')) row.addEventListener('keydown',event=>{
       if(event.target===row&&['Enter',' '].includes(event.key)) {event.preventDefault();CharacterSheet.toggleDetails.call(this,event,row);}
     });
+    for(const input of this.element.querySelectorAll('[data-inventory-id]')) input.addEventListener('change',async()=>{
+      const value=input.valueAsNumber,field=input.dataset.field,id=input.dataset.inventoryId;
+      if(!Number.isFinite(value)||value<0||(field==='quantity'&&(!Number.isInteger(value)||value<1))) return;
+      if(input.dataset.weapon==='true') await this.actor.items.get(id)?.update({'system.weight':value});
+      else await this.actor.update({'system.inventory':this.actor.system.inventory.map(i=>i.id===id?{...i,[field]:value}:i)});
+    });
+    for(const select of this.element.querySelectorAll('[data-weapon-range]')) select.addEventListener('change',()=>this.actor.update({'system.combat.range':select.value}));
     this._ammoChanges??={};
     this._saveAmmo??=foundry.utils.debounce(async()=>{
       const changes=this._ammoChanges;this._ammoChanges={};
@@ -61,7 +68,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       const chance=this.chanceFor(i,mode);
       return {mode,...shot,chance:chance?.total,supported:chance!==null,available:chance!==null&&!health.unconscious&&i.system.ammo>0};
     })}));
-    for(const row of armament) {row.expanded=this._expandedWeapons.has(row.id);row.held=held.find(h=>h.id===row.id);}
+    for(const row of armament) {row.expanded=this._expandedWeapons.has(row.id);row.held=held.find(h=>h.id===row.id);row.ranges=Object.entries({close:'Próximo (até 2 m)',short:`Curto (até ${row.system.short} m)`,long:`Longo (até ${row.system.long} m)`,extreme:`Extremo (até ${row.system.extreme} m)`}).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range}));}
     const gear=[...this.actor.items.filter(i=>i.type==='weapon').map(i=>({id:i.id,name:i.name,img:i.img,weapon:true,quantity:1,weight:i.system.weight??0})),...this.actor.system.inventory];
     const totalWeight=gear.reduce((n,i)=>n+i.quantity*i.weight,0);
     const ranges={close:'Próximo (até 2 m)',short:'Curto',long:'Longo',extreme:'Extremo'};
@@ -79,7 +86,17 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     if(event.target.closest('button,input,img,a,select')) return;
     const id=button.dataset.id;
     if(this._expandedWeapons.has(id)) this._expandedWeapons.delete(id);else this._expandedWeapons.add(id);
-    this.render();
+    const detail=button.nextElementSibling;
+    if(detail?.classList.contains('bh-weapon-details')) {
+      const panel=detail.querySelector('.bh-details-inner');
+      const opening=this._expandedWeapons.has(id);
+      button.setAttribute('aria-expanded',String(opening));
+      detail.hidden=false;
+      const height=panel.scrollHeight;
+      const animation=panel.animate([{height:opening?'0px':`${height}px`,opacity:opening?0:1},{height:opening?`${height}px`:'0px',opacity:opening?1:0}],{duration:220,easing:'ease-in-out'});
+      await animation.finished;
+      detail.hidden=!opening;
+    }
   }
   static async move(event,button) {
     if(!this.isEditable) return;
