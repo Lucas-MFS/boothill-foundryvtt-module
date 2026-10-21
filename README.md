@@ -80,3 +80,6 @@ Deslocamentos publicam a ação no chat e aplicam o movimento à precisão/rapid
 Inventário inclui todas as armas incorporadas ao ator e itens avulsos com quantidade e peso unitário em kg. Peso da arma é editado na ficha do item (inicial 0, deve ser preenchido). Total soma quantidade × peso; limite de carga é manual, pois não foi localizada uma fórmula explícita no PDF. Itens avulsos podem ser removidos e adicionados novamente para corrigir valores. Não automatiza penalidades de sobrecarga.
 
 Os testes existentes passaram. Validação visual desta versão pendente: ferramenta do navegador indisponível durante esta atualização.
+## Localização e gravidade — 0.5.0
+
+Tiros acertados oferecem Determinar localização (d20). A silhueta habilita regiões alcançáveis pelo ajuste da Tabela 12, combinando perícia, tiro e alcance com arredondamento para baixo. A escolha rola d6 de gravidade com modificador regional (+1 peito/cabeça, −1 membros) e da arma. Resultado persiste no cartão, sem novo consumo de munição e sem aplicação automática ao alvo. Mortais lembram o teste de Sorte do alvo. 20 natural exige confirmação do Juiz de ausência de defeito antes de localização; a tabela de defeitos continua manual. Referência: PDF fornecido, páginas físicas 36–37. Seletor de alcance com espaçamento e cores do sistema. Validação: 21 testes automatizados; validação visual pendente.

@@ -140,7 +140,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       await item.update({'system.ammo':item.system.ammo-1,'system.reloadProgress':0});
       await postCheck(this.actor,{title:`${item.name} · ${SHOTS[mode].label}`,target,roll,
         modifiers:[['Perícia',current.training],['Duas armas',current.twoWeapons],['Mão inábil',current.offhand],['Ferimentos',current.woundPenalty],['Alcance',current.distance],['Dispersão',current.spread],['Movimento',current.movementPenalty],['Juiz',modifier]],
-        note:roll.total===20?'20 natural: verificar defeito da arma. Ferimentos ainda não resolvidos.':'Ferimentos ainda não resolvidos.'});
+        shot:{mode,range:this.actor.system.combat.range,skill:this.actor.system.skills[weaponSummary(item.system).skill==='Rifle'?'rifle':'pistola'],wound:item.system.wound},note:roll.total===20?'20 natural: o Juiz deve verificar defeito antes de resolver o ferimento.':''});
     } finally {this._firing=false;}
   }
   rapidityFor(item) {
