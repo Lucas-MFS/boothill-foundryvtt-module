@@ -93,3 +93,12 @@ Um Juiz conectado com a versão atual processa os pedidos, permitindo atingir fi
 Leves/sérios incrementam a região e somam os pontos da gravidade modificada; temporários permanecem intactos. Arranhões não causam efeitos. Mortais rolam Sorte do alvo automaticamente: sucesso reduz a leve de 1 ponto; falha marca Ferimento mortal na saúde, bloqueando disparos. A condução narrativa da morte fica com o Juiz; o marcador pode ser removido manualmente. O cartão registra alvo, pontos e eventual teste de Sorte. A aplicação não dispara nova bala.
 
 Validação: 25 testes automatizados, incluindo deduplicação, ator sintético, saúde e mortalidade; no Foundry, seleção manual aplicou 2 pontos/leve no peito e targeting aplicou automaticamente 3 pontos/sério no braço. Saúde da ficha de validação restaurada ao terminar.
+## Espingardas, escopetas e dispersão — 0.7.0
+
+Armas shotgun/sawedOff passam a rolar a quantidade de ferimentos antes da localização: d6 1 dá 1/0/0; 2–3 dá 2/1/0; 4–6 dá 4/3/2 em curto/longo/extremo. A faixa 6 foi completada conforme o PDF adicional informado pelo usuário; o exemplo contraditório não é usado. Próximo usa a coluna curto. Cada ferimento cria um cartão independente com localização, gravidade e aplicação, mantendo o alvo do disparo registrado ao rolar a quantidade. O disparo consome uma única munição, independentemente do número de ferimentos. Zero ferimentos encerra a resolução do alvo.
+
+Somente escopeta (sawedOff), em longo/extremo, oferece dispersão a 2/5 m do alvo original, mesmo se o teste principal falhar. O Juiz escolhe quem está na área e informa um nome por rolagem secundária. A chance é piso(chance final do original/2), incluindo a perícia antes da divisão. Os secundários rolam quantidade, localização sem ajuste e gravidade; nunca aplicam saúde automaticamente nem oferecem Aplicar dano. Não há medição de área, detecção de tokens próximos ou gasto extra de munição. Um 20 no disparo original requer confirmação manual de ausência de defeito antes de resolver a dispersão.
+
+Os cartões derivados preservam sussurros e rolagens cegas. A localização mantém a escolha normal no alvo principal; nos secundários apenas a região sorteada fica habilitada. Referência: Tabela 13, PDF fornecido, página física 39, com complemento expresso do usuário para a rolagem 6.
+
+Validação: 29 testes automatizados; no Foundry, principal gerou um ferimento independente, secundário usou metade da chance, gerou três ferimentos e resolveu cabeça com ajuste zero e aplicação manual.

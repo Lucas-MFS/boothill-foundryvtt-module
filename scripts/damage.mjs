@@ -27,7 +27,7 @@ function damageAuthority() {
 const busy=new Set();
 let queue=Promise.resolve();
 export async function requestDamage(message,tokenUuid) {
- if(message.getFlag('boothill','check')?.applied) return;
+ if(message.getFlag('boothill','check')?.applied||message.getFlag('boothill','check')?.secondary) return;
  if(!tokenUuid) return ui.notifications.warn('Selecione exatamente um token para aplicar o dano.');
  const token=await fromUuid(tokenUuid);
  if(token?.documentName!=='Token'||!supportsHealth(token.actor)) return ui.notifications.warn('O token precisa ter uma ficha com saúde compatível.');
@@ -42,7 +42,7 @@ export function registerDamage(renderCard) {
   if(assigned?.active ? assigned.id!==game.user.id : damageAuthority()?.id!==game.user.id) return;
   if(!req||request.getFlag('boothill','damageProcessed')) return;
   const message=game.messages.get(req.messageId),data=message?.getFlag('boothill','check');
-  if(!data?.injury||!data.shot||!succeeds(data.die,data.target,data.luckDie,data.luck)||(data.die===20&&!data.defectCleared)) return;
+  if(!data?.injury||!data.shot||data.secondary||!succeeds(data.die,data.target,data.luckDie,data.luck)||(data.die===20&&!data.defectCleared)) return;
   // Respect private/blind rolls when another player clicks a damage card.
   const user=request.author;
   if(!user||(!user.isGM&&message.whisper.length&&!message.whisper.includes(user.id)&&message.author?.id!==user.id)) return;
