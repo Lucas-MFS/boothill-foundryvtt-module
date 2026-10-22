@@ -214,3 +214,4 @@
 .boothill .bh-location-rightShoulder,.boothill .bh-location-rightArm,.boothill .bh-location-rightLeg {left:calc(50% - 82px);}
 .boothill .bh-location input {width:31px;}
 .boothill .bh-location {width:80px;}
+.bh-roll-card [data-bh-damage] {width:100%;height:32px;margin-top:10px;background:#f6f3ec;color:#302b24;border:1px solid #b5ac99;border-radius:2px;font:bold 12px Arial,sans-serif;}

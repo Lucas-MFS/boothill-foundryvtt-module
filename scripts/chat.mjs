@@ -1,3 +1,4 @@
+import {registerDamage,requestDamage} from './damage.mjs';
 import {injuryCard,locationChoices,injuryResult} from './injury.mjs';
 import {needsLuck,succeeds} from './rules.mjs';
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -18,6 +19,7 @@ export async function postCheck(actor,{title,target,roll,modifiers=[],note='',sh
 }
 const resolving=new Set();
 export function registerChatCards() {
+  registerDamage(rollCard);
   Hooks.on('renderChatMessageHTML',(message,html)=>{
     const data=message.getFlag('boothill','check');
     if(!data||!message.isContentVisible) return;
@@ -41,15 +43,23 @@ export function registerChatCards() {
             next.defectCleared=true;
           } else {
             if(current.die===20&&!current.defectCleared) return;
-            if(kind==='location'&&!current.locationDie) {roll=await new Roll('1d20').evaluate();next.locationDie=roll.total;}
+            if(kind==='location'&&!current.locationDie) {roll=await new Roll('1d20').evaluate();next.locationDie=roll.total;const targets=[...game.user.targets];next.targetTokenUuid=targets.length===1?targets[0].document.uuid:null;if(targets.length>1) ui.notifications.warn('Mais de um alvo marcado: use Aplicar dano em um token selecionado.');}
             else if(current.locationDie&&locationChoices(current.locationDie,current.shot).some(r=>r.id===kind&&r.available)) {roll=await new Roll('1d6').evaluate();next.injury=injuryResult(roll.total,kind,current.shot.wound);}
             else return;
           }
           await message.update({content:rollCard(next),'flags.boothill.check':next,...(roll?{rolls:[...message.rolls,roll]}:{})});
+          if(next.injury&&next.targetTokenUuid) await requestDamage(message,next.targetTokenUuid);
         } catch(error) {console.error(error);ui.notifications.error('Não foi possível registrar o ferimento.');}
         finally {resolving.delete(message.id);}
       });
     }
+    const damageButton=content.querySelector('[data-bh-damage]');
+    damageButton?.addEventListener('click',async()=>{
+      const selected=canvas.tokens.controlled;
+      if(selected.length!==1) return ui.notifications.warn('Selecione exatamente um token (não apenas um alvo).');
+      damageButton.disabled=true;
+      try {await requestDamage(message,selected[0].document.uuid);} finally {damageButton.disabled=false;}
+    });
     const button=content.querySelector('[data-bh-luck]');
     if(!button) return;
     button.disabled=!(message.isAuthor||game.user.isGM)||resolving.has(message.id);

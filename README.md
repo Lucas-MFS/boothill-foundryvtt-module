@@ -83,3 +83,13 @@ Os testes existentes passaram. Validação visual desta versão pendente: ferram
 ## Localização e gravidade — 0.5.0
 
 Tiros acertados oferecem Determinar localização (d20). A silhueta habilita regiões alcançáveis pelo ajuste da Tabela 12, combinando perícia, tiro e alcance com arredondamento para baixo. A escolha rola d6 de gravidade com modificador regional (+1 peito/cabeça, −1 membros) e da arma. Resultado persiste no cartão, sem novo consumo de munição e sem aplicação automática ao alvo. Mortais lembram o teste de Sorte do alvo. 20 natural exige confirmação do Juiz de ausência de defeito antes de localização; a tabela de defeitos continua manual. Referência: PDF fornecido, páginas físicas 36–37. Seletor de alcance com espaçamento e cores do sistema. Validação: 21 testes automatizados; validação visual pendente.
+
+## Targeting e aplicação de dano — 0.6.0
+
+Ao rolar localização, um único token marcado em targeting é registrado no cartão. Após escolher a região e determinar a gravidade, o dano é aplicado automaticamente ao Actor daquele TokenDocument. Sem alvo único, Aplicar dano usa exatamente um token selecionado (controlado) pelo usuário que clica. Alvos sem estrutura de saúde são recusados. Mais de um alvo exige aplicação manual a um token selecionado.
+
+Um Juiz conectado com a versão atual processa os pedidos, permitindo atingir fichas que o atacante não controla. Pedidos são mensagens privadas ao solicitante e ao Juiz, sem alterar permissões de atores. Registros no ator e no cartão impedem reaplicar o mesmo ferimento; pedidos são serializados. Tokens desvinculados usam seu ator sintético, preservando a ficha-base e os outros tokens. A implementação consulta a estrutura de saúde, sem restringir o tipo character, para acomodar a futura ficha NPC.
+
+Leves/sérios incrementam a região e somam os pontos da gravidade modificada; temporários permanecem intactos. Arranhões não causam efeitos. Mortais rolam Sorte do alvo automaticamente: sucesso reduz a leve de 1 ponto; falha marca Ferimento mortal na saúde, bloqueando disparos. A condução narrativa da morte fica com o Juiz; o marcador pode ser removido manualmente. O cartão registra alvo, pontos e eventual teste de Sorte. A aplicação não dispara nova bala.
+
+Validação: 25 testes automatizados, incluindo deduplicação, ator sintético, saúde e mortalidade; no Foundry, seleção manual aplicou 2 pontos/leve no peito e targeting aplicou automaticamente 3 pontos/sério no braço. Saúde da ficha de validação restaurada ao terminar.

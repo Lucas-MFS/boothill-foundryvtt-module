@@ -29,7 +29,7 @@ test('postar teste mantém d20 original e não rola Sorte automaticamente',async
 });
 test('botão Sorte respeita privacidade, permissão e impede repetir resolução',async()=>{
  let hook,click,rolled=0;
- globalThis.Hooks={on:(name,fn)=>{assert.equal(name,'renderChatMessageHTML');hook=fn;}};
+ globalThis.Hooks={once:()=>{},on:(name,fn)=>{if(name==='renderChatMessageHTML') hook=fn;}};
  globalThis.game={user:{isGM:false}};
  globalThis.Roll=class {async evaluate(){rolled++;return {total:3};}};
  registerChatCards();

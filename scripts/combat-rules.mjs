@@ -23,7 +23,7 @@ export function healthSummary(health,strength) {
   const wounds=Object.values(health.locations);
   const light=wounds.reduce((n,w)=>n+w.light,0),serious=wounds.reduce((n,w)=>n+w.serious,0);
   const total=health.points+health.temporary;
-  return {light,serious,total,penalty:-light-4*serious,unconscious:strength>0&&total>=strength};
+  return {light,serious,total,penalty:-light-4*serious,unconscious:health.mortal||(strength>0&&total>=strength)};
 }
 export function shotTarget({coordination,skill,mode,weapon,secondary=false,dual=false,ambidextrous=false,woundPenalty=0,movementPenalty=0,range='short'}) {
   const category=WEAPON_MODELS[weapon.model].category;
