@@ -19,7 +19,7 @@ test('modelos NPC e personagem são independentes e NPC compartilha saúde e com
  assert.equal('inventory' in npc,false);assert.equal('player' in npc.identity.fields,false);
  assert.deepEqual(Object.keys(npc.health.fields),Object.keys(pc.health.fields));
  globalThis.game={user:{isGM:true}};
- const sheet=new CharacterSheet();sheet.actor={type:'npc',system:{attributes:Object.fromEntries(Object.keys(NPC_ATTRIBUTES).map(id=>[id,5])),skills:{},trained:{},health:{points:0,temporary:0,locations:Object.fromEntries(['head','leftShoulder','rightShoulder','leftArm','rightArm','chest','abdomen','leftLeg','rightLeg'].map(id=>[id,{light:0,serious:0}]))},combat:{movement:'still',range:'short'},identity:{ambidextrous:false}},items:[]};
+ const sheet=new CharacterSheet();sheet.actor={getFlag:()=>undefined,type:'npc',system:{attributes:Object.fromEntries(Object.keys(NPC_ATTRIBUTES).map(id=>[id,5])),skills:{},trained:{},health:{points:0,temporary:0,locations:Object.fromEntries(['head','leftShoulder','rightShoulder','leftArm','rightArm','chest','abdomen','leftLeg','rightLeg'].map(id=>[id,{light:0,serious:0}]))},combat:{movement:'still',range:'short'},identity:{ambidextrous:false}},items:[]};
  assert.equal((await sheet._prepareContext({})).extraAttributes.length,2);
  game.user.isGM=false;assert.equal((await sheet._prepareContext({})).extraAttributes.length,0);
 });

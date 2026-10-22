@@ -9,10 +9,10 @@ export function modifierText(entries=[]) {
 }
 export function rollCard(data) {
   const {title,target,die,luck,luckDie,modifiers=[],note=''}=data;
-  const pending=needsLuck(die,target)&&!Number.isInteger(luckDie);
-  const success=succeeds(die,target,luckDie,luck);
+  const pending=!data.bladeHit&&needsLuck(die,target)&&!Number.isInteger(luckDie);
+  const success=data.bladeHit||succeeds(die,target,luckDie,luck);
   const state=pending?'pending':success?'success':'failure';
-  return `<article class="bh-roll-card bh-roll-${state}"><header><span>BOOT HILL</span><h3>${escape(title)}</h3></header><div class="bh-roll-score" aria-label="Chance ${target}; rolagem ${die}"><strong>${target}</strong><span>/</span><strong>${die}</strong></div><div class="bh-roll-captions"><span>Chance de acerto</span><span>Rolagem · d20</span></div><p class="bh-roll-outcome">${pending?'Aguardando Sorte':success?'Sucesso':'Falha'}</p>${modifierText(modifiers)}${pending?`<button type="button" data-bh-luck><i class="fas fa-clover" aria-hidden="true"></i> Rolar Sorte <span>${luck}</span></button>`:''}${Number.isInteger(luckDie)?`<div class="bh-luck-result">Sorte <strong>${luck} / ${luckDie}</strong> · ${luckDie<=luck?'Sucesso':'Falha'}</div>`:''}${!pending&&success?(isShotgun(data)&&!data.pelletChild?pelletsCard(data):injuryCard(data)):''}${spreadCard(data)}${note?`<small class="bh-roll-note">${escape(note)}</small>`:''}</article>`;
+  return `<article class="bh-roll-card bh-roll-${state}"><header><span>BOOT HILL</span><h3>${escape(title)}</h3></header><div class="bh-roll-score" aria-label="Chance ${target}; rolagem ${die}"><strong>${target}</strong><span>/</span><strong>${die}</strong></div><div class="bh-roll-captions"><span>${data.bladeHit?'Total ajustado':'Chance de acerto'}</span><span>Rolagem · d20</span></div><p class="bh-roll-outcome">${pending?'Aguardando Sorte':success?'Sucesso':'Falha'}</p>${modifierText(modifiers)}${pending?`<button type="button" data-bh-luck><i class="fas fa-clover" aria-hidden="true"></i> Rolar Sorte <span>${luck}</span></button>`:''}${Number.isInteger(luckDie)?`<div class="bh-luck-result">Sorte <strong>${luck} / ${luckDie}</strong> · ${luckDie<=luck?'Sucesso':'Falha'}</div>`:''}${!pending&&success?(isShotgun(data)&&!data.pelletChild?pelletsCard(data):injuryCard(data)):''}${spreadCard(data)}${note?`<small class="bh-roll-note">${escape(note)}</small>`:''}</article>`;
 }
 export async function postCheck(actor,{title,target,roll,modifiers=[],note='',shot=null,whisper=null}) {
   const check={title,target,die:roll.total,luck:actor.system.attributes.luck,modifiers,note,shot};
@@ -48,7 +48,7 @@ export function registerChatCards() {
             await ChatMessage.create({speaker:message.speaker,whisper:message.whisper,blind:message.blind,style:CONST.CHAT_MESSAGE_STYLES.ROLL,rolls:[roll],content:rollCard(next),flags:{boothill:{check:next}}});
             return;
           }
-          if(!succeeds(current.die,current.target,current.luckDie,current.luck)) return;
+          if(!(current.bladeHit||succeeds(current.die,current.target,current.luckDie,current.luck))) return;
           let next={...current},roll;
           if(kind==='count'&&current.pelletsDie===undefined) {
             if(current.die===20&&!current.defectCleared) {
@@ -78,7 +78,7 @@ export function registerChatCards() {
       action.addEventListener('click',async()=>{
         if(!(message.isAuthor||game.user.isGM)||resolving.has(message.id)) return;
         const current=message.getFlag('boothill','check');
-        if(!current.shot||current.injury||!succeeds(current.die,current.target,current.luckDie,current.luck)) return;
+        if(!current.shot||current.injury||!(current.bladeHit||succeeds(current.die,current.target,current.luckDie,current.luck))) return;
         const kind=action.dataset.bhInjury;
         resolving.add(message.id);
         try {
@@ -88,7 +88,7 @@ export function registerChatCards() {
             next.defectCleared=true;
           } else {
             if(current.die===20&&!current.defectCleared) return;
-            if(kind==='location'&&!current.locationDie) {roll=await new Roll('1d20').evaluate();next.locationDie=roll.total;const targets=[...game.user.targets];next.targetTokenUuid=current.secondary?null:current.pelletChild?(current.targetTokenUuid??null):targets.length===1?targets[0].document.uuid:null;if(targets.length>1) ui.notifications.warn('Mais de um alvo marcado: use Aplicar dano em um token selecionado.');}
+            if(kind==='location'&&!current.locationDie) {roll=await new Roll('1d20').evaluate();next.locationDie=roll.total;const targets=[...game.user.targets];next.targetTokenUuid=current.secondary?null:(current.pelletChild||current.bladeHit)?(current.targetTokenUuid??null):targets.length===1?targets[0].document.uuid:null;if(targets.length>1) ui.notifications.warn('Mais de um alvo marcado: use Aplicar dano em um token selecionado.');}
             else if(current.locationDie&&locationChoices(current.locationDie,current.shot).some(r=>r.id===kind&&r.available)) {roll=await new Roll('1d6').evaluate();next.injury=injuryResult(roll.total,kind,current.shot.wound);}
             else return;
           }

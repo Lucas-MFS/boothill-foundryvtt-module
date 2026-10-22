@@ -20,12 +20,13 @@ export function healthDamage(health,injury,luckDie,luck=0) {
  }
  return {changes,points,severity,mortal};
 }
-function damageAuthority() {
+export function damageAuthority() {
  const capable=game.users.filter?.(u=>u.active&&u.isGM&&u.getFlag('boothill','damageProtocol')===1)??[];
  return capable.find(u=>u.id===game.users.activeGM?.id)??capable.sort((a,b)=>a.id.localeCompare(b.id))[0]??game.users.activeGM;
 }
 const busy=new Set();
 let queue=Promise.resolve();
+export function queueWorldUpdate(work) {queue=queue.then(work).catch(console.error);return queue;}
 export async function requestDamage(message,tokenUuid) {
  if(message.getFlag('boothill','check')?.applied) return;
  if(!tokenUuid) return ui.notifications.warn('Selecione exatamente um token para aplicar o dano.');
@@ -42,7 +43,7 @@ export function registerDamage(renderCard) {
   if(assigned?.active ? assigned.id!==game.user.id : damageAuthority()?.id!==game.user.id) return;
   if(!req||request.getFlag('boothill','damageProcessed')) return;
   const message=game.messages.get(req.messageId),data=message?.getFlag('boothill','check');
-  if(!data?.injury||!data.shot||!succeeds(data.die,data.target,data.luckDie,data.luck)||(data.die===20&&!data.defectCleared)) return;
+  if(!data?.injury||!data.shot||!(data.bladeHit||succeeds(data.die,data.target,data.luckDie,data.luck))||(data.die===20&&!data.defectCleared)) return;
   // Respect private/blind rolls when another player clicks a damage card.
   const user=request.author;
   if(!user||(!user.isGM&&message.whisper.length&&!message.whisper.includes(user.id)&&message.author?.id!==user.id)) return;
@@ -66,7 +67,7 @@ export function registerDamage(renderCard) {
   } catch(error) {console.error(error);ui.notifications.error(`Não foi possível aplicar o dano: ${error.message}`);}
   finally {busy.delete(message.id);}
  };
- const schedule=request=>{queue=queue.then(()=>process(request)).catch(console.error);};
+ const schedule=request=>queueWorldUpdate(()=>process(request));
  Hooks.on('createChatMessage',schedule);
  Hooks.once('ready',async()=>{if(game.user.isGM) await game.user.setFlag('boothill','damageProtocol',1);if(damageAuthority()?.id===game.user.id) for(const message of game.messages) if(message.getFlag('boothill','damageRequest')&&!message.getFlag('boothill','damageProcessed')) schedule(message);});
 }

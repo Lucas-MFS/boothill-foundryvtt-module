@@ -1,3 +1,6 @@
+import {attackMelee} from './melee-actions.mjs';
+import {registerMelee,consumeMeleeModifier} from './melee.mjs';
+import {pendingMeleeModifier,HOLDS} from './melee-rules.mjs';
 import {postCheck,modifierText,registerChatCards} from './chat.mjs';
 import {ATTRIBUTES,NPC_ATTRIBUTES,SKILLS,generatedNpcScore,generatedScore,creationSummary,isWorkTrained} from './rules.mjs';
 import {WeaponData,WeaponSheet} from './weapon.mjs';
@@ -12,7 +15,7 @@ class CharacterData extends foundry.abstract.TypeDataModel {
     const {SchemaField,NumberField,StringField,BooleanField,ArrayField}=foundry.data.fields;
     const level=()=>new NumberField({required:true,nullable:false,integer:true,min:0,initial:0});
     const health=new SchemaField({mortal:new BooleanField({initial:false}),mortalLocation:new StringField({initial:''}),points:level(),temporary:level(),locations:new SchemaField(Object.fromEntries(Object.keys(LOCATIONS).map(id=>[id,new SchemaField({light:level(),serious:level()})])))});
-    const combat=new SchemaField({movement:new StringField({initial:'still',choices:Object.keys(MOVEMENTS)}),movementRound:new NumberField({nullable:true,initial:null}),movementCombat:new StringField({initial:''}),primaryWeapon:new StringField({initial:''}),dualFire:new BooleanField({initial:true}),range:new StringField({initial:'short',choices:['close','short','long','extreme']})});
+    const combat=new SchemaField({stronger:new BooleanField({initial:false}),bladeReady:new BooleanField({initial:false}),movement:new StringField({initial:'still',choices:Object.keys(MOVEMENTS)}),movementRound:new NumberField({nullable:true,initial:null}),movementCombat:new StringField({initial:''}),primaryWeapon:new StringField({initial:''}),dualFire:new BooleanField({initial:true}),range:new StringField({initial:'short',choices:['close','short','long','extreme']})});
     return {health,combat,inventory:new ArrayField(new SchemaField({id:new StringField(),name:new StringField(),quantity:new NumberField({min:1,integer:true,initial:1}),weight:new NumberField({min:0,initial:0})}),{initial:[]}),carryCapacity:new NumberField({min:0,initial:0}),identity:new SchemaField({player:new StringField({initial:''}),age:level(),xp:level(),ambidextrous:new BooleanField({initial:false})}),attributes:new SchemaField(Object.fromEntries(Object.keys(ATTRIBUTES).map(id=>[id,level()]))),skills:new SchemaField(Object.fromEntries(SKILLS.map(s=>[s.id,level()]))),trained:new SchemaField(Object.fromEntries(SKILLS.filter(s=>s.kind==='work').map(s=>[s.id,new BooleanField({nullable:true,initial:null})])))};
   }
 }
@@ -31,7 +34,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
   get title() { return `${this.isNpc?'NPC':'Personagem'}: ${this.actor.name}`; }
   _editingSkills=false;
   _expandedWeapons=new Set();
-  static DEFAULT_OPTIONS={classes:['boothill'],tag:'form',position:{width:912,height:960},form:{submitOnChange:true,closeOnSubmit:false},actions:{check:CharacterSheet.check,generate:CharacterSheet.generate,generateSkill:CharacterSheet.generateSkill,toggleSkills:CharacterSheet.toggleSkills,openWeapon:CharacterSheet.openWeapon,toggleWeapon:CharacterSheet.toggleWeapon,createWeapon:CharacterSheet.createWeapon,shoot:CharacterSheet.shoot,swapHands:CharacterSheet.swapHands,reloadWeapon:CharacterSheet.reloadWeapon,reportRapidity:CharacterSheet.reportRapidity,toggleDetails:CharacterSheet.toggleDetails,move:CharacterSheet.move,clearMovement:CharacterSheet.clearMovement,addGear:CharacterSheet.addGear,removeGear:CharacterSheet.removeGear,toggleMortal:CharacterSheet.toggleMortal}};
+  static DEFAULT_OPTIONS={classes:['boothill'],tag:'form',position:{width:912,height:960},form:{submitOnChange:true,closeOnSubmit:false},actions:{check:CharacterSheet.check,generate:CharacterSheet.generate,generateSkill:CharacterSheet.generateSkill,toggleSkills:CharacterSheet.toggleSkills,openWeapon:CharacterSheet.openWeapon,toggleWeapon:CharacterSheet.toggleWeapon,createWeapon:CharacterSheet.createWeapon,shoot:CharacterSheet.shoot,swapHands:CharacterSheet.swapHands,reloadWeapon:CharacterSheet.reloadWeapon,reportRapidity:CharacterSheet.reportRapidity,toggleDetails:CharacterSheet.toggleDetails,move:CharacterSheet.move,clearMovement:CharacterSheet.clearMovement,addGear:CharacterSheet.addGear,removeGear:CharacterSheet.removeGear,toggleMortal:CharacterSheet.toggleMortal,melee:attackMelee,clearMelee:CharacterSheet.clearMelee}};
   static PARTS={main:{template:'systems/boothill/templates/character.hbs',scrollable:['.bh-body']}};
   async _onRender(context,options) {
     await super._onRender(context,options);
@@ -83,7 +86,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     const gear=[...this.actor.items.filter(i=>i.type==='weapon').map(i=>({id:i.id,name:i.name,img:i.img,weapon:true,quantity:1,weight:i.system.weight??0})),...(this.actor.system.inventory??[])];
     const totalWeight=gear.reduce((n,i)=>n+i.quantity*i.weight,0);
     const ranges={close:'Próximo (até 2 m)',short:'Curto',long:'Longo',extreme:'Extremo'};
-    return {...context,isNpc:this.isNpc,canGenerate:!this.isNpc||game.user.isGM,extraAttributes:this.isNpc&&game.user.isGM?['greed','bravery'].map(id=>({id,label:NPC_ATTRIBUTES[id],value:attributes[id]})):[],gear,totalWeight:Math.round(totalWeight*1000)/1000,movementActive:this.actor.system.combat.movement!=='still',movements:Object.entries(MOVEMENTS).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.movement})),distances:movementDistances(this.actor.system.health).map((r,index)=>({...r,id:['crawl','walk','dodge','run','horseWalk','trot','gallop'][index],combat:r.combat?`${r.combat.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—',firefight:r.firefight?`${r.firefight.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—'})),actor:this.actor,editable:this.isEditable,editingSkills:this._editingSkills,hasWork:work.length>0,work,held,hasTwo:held.length===2,health,locations:Object.entries(LOCATIONS).map(([id,label])=>({id,label,...this.actor.system.health.locations[id]})),ranges:Object.entries(ranges).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range})),armament,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,icon:icons[id],value:attributes[id]})),weapons:rows.filter(s=>s.kind==='weapon'),summary:creationSummary(attributes,skills,trained)};
+    return {...context,meleeEffect:pendingMeleeModifier(this.actor),meleeHolds:(this.actor.getFlag('boothill','meleeState')?.holds??[]).map(h=>HOLDS[h.kind]).join(' · '),outgoingHold:this.actor.getFlag('boothill','meleeState')?.outgoing,isNpc:this.isNpc,canGenerate:!this.isNpc||game.user.isGM,extraAttributes:this.isNpc&&game.user.isGM?['greed','bravery'].map(id=>({id,label:NPC_ATTRIBUTES[id],value:attributes[id]})):[],gear,totalWeight:Math.round(totalWeight*1000)/1000,movementActive:this.actor.system.combat.movement!=='still',movements:Object.entries(MOVEMENTS).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.movement})),distances:movementDistances(this.actor.system.health).map((r,index)=>({...r,id:['crawl','walk','dodge','run','horseWalk','trot','gallop'][index],combat:r.combat?`${r.combat.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—',firefight:r.firefight?`${r.firefight.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—'})),actor:this.actor,editable:this.isEditable,editingSkills:this._editingSkills,hasWork:work.length>0,work,held,hasTwo:held.length===2,health,locations:Object.entries(LOCATIONS).map(([id,label])=>({id,label,...this.actor.system.health.locations[id]})),ranges:Object.entries(ranges).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range})),armament,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,icon:icons[id],value:attributes[id]})),weapons:rows.filter(s=>s.kind==='weapon').map(s=>({...s,brawl:s.id==='briga',blade:s.id==='faca-espada'})),summary:creationSummary(attributes,skills,trained)};
   }
   heldWeapons() {
     return this.actor.items.filter(i=>i.type==='weapon'&&i.system.equipped).sort((a,b)=>Number(b.id===this.actor.system.combat.primaryWeapon)-Number(a.id===this.actor.system.combat.primaryWeapon)||a.sort-b.sort||a.id.localeCompare(b.id));
@@ -91,7 +94,8 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
   chanceFor(item,mode) {
     const held=this.heldWeapons(),index=held.findIndex(i=>i.id===item.id),{attributes,skills,identity,combat,health}=this.actor.system;
     if(combat.movement==='dodge'||index<0||held.reduce((n,i)=>n+handsRequired(i.system),0)>2) return null;
-    return shotTarget({coordination:attributes.coordination,skill:skills[weaponSummary(item.system).skill==='Rifle'?'rifle':'pistola'],mode,weapon:item.system,secondary:index===1,dual:held.length===2&&combat.dualFire,ambidextrous:identity.ambidextrous,woundPenalty:healthSummary(health,attributes.strength).penalty,range:combat.range,movementPenalty:['run','trot'].includes(combat.movement)?-2:combat.movement==='gallop'?-4:0});
+    const result=shotTarget({coordination:attributes.coordination,skill:skills[weaponSummary(item.system).skill==='Rifle'?'rifle':'pistola'],mode,weapon:item.system,secondary:index===1,dual:held.length===2&&combat.dualFire,ambidextrous:identity.ambidextrous,woundPenalty:healthSummary(health,attributes.strength).penalty,range:combat.range,movementPenalty:['run','trot'].includes(combat.movement)?-2:combat.movement==='gallop'?-4:0});
+    return result?{...result,effect:pendingMeleeModifier(this.actor),total:result.total+pendingMeleeModifier(this.actor)}:null;
   }
   static async toggleDetails(event,button) {
     if(event.target.closest('button,input,img,a,select')) return;
@@ -126,6 +130,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     await this.actor.update({'system.inventory':[...this.actor.system.inventory,{id:foundry.utils.randomID(),name,weight,quantity}]});
   }
   static async removeGear(event,button) {if(this.isEditable) await this.actor.update({'system.inventory':this.actor.system.inventory.filter(i=>i.id!==button.dataset.id)});}
+  static async clearMelee() {if(this.isEditable) await this.actor.update({'flags.boothill.meleeState.effects':[],'flags.boothill.meleeState.holds':[]});}
   static async toggleMortal() {if(this.isEditable) await this.actor.update({'system.health.mortal':!this.actor.system.health.mortal});}
   static async swapHands() {
     if(!this.isEditable) return;
@@ -150,9 +155,10 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       const current=this.chanceFor(item,mode);
       if(!current||healthSummary(this.actor.system.health,this.actor.system.attributes.strength).unconscious) return;
       const target=current.total+modifier,roll=await new Roll('1d20').evaluate();
+      await consumeMeleeModifier(this.actor);
       await item.update({'system.ammo':item.system.ammo-1,'system.reloadProgress':0});
       await postCheck(this.actor,{title:`${item.name} · ${SHOTS[mode].label}`,target,roll,
-        modifiers:[['Perícia',current.training],['Duas armas',current.twoWeapons],['Mão inábil',current.offhand],['Ferimentos',current.woundPenalty],['Alcance',current.distance],['Dispersão',current.spread],['Movimento',current.movementPenalty],['Juiz',modifier]],
+        modifiers:[['Perícia',current.training],['Duas armas',current.twoWeapons],['Mão inábil',current.offhand],['Ferimentos',current.woundPenalty],['Alcance',current.distance],['Dispersão',current.spread],['Movimento',current.movementPenalty],['Efeito de briga',current.effect],['Juiz',modifier]],
         shot:{model:item.system.model,mode,range:this.actor.system.combat.range,skill:this.actor.system.skills[weaponSummary(item.system).skill==='Rifle'?'rifle':'pistola'],wound:item.system.wound},note:roll.total===20?'20 natural: o Juiz deve verificar defeito antes de resolver o ferimento.':''});
     } finally {this._firing=false;}
   }
@@ -230,12 +236,15 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     if(group==='skills'&&!isWorkTrained(id,this.actor.system.skills,this.actor.system.trained)) return ui.notifications.warn('Perícia não treinada.');
     const modifier=await judgeModifier(event,'Modificador do Juiz');
     if(modifier===null||modifier===undefined||!Number.isInteger(modifier)) return;
-    target+=modifier;
+    const effect=pendingMeleeModifier(this.actor);
+    target+=modifier+effect;
     const roll=await new Roll('1d20').evaluate();
-    await postCheck(this.actor,{title:group==='attributes'?this.attributeLabels[id]:skill.label,target,roll,modifiers:[['Juiz',modifier]],...(secret?{whisper:game.users.filter(u=>u.isGM).map(u=>u.id)}:{})});
+    await consumeMeleeModifier(this.actor);
+    await postCheck(this.actor,{title:group==='attributes'?this.attributeLabels[id]:skill.label,target,roll,modifiers:[['Efeito de briga',effect],['Juiz',modifier]],...(secret?{whisper:game.users.filter(u=>u.isGM).map(u=>u.id)}:{})});
   }
 }
 registerChatCards();
+registerMelee();
 Hooks.once('init',()=>{
   CONFIG.Actor.dataModels.character=CharacterData;
   CONFIG.Actor.dataModels.npc=NpcData;

@@ -1,0 +1,70 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {meleeResult,allowedHands,pendingMeleeModifier} from '../scripts/melee-rules.mjs';
+import {registerMelee,consumeMeleeModifier} from '../scripts/melee.mjs';
+import {LOCATIONS} from '../scripts/combat-rules.mjs';
+import {rollCard} from '../scripts/chat.mjs';
+test('Tabela 15: resultados, dano por mão, sequência e efeitos literais',()=>{
+ const args={mode:'brawl',skill:0};
+ assert.equal(meleeResult({...args,die:1}).opponentEffect,2);
+ assert.equal(meleeResult({...args,die:8}).damage,1);assert.equal(meleeResult({...args,die:8}).opponentEffect,1);
+ assert.equal(meleeResult({...args,die:15,hand:'left'}).damage,1);
+ assert.equal(meleeResult({...args,die:15,hand:'left',ambidextrous:true}).damage,2);
+ assert.equal(meleeResult({...args,die:17}).damage,3);
+ assert.equal(meleeResult({...args,die:17,freeHands:1,hand:'left'}).damage,1);
+ assert.equal(meleeResult({...args,die:20}).opponentEffect,-3);
+ assert.equal(meleeResult({...args,die:20,object:'chair'}).damage,4);
+ assert.equal(meleeResult({...args,die:10,skill:3,defense:2,stronger:true,wounds:-1,effect:-2}).total,9);
+});
+test('Tabela 17: dano em si mesmo, chaves e liberdade',()=>{
+ const a={mode:'grapple'};
+ const fail=meleeResult({...a,die:1});assert.equal(fail.selfDamage,2);assert.equal(fail.selfEffect,-2);assert.equal(fail.damage,0);
+ assert.equal(meleeResult({...a,die:8}).hold,'leftArm');assert.equal(meleeResult({...a,die:12}).hold,'rightArm');
+ assert.equal(meleeResult({...a,die:17}).escape,true);
+ assert.equal(meleeResult({...a,die:19}).damage,3);assert.equal(meleeResult({...a,die:20}).hold,'bear');
+ assert.equal(meleeResult({...a,die:20}).opponentEffect,-4);
+});
+test('lâmina não usa Força nem defesa e fornece modificador da gravidade',()=>{
+ const a={mode:'knife',stronger:true,defense:10};
+ assert.equal(meleeResult({...a,die:8}).total,8);
+ assert.equal(meleeResult({...a,die:8}).severity,-2);
+ assert.equal(meleeResult({...a,die:20}).severity,2);
+ assert.equal(meleeResult({...a,die:7}).severity,null);
+ const html=rollCard({title:'Lâmina',target:20,die:20,luck:1,bladeHit:true,defectCleared:true,shot:{mode:'aimed',range:'short',skill:2,wound:2}});
+ assert.ok(html.includes('Determinar localização'));assert.ok(!html.includes('data-bh-luck'));
+});
+test('efeitos somam até próxima rolagem e não sobrevivem à rodada',async()=>{
+ let state={effects:[{modifier:-2,combatId:'c',round:2},{modifier:1,combatId:'c',round:2}]};
+ const actor={getFlag:()=>state,update:async()=>{state={...state,effects:[]};}};
+ assert.equal(pendingMeleeModifier(actor,{id:'c',round:2}),-1);
+ assert.equal(pendingMeleeModifier(actor,{id:'c',round:3}),0);
+ globalThis.game={combat:{id:'c',round:2}};assert.equal(await consumeMeleeModifier(actor),-1);assert.equal(await consumeMeleeModifier(actor),0);
+ assert.deepEqual(allowedHands({getFlag:()=>({holds:[{kind:'rightArm'}]})}),['left']);
+ assert.deepEqual(allowedHands({getFlag:()=>({holds:[{kind:'bear'}]})}),[]);
+});
+test('Juiz aplica temporários e efeitos uma vez; chaves podem ser mantidas e soltas',async()=>{
+ const set=(obj,path,value)=>{const keys=path.split('.');let cur=obj;for(const k of keys.slice(0,-1))cur=cur[k]??={};cur[keys.at(-1)]=value;};
+ const get=(obj,path)=>path.split('.').reduce((v,k)=>v?.[k],obj);
+ const makeActor=uuid=>({uuid,system:{health:{points:0,temporary:0,locations:Object.fromEntries(Object.keys(LOCATIONS).map(k=>[k,{light:0,serious:0}]))}},flags:{boothill:{}},getFlag(ns,key){return get(this.flags[ns],key);},async update(changes){for(const [k,v] of Object.entries(changes))set(this,k,v);},testUserPermission:()=>true});
+ const source=makeActor('Actor.a'),target=makeActor('Actor.b'),token={documentName:'Token',uuid:'Scene.s.Token.b',name:'Alvo',actor:target};
+ const gm={id:'gm',isGM:true,active:true,getFlag:()=>1};const users=[gm];users.activeGM=gm;users.get=id=>users.find(u=>u.id===id);
+ globalThis.game={user:gm,users,actors:[source,target],messages:new Map(),combat:{id:'c',round:1}};
+ globalThis.fromUuid=async id=>id===source.uuid?source:id===token.uuid?token:null;
+ const hooks={};globalThis.Hooks={on:(key,fn)=>hooks[key]=fn,once:()=>{}};
+ registerMelee();
+ const send=async(id,result,extra={})=>{
+  let data={actorUuid:source.uuid,targetTokenUuid:token.uuid,targetName:'Alvo',title:'Imobilização',result,...extra};
+  const msg={id,getFlag:()=>data,update:async changes=>{data=changes['flags.boothill.melee'];}};game.messages.set(id,msg);
+  const req={author:gm,getFlag:(ns,key)=>key==='meleeRequest'?{messageId:id,processorId:'gm'}:false,setFlag:async()=>{},update:async()=>{}};
+  await hooks.createChatMessage(req);await hooks.createChatMessage(req);return data;
+ };
+ await send('one',meleeResult({mode:'grapple',die:12}));
+ assert.equal(target.system.health.temporary,1);assert.equal(pendingMeleeModifier(target),-1);assert.deepEqual(allowedHands(target),['left']);
+ const hold=source.getFlag('boothill','meleeState').outgoing;
+ await send('two',{total:'—',damage:hold.damage,opponentEffect:hold.effect,hold:hold.kind,label:'Manter'}, {maintain:true});
+ assert.equal(target.system.health.temporary,2);assert.equal(pendingMeleeModifier(target),-2);
+ await send('three',{total:'—',damage:0,opponentEffect:0,hold:null,label:'Soltar'},{release:true});
+ assert.deepEqual(allowedHands(target),['right','left']);assert.equal(source.getFlag('boothill','meleeState').outgoing,null);
+ await send('four',meleeResult({mode:'grapple',die:1}));assert.equal(source.system.health.temporary,2);assert.equal(target.system.health.temporary,2);assert.equal(pendingMeleeModifier(source),-2);
+ game.combat.round=2;await hooks.updateCombat({...game.combat,active:true,combatants:[]},{round:2});assert.deepEqual(target.getFlag('boothill','meleeState').effects,[]);assert.deepEqual(source.getFlag('boothill','meleeState').effects,[]);
+});

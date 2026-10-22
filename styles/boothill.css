@@ -235,3 +235,10 @@
 .boothill .bh-npc-traits input {width:38px;text-align:center;}
 .boothill .bh-npc-traits small {font-size:9px;color:var(--bh-muted);}
 .boothill .bh-npc-page .bh-creation {grid-row:5;}
+.boothill .bh-melee-buttons {display:flex;gap:5px;flex-wrap:wrap;margin:3px 0 8px;}
+.boothill .bh-melee-buttons button {flex:1;min-width:0;height:27px;min-height:0;padding:3px 5px;font:10px Arial,sans-serif;background:#f6f3ec;color:var(--bh-ink);border:1px solid var(--bh-rule);border-radius:2px;}
+.boothill .bh-melee-options {border-top:1px solid var(--bh-rule);padding-top:8px;margin-top:5px;}
+.boothill .bh-melee-options label {display:flex;gap:6px;align-items:center;font-size:10px;margin-bottom:7px;}
+.boothill .bh-character-grid .bh-weapons .bh-melee-options input[type=checkbox] {width:14px;flex:0 0 14px;height:14px;}
+.boothill .bh-clear-melee {width:auto;min-height:0;height:22px;background:transparent;border:0;color:var(--bh-muted);font:10px Arial,sans-serif;padding:0;}
+.bh-roll-card [data-bh-melee-apply] {width:100%;margin-top:10px;min-height:30px;background:#f6f3ec;color:#302b24;border:1px solid #b5ac99;font:11px Arial,sans-serif;}
