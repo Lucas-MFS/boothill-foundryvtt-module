@@ -242,3 +242,11 @@
 .boothill .bh-character-grid .bh-weapons .bh-melee-options input[type=checkbox] {width:14px;flex:0 0 14px;height:14px;}
 .boothill .bh-clear-melee {width:auto;min-height:0;height:22px;background:transparent;border:0;color:var(--bh-muted);font:10px Arial,sans-serif;padding:0;}
 .bh-roll-card [data-bh-melee-apply] {width:100%;margin-top:10px;min-height:30px;background:#f6f3ec;color:#302b24;border:1px solid #b5ac99;font:11px Arial,sans-serif;}
+
+.boothill .bh-skill-toggle {display:flex;align-items:center;justify-content:space-between;gap:8px;flex:1;height:auto;min-height:28px;margin:0;padding:0 6px 0 0;border:0;background:transparent;box-shadow:none;color:inherit;font:inherit;text-align:left;}
+.boothill .bh-skill-toggle i {font-size:9px;opacity:.55;transition:transform 180ms;}
+.boothill .bh-skill-toggle[aria-expanded=true] i {transform:rotate(180deg);}
+.boothill .bh-melee-details {padding:8px;background:rgba(48,43,36,.07);border-bottom:1px solid var(--bh-rule);}
+.boothill .bh-melee-details[hidden] {display:none;}
+.boothill .bh-melee-details .bh-melee-options {border:0;margin:0;padding:0;}
+@media(prefers-reduced-motion:reduce) {.boothill .bh-skill-toggle i {transition:none;}}
