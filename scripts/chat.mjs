@@ -14,9 +14,9 @@ export function rollCard(data) {
   const state=pending?'pending':success?'success':'failure';
   return `<article class="bh-roll-card bh-roll-${state}"><header><span>BOOT HILL</span><h3>${escape(title)}</h3></header><div class="bh-roll-score" aria-label="Chance ${target}; rolagem ${die}"><strong>${target}</strong><span>/</span><strong>${die}</strong></div><div class="bh-roll-captions"><span>Chance de acerto</span><span>Rolagem · d20</span></div><p class="bh-roll-outcome">${pending?'Aguardando Sorte':success?'Sucesso':'Falha'}</p>${modifierText(modifiers)}${pending?`<button type="button" data-bh-luck><i class="fas fa-clover" aria-hidden="true"></i> Rolar Sorte <span>${luck}</span></button>`:''}${Number.isInteger(luckDie)?`<div class="bh-luck-result">Sorte <strong>${luck} / ${luckDie}</strong> · ${luckDie<=luck?'Sucesso':'Falha'}</div>`:''}${!pending&&success?(isShotgun(data)&&!data.pelletChild?pelletsCard(data):injuryCard(data)):''}${spreadCard(data)}${note?`<small class="bh-roll-note">${escape(note)}</small>`:''}</article>`;
 }
-export async function postCheck(actor,{title,target,roll,modifiers=[],note='',shot=null}) {
+export async function postCheck(actor,{title,target,roll,modifiers=[],note='',shot=null,whisper=null}) {
   const check={title,target,die:roll.total,luck:actor.system.attributes.luck,modifiers,note,shot};
-  return ChatMessage.create({speaker:ChatMessage.getSpeaker({actor}),style:CONST.CHAT_MESSAGE_STYLES.ROLL,rolls:[roll],content:rollCard(check),flags:{boothill:{check}}});
+  return ChatMessage.create({speaker:ChatMessage.getSpeaker({actor}),...(whisper?{whisper}:{}),style:CONST.CHAT_MESSAGE_STYLES.ROLL,rolls:[roll],content:rollCard(check),flags:{boothill:{check}}});
 }
 const resolving=new Set();
 export function registerChatCards() {

@@ -21,3 +21,9 @@ export function creationSummary(attributes,skills,trained={}) {
   if(!isWorkTrained('literatura',skills,trained)&&['burocracia','contabilidade','direito','engenharia-civil','impressao-jornalismo','linguas','medicina','odontologia','quimica','sondagem-mapas'].some(s=>isWorkTrained(s,skills,trained))) warnings.push('Há perícias que exigem Literatura.');
   return {total,budget,weapon,used,warnings};
 }
+
+export const NPC_ATTRIBUTES={...ATTRIBUTES,greed:'Ganância',bravery:'Bravura'};
+export function generatedNpcScore(n,half=false) {
+ if(!Number.isInteger(n)||n<2||n>20) throw new RangeError('Esperado total de 2d10.');
+ return half?Math.ceil(n/2):n;
+}

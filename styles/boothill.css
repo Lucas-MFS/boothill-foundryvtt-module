@@ -226,3 +226,12 @@
 .boothill .bh-mortal-toggle:hover,.boothill .bh-mortal-toggle:focus-visible {border-color:var(--bh-rule);background:#302b2008;}
 .boothill .bh-mortal-toggle[aria-pressed=true] {color:#874b43;background:#874b430b;}
 .boothill .bh-mortal-toggle[aria-pressed=true] i {opacity:1;}
+
+.boothill .bh-location-leftShoulder,.boothill .bh-location-leftArm {right:20px;}
+.boothill .bh-location-rightShoulder,.boothill .bh-location-rightArm {left:20px;}
+.boothill .bh-location-abdomen {top:145px;}
+.boothill .bh-npc-traits {display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--bh-rule);}
+.boothill .bh-npc-traits .bh-npc-trait {display:flex;align-items:center;gap:6px;font-size:12px;}
+.boothill .bh-npc-traits input {width:38px;text-align:center;}
+.boothill .bh-npc-traits small {font-size:9px;color:var(--bh-muted);}
+.boothill .bh-npc-page .bh-creation {grid-row:5;}

@@ -110,3 +110,11 @@ Ferimentos secundários passam a oferecer Aplicar dano, usando um único token s
 ## Ajustes — 0.7.2
 
 Rolagem secundária direta, sem pedir nome. Saúde com peito entre ombros e abdômen entre braços; cabeça e pernas preservadas. Conferido visualmente no Foundry.
+
+## Ficha de NPC — 0.8.0
+
+Novo tipo de ator npc com modelo próprio e a ficha compartilhada de combate, saúde, deslocamento, armas e perícias. Não exibe inventário, Jogador, idade ou XP. Mantém os cinco atributos básicos: o PDF não retira nenhum deles. Ganância e Bravura aparecem como campos opcionais apenas na interface do Juiz, e seus testes são sussurrados aos GMs. A geração de NPC usa 2d10 sem o bônus da Tabela 1; Estatura/Sorte conservam a divisão por dois. Geração dos atributos é reservada ao Juiz. Níveis de perícias de trabalho gerados também usam 2d10 direto. Não usa limites de escolhas da criação de personagens de jogador.
+
+Saúde, mãos, tiros, targeting, dano e término do movimento por rodada compartilham o fluxo do personagem. Modelo de NPC exclui inventário/carga e identificação de jogador; a base character permanece independente. A migração não transforma personagens existentes em NPCs. Ombros/braços aproximados 20 px das laterais e abdômen baixado 15 px, sem mexer em cabeça/pernas.
+
+Referência: PDF fornecido, páginas físicas 60–61. Reações em 2d6 é uma possível etapa futura; não automatizada nesta versão. Validação: 31 testes, modelo e contexto NPC, preservação dos atributos de jogador, geração distinta e campos reservados; criação, geração e teste de Ganância conferidos no Foundry.
