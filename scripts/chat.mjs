@@ -95,7 +95,7 @@ export function registerChatCards() {
             else return;
           }
           await message.update({content:rollCard(next),'flags.boothill.check':next,...(roll?{rolls:[...message.rolls,roll]}:{})});
-          if(next.injury&&next.targetTokenUuid) await requestDamage(message,next.targetTokenUuid);
+          if(next.injury&&next.targetTokenUuid&&!next.secondary) await requestDamage(message,next.targetTokenUuid);
         } catch(error) {console.error(error);ui.notifications.error('Não foi possível registrar o ferimento.');}
         finally {resolving.delete(message.id);}
       });

@@ -20,13 +20,13 @@ test('compatibilidade usa estrutura de saúde para permitir futuras fichas NPC',
  assert.equal(supportsHealth({type:'npc',system:{health:health()}}),true);
  assert.equal(supportsHealth({system:{}}),false);
 });
-test('Juiz aplica ao actor do token, serializa pedidos e impede dano duplicado',async()=>{
+test('Juiz aplica secundário manual ao actor do token sem duplicar pedidos',async()=>{
  const hooks={};globalThis.Hooks={on:(name,fn)=>hooks[name]=fn,once:()=>{}};
  globalThis.game={user:{id:'gm'},users:{activeGM:{id:'gm'}},messages:new Map()};
  let writes=0;const h=health(),ledger={};
  const actor={system:{health:h},getFlag:(s,key)=>ledger[key],update:async changes=>{writes++;h.points=changes['system.health.points'];for(const [key,value] of Object.entries(changes)) if(key.startsWith('flags.boothill.')) ledger[key.slice('flags.boothill.'.length)]=value;}};
  globalThis.fromUuid=async()=>({documentName:'Token',uuid:'Scene.s.Token.t',name:'Alvo desvinculado',actor});
- let data={shot:{},target:12,die:8,injury:{id:'leftLeg',total:3,severity:'Ferimento sério'}};
+ let data={secondary:true,shot:{},target:12,die:8,injury:{id:'leftLeg',total:3,severity:'Ferimento sério'}};
  const source={id:'source',whisper:[],rolls:[],getFlag:()=>data,update:async changes=>{data=changes['flags.boothill.check'];}};
  game.messages.set('source',source);
  const request=()=>({author:{id:'player'},getFlag:(s,key)=>key==='damageRequest'?{messageId:'source',tokenUuid:'Scene.s.Token.t'}:false,setFlag:async()=>{},update:async()=>{}});

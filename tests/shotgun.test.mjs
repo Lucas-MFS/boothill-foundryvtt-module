@@ -23,11 +23,11 @@ test('erro no principal ainda oferece dispersão; ferimentos só após acerto',(
  assert.ok(rollCard({...base,die:5}).includes('Rolar quantidade'));
  assert.ok(pelletsCard({pelletsDie:1,pelletsCount:0}).includes('não causou ferimentos'));
 });
-test('cada ferimento ganha cartão próprio, secundários sem ajuste e sem aplicação',()=>{
+test('cada ferimento ganha cartão próprio, secundários sem ajuste e com aplicação manual',()=>{
  assert.equal(locationAllowance({skill:0,mode:'fan',range:'long'}),0);
  const data={title:'Secundário',target:10,die:4,luck:7,secondary:true,pelletChild:true,shot:{model:'sawedOff',skill:0,mode:'fan',range:'long'},injury:{id:'head',die:2,location:1,weapon:0,total:3,severity:'Ferimento sério'}};
- assert.ok(!injuryCard(data).includes('data-bh-damage'));
- assert.ok(injuryCard(data).includes('Aplicação manual'));
+ assert.ok(injuryCard(data).includes('data-bh-damage'));
+ assert.ok(!injuryCard({...data,applied:{name:'Alvo',points:3,severity:'Ferimento sério'}}).includes('data-bh-damage'));
  const parent=pelletsCard({pelletsDie:5,pelletsCount:3,pelletMessages:{0:'msg'}});
  assert.equal((parent.match(/data-bh-pellets="wound"/g)||[]).length,3);
  assert.ok(parent.includes('Criado no chat'));

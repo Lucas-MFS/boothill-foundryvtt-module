@@ -102,3 +102,7 @@ Somente escopeta (sawedOff), em longo/extremo, oferece dispersão a 2/5 m do alv
 Os cartões derivados preservam sussurros e rolagens cegas. A localização mantém a escolha normal no alvo principal; nos secundários apenas a região sorteada fica habilitada. Referência: Tabela 13, PDF fornecido, página física 39, com complemento expresso do usuário para a rolagem 6.
 
 Validação: 29 testes automatizados; no Foundry, principal gerou um ferimento independente, secundário usou metade da chance, gerou três ferimentos e resolveu cabeça com ajuste zero e aplicação manual.
+
+## Ajustes — 0.7.1
+
+Ferimentos secundários passam a oferecer Aplicar dano, usando um único token selecionado pelo usuário que clica, com o mesmo encaminhamento ao Juiz e proteção contra duplicação. A dispersão continua sem aplicação automática aos secundários. O marcador de ferimento mortal foi movido para baixo do resumo da saúde como controle discreto Sim/Não, com indicação acessível aria-pressed e suporte a teclado. Validação: 29 testes.

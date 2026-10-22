@@ -220,3 +220,9 @@
 .bh-roll-card .bh-spread h4 {font:bold 16px Georgia,serif;margin:0;}
 .bh-roll-card .bh-spread p,.bh-roll-card .bh-pellets p {font-size:11px;}
 .bh-roll-card .bh-spread small {font-size:10px;line-height:1.4;display:block;color:#82796d;}
+.boothill .bh-mortal-toggle {display:flex;align-items:center;gap:6px;width:auto;min-height:0;height:24px;padding:3px 7px;margin:0 auto 8px;border:1px solid transparent;border-radius:12px;background:transparent;color:var(--bh-muted);font:10px Arial,sans-serif;box-shadow:none;}
+.boothill .bh-mortal-toggle i {font-size:5px;opacity:.45;}
+.boothill .bh-mortal-toggle span {font-size:9px;opacity:.65;}
+.boothill .bh-mortal-toggle:hover,.boothill .bh-mortal-toggle:focus-visible {border-color:var(--bh-rule);background:#302b2008;}
+.boothill .bh-mortal-toggle[aria-pressed=true] {color:#874b43;background:#874b430b;}
+.boothill .bh-mortal-toggle[aria-pressed=true] i {opacity:1;}
