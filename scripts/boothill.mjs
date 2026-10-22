@@ -68,7 +68,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       const chance=this.chanceFor(i,mode);
       return {mode,...shot,chance:chance?.total,supported:chance!==null,available:chance!==null&&!health.unconscious&&i.system.ammo>0};
     })}));
-    for(const row of armament) {row.expanded=this._expandedWeapons.has(row.id);row.held=held.find(h=>h.id===row.id);row.ranges=Object.entries({close:'Próximo (até 2 m)',short:`Curto (até ${row.system.short} m)`,long:`Longo (até ${row.system.long} m)`,extreme:`Extremo (até ${row.system.extreme} m)`}).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range}));}
+    for(const row of armament) {row.expanded=this._expandedWeapons.has(row.id);row.held=held.find(h=>h.id===row.id);row.handLabel=row.held?.hand??'Guardada';row.offhandPenalty=row.held?.hand==='Mão secundária'&&!this.actor.system.identity.ambidextrous;row.ranges=Object.entries({close:'Próximo (até 2 m)',short:`Curto (até ${row.system.short} m)`,long:`Longo (até ${row.system.long} m)`,extreme:`Extremo (até ${row.system.extreme} m)`}).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range}));}
     const gear=[...this.actor.items.filter(i=>i.type==='weapon').map(i=>({id:i.id,name:i.name,img:i.img,weapon:true,quantity:1,weight:i.system.weight??0})),...this.actor.system.inventory];
     const totalWeight=gear.reduce((n,i)=>n+i.quantity*i.weight,0);
     const ranges={close:'Próximo (até 2 m)',short:'Curto',long:'Longo',extreme:'Extremo'};
@@ -117,6 +117,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
   static async removeGear(event,button) {if(this.isEditable) await this.actor.update({'system.inventory':this.actor.system.inventory.filter(i=>i.id!==button.dataset.id)});}
   static async swapHands() {
     if(!this.isEditable) return;
+    await this.submit();
     const held=this.heldWeapons();
     if(held.length===2) await this.actor.update({'system.combat.primaryWeapon':held[1].id});
   }
@@ -246,4 +247,9 @@ Hooks.on('updateCombat',async(combat,changes)=>{
 Hooks.on('deleteCombat',async combat=>{
  if(!game.user.isGM||game.users.activeGM?.id!==game.user.id) return;
  for(const actor of game.actors) if(actor.type==='character'&&actor.system.combat.movementCombat===combat.id) await actor.update({'system.combat.movement':'still','system.combat.movementRound':null,'system.combat.movementCombat':''});
+});
+
+Hooks.on('renderApplicationV2',app=>{
+ if(!app.element?.classList.contains('boothill')) return;
+ for(const input of app.element.querySelectorAll('input[type="number"]')) input.step='1';
 });

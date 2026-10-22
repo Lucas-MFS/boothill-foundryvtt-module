@@ -206,3 +206,11 @@
 .bh-choice-leftLeg {top:290px;right:0;}.bh-choice-rightLeg {top:290px;left:0;}
 .bh-injury-result {border-top:1px solid #b5ac99;margin-top:12px;padding-top:10px;}
 .bh-injury-result small {display:block;font-size:10px;margin-top:5px;}
+
+.boothill .bh-page input[type=number] {appearance:auto;-moz-appearance:auto;}
+.boothill .bh-page input::-webkit-inner-spin-button,.boothill .bh-page input::-webkit-outer-spin-button {-webkit-appearance:auto;margin:0;opacity:0;}
+.boothill .bh-page input[type=number]:hover::-webkit-inner-spin-button,.boothill .bh-page input[type=number]:focus::-webkit-inner-spin-button {opacity:1;cursor:pointer;}
+.boothill .bh-location-leftShoulder,.boothill .bh-location-leftArm,.boothill .bh-location-leftLeg {right:calc(50% - 82px);}
+.boothill .bh-location-rightShoulder,.boothill .bh-location-rightArm,.boothill .bh-location-rightLeg {left:calc(50% - 82px);}
+.boothill .bh-location input {width:31px;}
+.boothill .bh-location {width:80px;}
