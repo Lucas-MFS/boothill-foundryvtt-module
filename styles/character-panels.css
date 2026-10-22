@@ -38,8 +38,8 @@
 .boothill .bh-location-rightShoulder { top:65px; left:0; }
 .boothill .bh-location-leftArm { top:130px; right:0; }
 .boothill .bh-location-rightArm { top:130px; left:0; }
-.boothill .bh-location-chest { top:185px; left:50%; transform:translateX(-50%); }
-.boothill .bh-location-abdomen { top:240px; left:50%; transform:translateX(-50%); }
+.boothill .bh-location-chest { top:65px; left:50%; transform:translateX(-50%); }
+.boothill .bh-location-abdomen { top:130px; left:50%; transform:translateX(-50%); }
 .boothill .bh-location-leftLeg { top:320px; right:0; }
 .boothill .bh-location-rightLeg { top:320px; left:0; }
 .boothill .bh-health-points { display:flex; gap:8px; border-top:1px solid var(--bh-rule); padding-top:8px; }

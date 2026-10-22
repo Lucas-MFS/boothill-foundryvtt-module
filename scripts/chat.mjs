@@ -43,10 +43,8 @@ export function registerChatCards() {
               if(!game.user.isGM||!await foundry.applications.api.DialogV2.confirm({window:{title:'Defeito da arma'},content:'<p>A verificação confirmou ausência de defeito no disparo original?</p>'})) return;
               current.defectCleared=true;await message.update({'flags.boothill.check.defectCleared':true});
             }
-            const label=await foundry.applications.api.DialogV2.prompt({window:{title:'Alvo secundário'},content:'<label>Nome do alvo <input name="targetName" maxlength="80" placeholder="Alvo secundário"></label>',ok:{label:'Rolar',callback:(e,b,d)=>d.element.querySelector('[name="targetName"]').value.trim()||'Alvo secundário'},rejectClose:false});
-            if(label===null||label===undefined) return;
             const roll=await new Roll('1d20').evaluate();
-            const next={title:`${current.title} · Dispersão: ${label}`,target:info.target,die:roll.total,luck:current.luck,shot:{...current.shot,skill:0,mode:'fan'},secondary:true,defectCleared:true,modifiers:[],note:'Alvo secundário: sem ajuste de localização; dano manual pelo Juiz.'};
+            const next={title:`${current.title} · Alvo secundário`,target:info.target,die:roll.total,luck:current.luck,shot:{...current.shot,skill:0,mode:'fan'},secondary:true,defectCleared:true,modifiers:[],note:'Alvo secundário: sem ajuste de localização; dano manual pelo Juiz.'};
             await ChatMessage.create({speaker:message.speaker,whisper:message.whisper,blind:message.blind,style:CONST.CHAT_MESSAGE_STYLES.ROLL,rolls:[roll],content:rollCard(next),flags:{boothill:{check:next}}});
             return;
           }

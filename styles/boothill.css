@@ -210,8 +210,8 @@
 .boothill .bh-page input[type=number] {appearance:auto;-moz-appearance:auto;}
 .boothill .bh-page input::-webkit-inner-spin-button,.boothill .bh-page input::-webkit-outer-spin-button {-webkit-appearance:auto;margin:0;opacity:0;}
 .boothill .bh-page input[type=number]:hover::-webkit-inner-spin-button,.boothill .bh-page input[type=number]:focus::-webkit-inner-spin-button {opacity:1;cursor:pointer;}
-.boothill .bh-location-leftShoulder,.boothill .bh-location-leftArm,.boothill .bh-location-leftLeg {right:calc(50% - 82px);}
-.boothill .bh-location-rightShoulder,.boothill .bh-location-rightArm,.boothill .bh-location-rightLeg {left:calc(50% - 82px);}
+.boothill .bh-location-leftLeg {right:calc(50% - 82px);}
+.boothill .bh-location-rightLeg {left:calc(50% - 82px);}
 .boothill .bh-location input {width:31px;}
 .boothill .bh-location {width:80px;}
 .bh-roll-card [data-bh-damage] {width:100%;height:32px;margin-top:10px;background:#f6f3ec;color:#302b24;border:1px solid #b5ac99;border-radius:2px;font:bold 12px Arial,sans-serif;}

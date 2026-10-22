@@ -97,7 +97,7 @@ Validação: 25 testes automatizados, incluindo deduplicação, ator sintético,
 
 Armas shotgun/sawedOff passam a rolar a quantidade de ferimentos antes da localização: d6 1 dá 1/0/0; 2–3 dá 2/1/0; 4–6 dá 4/3/2 em curto/longo/extremo. A faixa 6 foi completada conforme o PDF adicional informado pelo usuário; o exemplo contraditório não é usado. Próximo usa a coluna curto. Cada ferimento cria um cartão independente com localização, gravidade e aplicação, mantendo o alvo do disparo registrado ao rolar a quantidade. O disparo consome uma única munição, independentemente do número de ferimentos. Zero ferimentos encerra a resolução do alvo.
 
-Somente escopeta (sawedOff), em longo/extremo, oferece dispersão a 2/5 m do alvo original, mesmo se o teste principal falhar. O Juiz escolhe quem está na área e informa um nome por rolagem secundária. A chance é piso(chance final do original/2), incluindo a perícia antes da divisão. Os secundários rolam quantidade, localização sem ajuste e gravidade; nunca aplicam saúde automaticamente nem oferecem Aplicar dano. Não há medição de área, detecção de tokens próximos ou gasto extra de munição. Um 20 no disparo original requer confirmação manual de ausência de defeito antes de resolver a dispersão.
+Somente escopeta (sawedOff), em longo/extremo, oferece dispersão a 2/5 m do alvo original, mesmo se o teste principal falhar. O Juiz escolhe quem está na área e rola diretamente contra cada alvo secundário. A chance é piso(chance final do original/2), incluindo a perícia antes da divisão. Os secundários rolam quantidade, localização sem ajuste e gravidade; nunca aplicam saúde automaticamente nem oferecem Aplicar dano. Não há medição de área, detecção de tokens próximos ou gasto extra de munição. Um 20 no disparo original requer confirmação manual de ausência de defeito antes de resolver a dispersão.
 
 Os cartões derivados preservam sussurros e rolagens cegas. A localização mantém a escolha normal no alvo principal; nos secundários apenas a região sorteada fica habilitada. Referência: Tabela 13, PDF fornecido, página física 39, com complemento expresso do usuário para a rolagem 6.
 
@@ -106,3 +106,7 @@ Validação: 29 testes automatizados; no Foundry, principal gerou um ferimento i
 ## Ajustes — 0.7.1
 
 Ferimentos secundários passam a oferecer Aplicar dano, usando um único token selecionado pelo usuário que clica, com o mesmo encaminhamento ao Juiz e proteção contra duplicação. A dispersão continua sem aplicação automática aos secundários. O marcador de ferimento mortal foi movido para baixo do resumo da saúde como controle discreto Sim/Não, com indicação acessível aria-pressed e suporte a teclado. Validação: 29 testes.
+
+## Ajustes — 0.7.2
+
+Rolagem secundária direta, sem pedir nome. Saúde com peito entre ombros e abdômen entre braços; cabeça e pernas preservadas. Conferido visualmente no Foundry.
