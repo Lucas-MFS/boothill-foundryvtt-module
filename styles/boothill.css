@@ -250,3 +250,20 @@
 .boothill .bh-melee-details[hidden] {display:none;}
 .boothill .bh-melee-details .bh-melee-options {border:0;margin:0;padding:0;}
 @media(prefers-reduced-motion:reduce) {.boothill .bh-skill-toggle i {transition:none;}}
+
+/* Independent columns keep inventory directly after movement on either sheet. */
+.boothill .bh-character-grid {grid-template-rows:auto;align-items:start;}
+.boothill .bh-sheet-column {min-width:0;display:flex;flex-direction:column;gap:20px;}
+.boothill .bh-main-column {grid-column:1;}
+.boothill .bh-side-column {grid-column:2;}
+.boothill .bh-sheet-column > .bh-section,.boothill .bh-sheet-column > .bh-creation {float:none;width:auto;margin:0;display:block;}
+.boothill .bh-inventory table {margin-bottom:3px;}
+.boothill .bh-load {margin:3px 0 8px;}
+.boothill .bh-add-gear {grid-template-columns:40px 1fr 55px 28px;align-items:center;}
+.boothill .bh-add-gear button {width:28px;height:28px;min-height:28px;padding:0;border:1px solid var(--bh-rule);border-radius:6px;background:#f6f3ec;color:var(--bh-ink);}
+.boothill .bh-movement-heading {display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--bh-rule);}
+.boothill .bh-movement-heading h3 {margin:0;padding:0;border:0;}
+.boothill .bh-movement-tabs {display:flex;gap:3px;}
+.boothill .bh-movement-tabs button {width:auto;min-height:26px;height:26px;padding:3px 9px;border:0;border-radius:4px 4px 0 0;background:transparent;color:var(--bh-muted);font:11px Arial,sans-serif;}
+.boothill .bh-movement-tabs button[aria-selected=true] {background:#302b201a;color:var(--bh-ink);box-shadow:inset 0 -2px #8c7453;}
+.boothill .bh-movement tr[hidden] {display:none;}

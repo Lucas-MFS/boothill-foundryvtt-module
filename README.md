@@ -134,3 +134,7 @@ Referência: PDF fornecido, páginas físicas 42–45, Tabelas 15–17. A tabela
 ## Controles recolhíveis — 0.9.1
 
 Briga e Faca/Espada começam recolhidas. Clique no nome para mostrar ou esconder botões e opções; editar o nível não altera a expansão. O estado aberto é preservado durante atualizações da ficha. Opções de força ficam em Briga e guarda com lâmina em Faca/Espada. Validado no Foundry: expansão independente e recolhimento, com 36 testes passando.
+
+## Inventário e deslocamento — 0.9.2
+
+Colunas independentes eliminam o vazio entre deslocamento e inventário. Botão de adicionar compacto com +, cantos arredondados e carga próxima da tabela. Deslocamento alterna entre Em pé e Montado sem publicar movimento nem alterar penalidades ao trocar de aba; a escolha é preservada nas atualizações da ficha. Personagens e NPCs compartilham o layout e os controles, mantendo NPC sem inventário. Validado visualmente nas duas fichas no Foundry; 36 testes passaram.
