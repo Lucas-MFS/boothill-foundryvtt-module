@@ -254,3 +254,7 @@ Novo ator wildAnimal, genérico, com layout de cavalo, retrato do token e silhue
 Ataque conforme Animais em Combate/Tabela 19 (PDF físico 46–47): d20 + modificador de ataque + penalidade de ferimentos, resultado de 8 ou mais gera localização aleatória e d6 de gravidade com modificadores de local e seriedade. Não usa o dano temporário de Briga. Shift+clique permite ajuste do Juiz. Alvo marcado recebe aplicação pelo protocolo existente do Juiz; sem alvo, botão Aplicar dano usa token selecionado. Defesa de ferimentos modifica a gravidade recebida; d6 natural 6 contra animal é mortal, mesmo com defesa. Tiros identificam animal selvagem como quadrúpede, com silhueta de urso e nomes de patas. Novo ator não funciona como montaria vinculável.
 
 Validação: 61 testes aprovados, incluindo limite de acerto, geração de localização/gravidade, aplicação manual sem alvo e schema do novo ator. Conferência no Foundry concluída: criado “Urso de teste” com Força 50, ataque +5, gravidade +2 e defesa −2. Botão gerou ataque 24 (d20 19 +5), ferimento sério no abdômen (d6 2 +2) e Aplicar dano; nenhuma saúde de outro ator alterada. Ficha e silhueta verificadas visualmente.
+
+## Botão de ataque integrado — 0.15.1
+
+Removido painel exclusivo de ataque do animal. Botão compacto Atacar com ícone de pata fica no cabeçalho dos atributos; tooltip mantém dica de Shift+clique. Conferido no Foundry. Mecânica de dano permanece automática para um alvo marcado, via Juiz conectado; fallback Aplicar dano usa token selecionado.
