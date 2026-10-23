@@ -262,12 +262,76 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     await postCheck(this.actor,{title:group==='attributes'?this.attributeLabels[id]:skill.label,target,roll,modifiers:[['Efeito de briga',effect],['Juiz',modifier]],...(secret?{whisper:game.users.filter(u=>u.isGM).map(u=>u.id)}:{})});
   }
 }
+export const HORSE_ATTRIBUTES={strength:'Força',coordination:'Coordenação',intelligence:'Inteligência',luck:'Sorte'};
+export const HORSE_SKILLS={herding:'Pastoreio',cutting:'Corte',swimming:'Natação',gunfire:'Explosão'};
+export const HORSE_LOCATIONS={head:'Cabeça',leftShoulder:'Ombro esq.',rightShoulder:'Ombro dir.',chest:'Peito',abdomen:'Abdômen',leftArm:'Dianteira esq.',rightArm:'Dianteira dir.',leftLeg:'Traseira esq.',rightLeg:'Traseira dir.'};
+export class HorseData extends CharacterData {
+  static defineSchema() {
+    const schema=super.defineSchema(),{SchemaField,NumberField,BooleanField,ArrayField,StringField}=foundry.data.fields;
+    const level=()=>new NumberField({required:true,nullable:false,integer:true,min:0,initial:0});
+    schema.attributes=new SchemaField(Object.fromEntries(Object.keys(HORSE_ATTRIBUTES).map(id=>[id,level()])));
+    schema.skills=new SchemaField(Object.fromEntries(Object.keys(HORSE_SKILLS).map(id=>[id,level()])));
+    schema.trained=new SchemaField(Object.fromEntries(Object.keys(HORSE_SKILLS).map(id=>[id,new BooleanField({initial:false})])));
+    schema.tricks=new ArrayField(new SchemaField({id:new StringField(),name:new StringField(),level:level()}),{initial:[]});
+    delete schema.identity;
+    return schema;
+  }
+}
+export class HorseSheet extends CharacterSheet {
+  get title() {return `Cavalo: ${this.actor.name}`;}
+  static DEFAULT_OPTIONS={classes:['boothill','bh-horse-sheet'],position:{width:912,height:960},actions:{check:HorseSheet.check,addTrick:HorseSheet.addTrick,removeTrick:HorseSheet.removeTrick}};
+  static PARTS={main:{template:'systems/boothill/templates/horse.hbs',scrollable:['.bh-body']}};
+  async _prepareContext(options) {
+    const context=await foundry.applications.sheets.ActorSheetV2.prototype._prepareContext.call(this,options);
+    const actor=this.actor,system=actor.system;
+    const gear=[...actor.items.filter(i=>i.type==='weapon').map(i=>({id:i.id,name:i.name,img:i.img,weapon:true,quantity:1,weight:i.system.weight??0})),...system.inventory];
+    return {...context,actor,editable:this.isEditable,gear,totalWeight:Math.round(gear.reduce((sum,i)=>sum+i.quantity*i.weight,0)*1000)/1000,health:healthSummary(system.health,system.attributes.strength),locations:Object.entries(HORSE_LOCATIONS).map(([id,label])=>({id,label,...system.health.locations[id]})),attributes:Object.entries(HORSE_ATTRIBUTES).map(([id,label])=>({id,label,value:system.attributes[id]})),skills:Object.entries(HORSE_SKILLS).map(([id,label])=>({id,label,value:system.skills[id],trained:system.trained[id]})),tricks:system.tricks};
+  }
+  async _onRender(context,options) {
+    await super._onRender(context,options);
+    if(!this.isEditable) return;
+    for(const input of this.element.querySelectorAll('input[name]')) input.addEventListener('change',async()=>{
+      const value=input.type==='checkbox'?input.checked:input.type==='number'?input.valueAsNumber:input.value;
+      if(input.type==='number'&&(!Number.isFinite(value)||value<0)) return;
+      await this.actor.update({[input.name]:value});
+    });
+    for(const input of this.element.querySelectorAll('[data-trick-id]')) input.addEventListener('change',async()=>{
+      const level=input.valueAsNumber;
+      if(!Number.isInteger(level)||level<0) return;
+      await this.actor.update({'system.tricks':this.actor.system.tricks.map(t=>t.id===input.dataset.trickId?{...t,level}:t)});
+    });
+  }
+  static async check(event,button) {
+    if(!this.isEditable) return;
+    await this.submit();
+    const {attributes,skills,trained,tricks}=this.actor.system,id=button.dataset.id,group=button.dataset.group;
+    let target,title;
+    if(group==='attributes'&&Object.hasOwn(HORSE_ATTRIBUTES,id)) {target=attributes[id];title=HORSE_ATTRIBUTES[id];if(id==='coordination'&&trained.cutting) target=skills.cutting>target?skills.cutting:target+3;}
+    else if(group==='skills'&&Object.hasOwn(HORSE_SKILLS,id)) {
+      title=HORSE_SKILLS[id];target=trained[id]?skills[id]:id==='swimming'?Math.ceil(attributes.strength/2):id==='gunfire'?attributes.intelligence:null;
+      if(id==='gunfire'&&trained[id]&&attributes.intelligence>=target) target=attributes.intelligence+3;
+    } else if(group==='tricks') {const trick=tricks.find(t=>t.id===id);target=trick?.level;title=trick?.name;}
+    if(!Number.isFinite(target)) return ui.notifications.warn('Marque esta perícia como treinada para rolá-la.');
+    const modifier=await judgeModifier(event,title);
+    if(!Number.isInteger(modifier)) return;
+    await postCheck(this.actor,{title,target:target+modifier,roll:await new Roll('1d20').evaluate(),modifiers:[['Juiz',modifier]]});
+  }
+  static async addTrick() {
+    if(!this.isEditable) return;
+    const name=this.element.querySelector('[data-trick-name]').value.trim();
+    if(!name) return;
+    await this.actor.update({'system.tricks':[...this.actor.system.tricks,{id:foundry.utils.randomID(),name,level:0}]});
+  }
+  static async removeTrick(event,button) {if(this.isEditable) await this.actor.update({'system.tricks':this.actor.system.tricks.filter(t=>t.id!==button.dataset.id)});}
+}
 registerChatCards();
 registerMelee();
 Hooks.once('init',()=>{
   CONFIG.Actor.dataModels.character=CharacterData;
   CONFIG.Actor.dataModels.npc=NpcData;
+  CONFIG.Actor.dataModels.horse=HorseData;
   CONFIG.Item.dataModels.weapon=WeaponData;
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',HorseSheet,{types:['horse'],makeDefault:true,label:'Boot Hill — Cavalo'});
   foundry.applications.apps.DocumentSheetConfig.registerSheet(Item,'boothill',WeaponSheet,{types:['weapon'],makeDefault:true,label:'Boot Hill — Arma'});
   foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',CharacterSheet,{types:['character'],makeDefault:true,label:'Boot Hill — Personagem de jogador'});
   foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',CharacterSheet,{types:['npc'],makeDefault:true,label:'Boot Hill — NPC'});

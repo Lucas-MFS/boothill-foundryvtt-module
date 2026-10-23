@@ -34,3 +34,11 @@ test('Juiz aplica secundário manual ao actor do token sem duplicar pedidos',asy
  await new Promise(resolve=>setImmediate(resolve));
  assert.equal(writes,1);assert.equal(h.points,5);assert.equal(data.applied.name,'Alvo desvinculado');
 });
+
+test('animal: d6 natural 6 é mortal mesmo com total reduzido; Sorte ainda pode salvar',()=>{
+ const health={points:0,locations:Object.fromEntries(['head','leftShoulder','rightShoulder','leftArm','rightArm','chest','abdomen','leftLeg','rightLeg'].map(id=>[id,{light:0,serious:0}]))};
+ const injury={id:'leftArm',die:6,total:4,severity:'Ferimento sério'};
+ const failed=healthDamage(health,injury,20,5,true);assert.equal(failed.mortal,true);assert.equal(failed.severity,'Ferimento mortal');
+ const saved=healthDamage(health,injury,1,5,true);assert.equal(saved.points,1);assert.equal(saved.severity,'Ferimento leve');
+ assert.equal(healthDamage(health,injury,undefined,5,false).mortal,false);
+});

@@ -148,3 +148,13 @@ A ficha da arma permite destravar um turno por clique: três turnos, ou dois com
 Explosão na última bala é Sem defeito; caso contrário esvazia o cilindro e oferece gravidade d6 na mão escolhida, +1 com quatro ou mais balas antes do disparo. Mão usa a região de braço correspondente (modificador local −1). O cartão de ferimento permite Aplicar dano ao token selecionado do atirador, incluindo Sorte para ferimento mortal. Não aplica dano explosivo automaticamente a alvos marcados.
 
 Validação: 39 testes, limites da tabela, bloqueio de dano/dispersão e execução do botão com permissão e prevenção de clique repetido. No Foundry, um disparo antigo com 20 foi resolvido: defeito d20=4, Sem defeito; Sorte já falhada manteve o erro. Nenhuma saúde ou munição foi alterada nesse teste.
+
+## Ficha de Cavalo — 0.11.0
+
+Novo tipo Actor horse com ficha própria: nome no cabeçalho; saúde em cinco colunas usando a silhueta fornecida; inventário em três colunas e perícias nas duas restantes abaixo da saúde. Regiões seguem a Tabela 10: braços são patas dianteiras, pernas são traseiras; campos separados para ambos os lados. Mantém saúde, pontos temporários, mortalidade e inventário editável compatíveis com o sistema. Imagem original copiada sem edição para assets/horse.png.
+
+Força, Coordenação, Inteligência e Sorte são editáveis. Pastoreio, Corte, Natação e Explosão têm seleção de treinamento; Truques são cadastrados com nome e nível individual. Coordenação usa Corte quando superior ou bônus +3 quando treinada; Natação sem treinamento usa metade da Força (teto); Explosão sem treinamento usa Inteligência, e treinada no mínimo Inteligência+3 quando a Inteligência alcança/supera o nível. Criação/geração de atributos, aprendizado e qualidades de cavalos ficam manuais nesta versão. Referência: páginas físicas 46 e 55–57 do PDF fornecido.
+
+Aplicação de dano por targeting/botão aceita saúde do cavalo. No processamento do dano em cavalo, d6 natural 6 de gravidade é mortal mesmo que o total modificado seja menor; mantém a confirmação de Sorte do alvo. Transferência de tiros entre cavaleiro e montaria continua manual.
+
+Validação: 41 testes. Criado Validação Cavalo no mundo Boothill; Força salva, inventário com 3 itens de 3 kg totaliza 9 kg, truque com nível individual e marcação de treinamento persistem após recarregar. Conferidas silhueta, posições anatômicas e painéis inferiores. O serviço foi reiniciado apenas para registrar o novo tipo de ator.

@@ -4,14 +4,14 @@ export function supportsHealth(actor) {
  const h=actor?.system?.health;
  return Number.isFinite(h?.points)&&h?.locations&&HIT_REGIONS.every(([id])=>Number.isFinite(h.locations[id]?.light)&&Number.isFinite(h.locations[id]?.serious));
 }
-export function healthDamage(health,injury,luckDie,luck=0) {
+export function healthDamage(health,injury,luckDie,luck=0,animal=false) {
  if(!HIT_REGIONS.some(([id])=>id===injury.id)||!Number.isFinite(injury.total)) throw new Error('Ferimento inválido.');
  const changes={};
  let points=0,severity=injury.severity,mortal=false;
- if(injury.total>=6) {
+ if(injury.total>=6||(animal&&injury.die===6)) {
   if(!Number.isInteger(luckDie)) throw new Error('Ferimento mortal exige Sorte do alvo.');
   if(luckDie<=luck) {points=1;severity='Ferimento leve';}
-  else {mortal=true;changes['system.health.mortal']=true;changes['system.health.mortalLocation']=injury.id;}
+  else {mortal=true;severity='Ferimento mortal';changes['system.health.mortal']=true;changes['system.health.mortalLocation']=injury.id;}
  } else if(injury.total>=0) points=injury.total;
  if(!mortal&&injury.total>=0) {
   const kind=points<=2?'light':'serious';
@@ -57,8 +57,8 @@ export function registerDamage(renderCard) {
    let applied=actor.getFlag('boothill',`damageLedger.${message.id}`);
    let luckRoll;
    if(!applied) {
-    if(data.injury.total>=6) luckRoll=await new Roll('1d20').evaluate();
-    const result=healthDamage(actor.system.health,data.injury,luckRoll?.total,actor.system.attributes?.luck??0);
+    if(data.injury.total>=6||(actor.type==='horse'&&data.injury.die===6)) luckRoll=await new Roll('1d20').evaluate();
+    const result=healthDamage(actor.system.health,data.injury,luckRoll?.total,actor.system.attributes?.luck??0,actor.type==='horse');
     applied={tokenUuid:token.uuid,name:token.name,points:result.points,severity:result.severity,mortal:result.mortal,...(luckRoll?{luckDie:luckRoll.total,luck:actor.system.attributes?.luck??0}:{})};
     await actor.update({...result.changes,[`flags.boothill.damageLedger.${message.id}`]:applied});
    }

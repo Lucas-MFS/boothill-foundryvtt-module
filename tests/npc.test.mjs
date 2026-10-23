@@ -23,3 +23,14 @@ test('modelos NPC e personagem são independentes e NPC compartilha saúde e com
  assert.equal((await sheet._prepareContext({})).extraAttributes.length,2);
  game.user.isGM=false;assert.equal((await sheet._prepareContext({})).extraAttributes.length,0);
 });
+
+test('Cavalo tem atributos próprios, inventário e regiões compatíveis com dano',async()=>{
+ const {HorseSheet,HORSE_ATTRIBUTES,HORSE_SKILLS}=await import('../scripts/boothill.mjs');
+ const schema=CONFIG.Actor.dataModels.horse.defineSchema();
+ assert.deepEqual(Object.keys(schema.attributes.fields),['strength','coordination','intelligence','luck']);
+ assert.deepEqual(Object.keys(schema.skills.fields),Object.keys(HORSE_SKILLS));
+ assert.ok(schema.inventory);assert.ok(schema.tricks);assert.equal('identity' in schema,false);
+ const sheet=new HorseSheet();sheet.isEditable=true;
+ sheet.actor={type:'horse',system:{attributes:{strength:20,coordination:12,intelligence:5,luck:10},skills:{},trained:{},tricks:[],inventory:[{id:'rope',name:'Corda',quantity:2,weight:1.5}],health:{points:1,temporary:2,locations:Object.fromEntries(Object.keys(schema.health.fields.locations.fields).map(id=>[id,{light:0,serious:0}]))}},items:[]};
+ const context=await sheet._prepareContext();assert.equal(context.totalWeight,3);assert.equal(context.health.total,3);assert.equal(context.locations.find(l=>l.id==='leftArm').label,'Dianteira esq.');assert.equal(context.locations.find(l=>l.id==='rightLeg').label,'Traseira dir.');assert.equal(context.attributes.length,Object.keys(HORSE_ATTRIBUTES).length);
+});
