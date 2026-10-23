@@ -45,3 +45,14 @@ test('rapidez considera arma, duas armas, movimento e ferimentos',()=>{
  assert.equal(rapidity({coordination:18,weapon:{speed:-2}}).total,16);
  assert.equal(shotTarget({coordination:18,skill:2,mode:'aimed',weapon:{model:'singleAction'},movementPenalty:-2}).total,18);
 });
+test('deslocamento montado usa ferimentos da montaria sem misturar os do cavaleiro',()=>{
+ const fresh=()=>({mortal:false,points:0,temporary:0,locations:Object.fromEntries(Object.keys(LOCATIONS).map(id=>[id,{light:0,serious:0}]))});
+ const rider=fresh(),horse=fresh();rider.locations.leftLeg.serious=1;
+ assert.deepEqual(movementDistances(rider,horse,20).slice(4).map(r=>r.combat),[8,16,32]);
+ horse.locations.leftLeg.light=1;
+ let rows=movementDistances(rider,horse,20);assert.deepEqual(rows.slice(4).map(r=>r.combat),[4,8,16]);assert.deepEqual(rows.slice(4).map(r=>r.firefight),[.5,1.5,2.5]);
+ horse.locations.leftLeg.serious=1;assert.deepEqual(movementDistances(rider,horse,20).slice(4).map(r=>r.combat),[2,0,0]);
+ horse.locations.rightLeg.serious=1;assert.deepEqual(movementDistances(rider,horse,20).slice(4).map(r=>r.combat),[0,0,0]);
+ const other=fresh();other.locations.chest.serious=1;assert.deepEqual(movementDistances(rider,other,20).slice(4).map(r=>r.combat),[8,8,16]);
+ other.points=20;assert.deepEqual(movementDistances(rider,other,20).slice(4).map(r=>r.combat),[0,0,0]);
+});

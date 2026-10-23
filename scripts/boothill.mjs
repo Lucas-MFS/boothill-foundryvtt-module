@@ -104,17 +104,20 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     const totalWeight=gear.reduce((n,i)=>n+i.quantity*i.weight,0);
     const mount=await this.mountContext();
     const ranges={close:'Próximo (até 2 m)',short:'Curto',long:'Longo',extreme:'Extremo'};
-    return {...context,mount,mountedTab:this._movementTab==='mounted',meleeEffect:pendingMeleeModifier(this.actor),meleeHolds:(this.actor.getFlag('boothill','meleeState')?.holds??[]).map(h=>HOLDS[h.kind]).join(' · '),outgoingHold:this.actor.getFlag('boothill','meleeState')?.outgoing,isNpc:this.isNpc,canGenerate:!this.isNpc||game.user.isGM,extraAttributes:this.isNpc&&game.user.isGM?['greed','bravery'].map(id=>({id,label:NPC_ATTRIBUTES[id],value:attributes[id]})):[],gear,totalWeight:Math.round(totalWeight*1000)/1000,movementActive:this.actor.system.combat.movement!=='still',movements:Object.entries(MOVEMENTS).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.movement})),distances:movementDistances(this.actor.system.health).map((r,index)=>({...r,group:index<4?'foot':'mounted',visible:(index<4?'foot':'mounted')===this._movementTab,id:['crawl','walk','dodge','run','horseWalk','trot','gallop'][index],combat:r.combat?`${r.combat.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—',firefight:r.firefight?`${r.firefight.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—'})),actor:this.actor,editable:this.isEditable,editingSkills:this._editingSkills,hasWork:work.length>0,work,held,hasTwo:held.length===2,health,locations:Object.entries(LOCATIONS).map(([id,label])=>({id,label,...this.actor.system.health.locations[id]})),ranges:Object.entries(ranges).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range})),armament,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,icon:icons[id],value:attributes[id]})),weapons:rows.filter(s=>s.kind==='weapon').map(s=>({...s,brawl:s.id==='briga',blade:s.id==='faca-espada',expandable:['briga','faca-espada'].includes(s.id),expanded:this._expandedSkills.has(s.id)})),summary:creationSummary(attributes,skills,trained)};
+    return {...context,mount,mountedTab:this._movementTab==='mounted',meleeEffect:pendingMeleeModifier(this.actor),meleeHolds:(this.actor.getFlag('boothill','meleeState')?.holds??[]).map(h=>HOLDS[h.kind]).join(' · '),outgoingHold:this.actor.getFlag('boothill','meleeState')?.outgoing,isNpc:this.isNpc,canGenerate:!this.isNpc||game.user.isGM,extraAttributes:this.isNpc&&game.user.isGM?['greed','bravery'].map(id=>({id,label:NPC_ATTRIBUTES[id],value:attributes[id]})):[],gear,totalWeight:Math.round(totalWeight*1000)/1000,movementActive:this.actor.system.combat.movement!=='still',movements:Object.entries(MOVEMENTS).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.movement})),distances:movementDistances(this.actor.system.health,mount?.health,mount?.strength).map((r,index)=>({...r,group:index<4?'foot':'mounted',visible:(index<4?'foot':'mounted')===this._movementTab,id:['crawl','walk','dodge','run','horseWalk','trot','gallop'][index],combat:r.combat?`${r.combat.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—',firefight:r.firefight?`${r.firefight.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—'})),actor:this.actor,editable:this.isEditable,editingSkills:this._editingSkills,hasWork:work.length>0,work,held,hasTwo:held.length===2,health,locations:Object.entries(LOCATIONS).map(([id,label])=>({id,label,...this.actor.system.health.locations[id]})),ranges:Object.entries(ranges).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range})),armament,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,icon:icons[id],value:attributes[id]})),weapons:rows.filter(s=>s.kind==='weapon').map(s=>({...s,brawl:s.id==='briga',blade:s.id==='faca-espada',expandable:['briga','faca-espada'].includes(s.id),expanded:this._expandedSkills.has(s.id)})),summary:creationSummary(attributes,skills,trained)};
   }
   async mountContext() {
     const link=this.actor.system.mount;
     if(!link?.uuid) return null;
     const horse=await mountActor(link);
     const token=link.tokenUuid?await fromUuid(link.tokenUuid):null;
-    return {name:horse?.name??'Montaria indisponível',img:horse?.img??'icons/svg/horse.svg',mounted:link.mounted,tokenName:token?.name??'Automático (se único na cena)'};
+    const candidates=[...(globalThis.canvas?.scene?.tokens??[])].filter(t=>t.actor?.type==='horse'&&t.actor.id===horse?.id);
+    const source=token?.actor?.id===horse?.id?token.actor:horse?.token?horse:candidates.length===1?candidates[0].actor:horse;
+    return {name:horse?.name??'Montaria indisponível',img:horse?.img??'icons/svg/horse.svg',mounted:link.mounted,tokenName:token?.name??'Automático (se único na cena)',health:source?.system?.health,strength:source?.system?.attributes?.strength,sourceUuid:source?.uuid};
   }
   async openMount() {
-    const horse=await mountActor(this.actor.system.mount);
+    const context=await this.mountContext();
+    const horse=context?.sourceUuid?await fromUuid(context.sourceUuid):await mountActor(this.actor.system.mount);
     if(!horse) return ui.notifications.warn('Montaria não encontrada.');
     horse.sheet.render(true);
   }
@@ -420,4 +423,15 @@ Hooks.on('deleteCombat',async combat=>{
 Hooks.on('renderApplicationV2',app=>{
  if(!app.element?.classList.contains('boothill')) return;
  for(const input of app.element.querySelectorAll('input[type="number"]')) input.step='1';
+});
+
+// Refresh open rider sheets when their actual mount's health changes.
+Hooks.on('updateActor',async actor=>{
+ if(actor.type!=='horse') return;
+ const riders=new Map([...game.actors,...[...(globalThis.canvas?.scene?.tokens??[])].map(t=>t.actor).filter(Boolean)].map(a=>[a.uuid,a]));
+ for(const rider of riders.values()) for(const sheet of Object.values(rider.apps??{})) {
+  if(!(sheet instanceof CharacterSheet)||sheet instanceof HorseSheet||!sheet.rendered||!rider.system.mount?.uuid) continue;
+  const mount=await sheet.mountContext();
+  if(mount?.sourceUuid===actor.uuid) sheet.render();
+ }
 });

@@ -184,3 +184,11 @@ A seleção de localização mostra Cavalo quando um alvo montado tem algum valo
 ## Escolha exclusiva de Cavalo — 0.12.4
 
 No cavaleiro montado, perna/abdômen só ficam habilitados se houver valor par alcançável para atingir o próprio cavaleiro. Ímpares ficam exclusivamente no botão Cavalo; removida a indicação redundante → Cavalo dos membros. Havendo par e ímpar alcançáveis, o jogador escolhe o membro para o cavaleiro ou Cavalo para a montaria. Mesma validação no clique e no desenho dos botões. Validação: 48 testes.
+
+## Limpeza visual e movimento da montaria — 0.12.5
+
+Removidas legendas de deslocamento e saúde das fichas de personagem/NPC; armamento mantém apenas a dica Shift+clique. Inventários de personagem e cavalo exibem balança no cabeçalho Peso. Pontos de ferimento continuam editáveis para cura e correções manuais; contagens regionais não determinam os pontos exatos de dano.
+
+Deslocamento montado passa a consultar saúde da montaria vinculada, priorizando o token escolhido ou o único correspondente na cena. Aplica os fatores de movimento da Tabela 6 às distâncias de montaria; pernas correspondem às patas traseiras conforme a Tabela 10/Animais em Combate. Ferimentos leves em perna reduzem cumulativamente as distâncias; sérios impedem trote/galope e sérios nas duas pernas impedem deslocamento montado. Outros sérios reduzem trote/galope; mortal/desmaio impede movimento. Ferimentos do cavaleiro continuam afetando apenas a pé. Sem montaria vinculada, exibe distâncias base. Fonte: PDF físico 28–30 e 46.
+
+Atualizar a montaria atualiza fichas abertas de cavaleiros. O duplo clique abre a mesma cópia de ator/token usada no cálculo. Validação: 50 testes, incluindo separação entre saúde de cavalo/cavaleiro, restrições por gravidade, impedimento por desmaio e preferência pelo token correto. Limpeza conferida no Foundry; ferimento temporário de teste foi restaurado.

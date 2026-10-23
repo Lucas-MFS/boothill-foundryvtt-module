@@ -44,3 +44,14 @@ test('soltar Cavalo cria referência sem copiar ator e inicia desmontado',async(
  assert.equal(await sheet._onDropActor(null,horse),horse);
  assert.deepEqual(change,{'system.mount':{uuid:'Actor.horse',tokenUuid:'Scene.s.Token.h',mounted:false}});
 });
+test('vínculo abre a mesma cópia de montaria usada no deslocamento',async()=>{
+ const {CharacterSheet}=await import('../scripts/boothill.mjs');
+ const base={id:'h',uuid:'Actor.h',name:'Cavalo',system:{health:{points:0},attributes:{strength:20}}};let opened=false;
+ const actual={...base,uuid:'Scene.s.Token.h.Actor.h',system:{health:{points:3},attributes:{strength:20}},sheet:{render:()=>{opened=true;}}};
+ const token={uuid:'Scene.s.Token.h',name:'Cavalo da cena',actor:actual};
+ globalThis.fromUuid=async uuid=>uuid===base.uuid?base:uuid===token.uuid?token:actual;
+ globalThis.canvas={scene:{tokens:[token]}};
+ const sheet=new CharacterSheet();sheet.actor={system:{mount:{uuid:base.uuid,tokenUuid:token.uuid,mounted:true}}};
+ const mount=await sheet.mountContext();assert.equal(mount.health.points,3);assert.equal(mount.sourceUuid,actual.uuid);
+ await sheet.openMount();assert.equal(opened,true);
+});
