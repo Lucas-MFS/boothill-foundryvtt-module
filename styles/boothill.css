@@ -331,3 +331,13 @@
 .boothill .bh-personal .bh-mount-link small {display:none;}
 .boothill .bh-personal .bh-mount-placeholder {font-size:9px;}
 .boothill .bh-personal .bh-mount-state {font-size:9px;padding:3px 5px;}
+
+/* Soft panel separators for player and NPC sheets. */
+.boothill .bh-character-grid .bh-sheet-column {position:relative;}
+.boothill .bh-character-grid .bh-side-column::before {content:'';position:absolute;left:-9px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,rgba(94,85,68,.2) 5%,rgba(94,85,68,.2) 95%,transparent);pointer-events:none;}
+.boothill .bh-character-grid .bh-sheet-column > .bh-section,
+.boothill .bh-character-grid .bh-sheet-column > .bh-creation {position:relative;}
+.boothill .bh-character-grid .bh-sheet-column > :is(.bh-section,.bh-creation) + :is(.bh-section,.bh-creation)::before {content:'';position:absolute;left:0;right:0;top:-11px;height:2px;background:linear-gradient(to right,transparent,rgba(94,85,68,.18) 12%,rgba(94,85,68,.18) 88%,transparent);pointer-events:none;}
+.boothill .bh-character-grid .bh-sheet-column > .bh-creation {border-top:0;}
+.boothill .bh-character-grid .bh-movement {position:relative;padding-top:10px;margin-top:20px;}
+.boothill .bh-character-grid .bh-movement::before {content:'';position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(to right,transparent,rgba(94,85,68,.18) 12%,rgba(94,85,68,.18) 88%,transparent);pointer-events:none;}
