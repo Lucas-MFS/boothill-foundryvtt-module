@@ -1,3 +1,4 @@
+import {playWeaponSound,shotAudio} from './weapon-audio.mjs';
 import {mountActor} from './mounts.mjs';
 import {attackMelee} from './melee-actions.mjs';
 import {registerMelee,consumeMeleeModifier} from './melee.mjs';
@@ -236,9 +237,10 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       const target=current.total+modifier,roll=await new Roll('1d20').evaluate();
       await consumeMeleeModifier(this.actor);
       await item.update({'system.ammo':item.system.ammo-1,'system.reloadProgress':0});
+      if(roll.total!==20) await playWeaponSound(item.system);
       await postCheck(this.actor,{title:`${item.name} · ${SHOTS[mode].label}`,target,roll,
         modifiers:[['Perícia',current.training],['Duas armas',current.twoWeapons],['Mão inábil',current.offhand],['Ferimentos',current.woundPenalty],['Alcance',current.distance],['Dispersão',current.spread],['Movimento',current.movementPenalty],['Efeito de briga',current.effect],['Juiz',modifier]],
-        shot:{weaponUuid:item.uuid,actorUuid:this.actor.uuid,ammoBefore,model:item.system.model,mode,range:this.actor.system.combat.range,skill:this.actor.system.skills[weaponSummary(item.system).skill==='Rifle'?'rifle':'pistola'],wound:item.system.wound},note:''});
+        shot:{audio:shotAudio(item.system),weaponUuid:item.uuid,actorUuid:this.actor.uuid,ammoBefore,model:item.system.model,mode,range:this.actor.system.combat.range,skill:this.actor.system.skills[weaponSummary(item.system).skill==='Rifle'?'rifle':'pistola'],wound:item.system.wound},note:''});
     } finally {this._firing=false;}
   }
   rapidityFor(item) {

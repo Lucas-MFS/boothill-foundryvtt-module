@@ -360,3 +360,10 @@
 
 /* Place the texture on the sheet itself so inner surfaces cannot hide it. */
 .boothill .window-content .bh-page {background-color:var(--bh-paper);background-image:linear-gradient(rgba(238,236,228,.70),rgba(238,236,228,.70)),url('../assets/paper-texture.webp?v=0.12.9');background-size:cover;background-position:center;background-repeat:no-repeat;}
+
+.boothill .bh-audio-config {height:auto;padding:18px;gap:12px;font-size:12px;}
+.boothill .bh-audio-file {display:flex;gap:7px;}
+.boothill .bh-audio-file button {width:32px;flex:0 0 32px;}
+.boothill .bh-audio-actions {display:flex;gap:7px;}
+.boothill .bh-audio-config button {min-height:28px;border:1px solid var(--bh-rule);border-radius:4px;background:#f6f3ec;color:var(--bh-ink);font:11px Arial,sans-serif;}
+.boothill .bh-audio-config input[type=range] {width:100%;}

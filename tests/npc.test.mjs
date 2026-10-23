@@ -11,7 +11,7 @@ test('modelos NPC e personagem são independentes e NPC compartilha saúde e com
  class Schema extends Field {constructor(fields){super();this.fields=fields;}}
  class Sheet {async _prepareContext(){return {};}}
  const hooks={};globalThis.Hooks={once:(name,fn)=>hooks[name]=fn,on:()=>{}};
- globalThis.foundry={abstract:{TypeDataModel:class{}},data:{fields:{SchemaField:Schema,NumberField:Field,StringField:Field,BooleanField:Field,ArrayField:Field}},applications:{api:{HandlebarsApplicationMixin:Base=>Base},sheets:{ActorSheetV2:Sheet,ItemSheetV2:Sheet},apps:{DocumentSheetConfig:{registerSheet:()=>{}}}}};
+ globalThis.foundry={abstract:{TypeDataModel:class{}},data:{fields:{SchemaField:Schema,NumberField:Field,StringField:Field,BooleanField:Field,ArrayField:Field}},applications:{api:{ApplicationV2:Sheet,HandlebarsApplicationMixin:Base=>Base},sheets:{ActorSheetV2:Sheet,ItemSheetV2:Sheet},apps:{DocumentSheetConfig:{registerSheet:()=>{}}}}};
  globalThis.CONFIG={Actor:{dataModels:{}},Item:{dataModels:{}}};globalThis.Actor=class{};globalThis.Item=class{};
  const {CharacterSheet}=await import('../scripts/boothill.mjs');hooks.init();
  const pc=CONFIG.Actor.dataModels.character.defineSchema(),npc=CONFIG.Actor.dataModels.npc.defineSchema();

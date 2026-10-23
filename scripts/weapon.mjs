@@ -1,3 +1,4 @@
+import {WeaponAudioConfig} from './weapon-audio-config.mjs';
 import {WEAPON_MODELS,weaponSummary,advanceReload} from './weapon-rules.mjs';
 import {handsRequired} from './combat-rules.mjs';
 
@@ -5,7 +6,7 @@ export class WeaponData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const {StringField,NumberField,BooleanField}=foundry.data.fields;
     const number=(initial,min=0)=>new NumberField({required:true,nullable:false,integer:true,min,initial});
-    return {malfunction:new StringField({initial:'',blank:true,choices:['','jam','cleaning']}),jamProgress:number(0),weight:new NumberField({min:0,initial:0}),model:new StringField({required:true,choices:Object.keys(WEAPON_MODELS),initial:'singleAction'}),
+    return {shotSound:new StringField({initial:''}),shotVolume:new NumberField({min:0,max:1,initial:.6,nullable:false}),malfunction:new StringField({initial:'',blank:true,choices:['','jam','cleaning']}),jamProgress:number(0),weight:new NumberField({min:0,initial:0}),model:new StringField({required:true,choices:Object.keys(WEAPON_MODELS),initial:'singleAction'}),
       hands:new NumberField({integer:true,nullable:true,initial:null,choices:[1,2]}),capacity:number(6,1),ammo:number(0),roundsPerLoad:number(3,1),turnsPerLoad:number(1,1),reloadProgress:number(0),
       short:number(10),long:number(20),extreme:number(55),speed:number(1,-2),wound:number(0,-10),
       caliber:new StringField({initial:''}),notes:new StringField({initial:''}),equipped:new BooleanField({initial:false})};
@@ -21,6 +22,14 @@ export class WeaponSheet extends foundry.applications.api.HandlebarsApplicationM
   get title() { return `Arma: ${this.document.name}`; }
   static DEFAULT_OPTIONS={classes:['boothill','bh-weapon-sheet'],tag:'form',position:{width:540,height:520},form:{submitOnChange:true,closeOnSubmit:false},actions:{reload:WeaponSheet.reload,spend:WeaponSheet.spend,clearDefect:WeaponSheet.clearDefect}};
   static PARTS={main:{template:'systems/boothill/templates/weapon.hbs',scrollable:['.bh-body']}};
+  async _onRender(context,options) {
+    await super._onRender(context,options);
+    const header=this.element.querySelector('.window-header');
+    if(!header||header.querySelector('[data-bh-weapon-audio]')) return;
+    const button=document.createElement('button');button.type='button';button.className='header-control icon fa-solid fa-volume-high';button.dataset.bhWeaponAudio='';button.title='Configurar som do disparo';button.setAttribute('aria-label','Configurar som do disparo');
+    button.addEventListener('click',event=>{event.stopPropagation();new WeaponAudioConfig(this.document).render({force:true});});
+    header.insertBefore(button,header.querySelector('[data-action="close"]'));
+  }
   async _prepareContext(options) {
     return {...await super._prepareContext(options),item:this.document,system:this.document.system,editable:this.isEditable,
       models:Object.entries(WEAPON_MODELS).map(([id,m])=>({id,label:m.label,selected:id===this.document.system.model})),

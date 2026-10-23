@@ -204,3 +204,11 @@ Validação: 53 testes, todas as patas, gravidade, ajuste manual válido/inváli
 ## Edição direta da saúde restaurada — 0.12.7
 
 Por solicitação do usuário, pontos de ferimento voltam a ser editáveis diretamente em personagem, NPC e cavalo. Removido diálogo de dano/cura ao editar contagens regionais; essas contagens e os pontos são ajustados separadamente, como antes. Dano por tiros continua somando automaticamente. Mantida correção de movimento pelas quatro patas.
+
+## Som por arma — 0.13.0
+
+Alto-falante no cabeçalho da ficha de arma, ao lado de fechar, abre configuração com arquivo de áudio, seletor nativo do Foundry, volume, prévia local, remoção e salvamento. Caminho e volume são dados do Item, preservados ao arrastar novas cópias para atores; cópias já existentes são configuradas individualmente.
+
+O disparo pelo painel de armamento reproduz uma vez para os clientes conectados, no canal de efeitos de interface e sem repetição. No 20 natural, aguarda o defeito: sem defeito/trava/explosão reproduz som; falha de munição não reproduz. Guardado snapshot do áudio no disparo para verificação posterior de defeito. Localização, ferimentos e dispersão não repetem áudio. Arquivo ausente informa erro sem interromper o ataque. Prévia usa apenas o cliente atual.
+
+Validação: 53 testes, reprodução opcional, transmissão única, prévia local e tolerância a erro. No Foundry, alto-falante, navegador de áudio, prévia de sounds/lock.wav sem erros e persistência após salvar/reabrir; som de teste removido ao concluir. Nenhuma munição/saúde alterada na conferência visual. API de áudio consultada em modo leitura na instalação v13; nenhum arquivo nativo alterado.

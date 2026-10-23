@@ -1,3 +1,4 @@
+import {playWeaponSound} from './weapon-audio.mjs';
 import {defectResult,defectCard} from './defects.mjs';
 import {isShotgun,pelletCount,spreadInfo,pelletsCard,spreadCard} from './shotgun.mjs';
 import {registerDamage,requestDamage} from './damage.mjs';
@@ -58,6 +59,7 @@ export function registerChatCards() {
             const defect=defectResult(current.shot.model,roll.total,current.shot.ammoBefore??2);
             const next={...current,defect,defectCleared:defect.fired,note:current.note?.startsWith('20 natural:')?'':current.note};
             await message.update({content:rollCard(next),'flags.boothill.check':next,rolls:[...message.rolls,roll]});
+            if(defect.fired||defect.kind==='explosion') await playWeaponSound(current.shot.audio??item.system);
             if(defect.blocked) await item.update({'system.malfunction':defect.blocked,'system.jamProgress':0});
             if(defect.kind==='explosion') await item.update({'system.ammo':0,'system.reloadProgress':0});
           } else {
