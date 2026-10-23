@@ -158,3 +158,7 @@ Força, Coordenação, Inteligência e Sorte são editáveis. Pastoreio, Corte, 
 Aplicação de dano por targeting/botão aceita saúde do cavalo. No processamento do dano em cavalo, d6 natural 6 de gravidade é mortal mesmo que o total modificado seja menor; mantém a confirmação de Sorte do alvo. Transferência de tiros entre cavaleiro e montaria continua manual.
 
 Validação: 41 testes. Criado Validação Cavalo no mundo Boothill; Força salva, inventário com 3 itens de 3 kg totaliza 9 kg, truque com nível individual e marcação de treinamento persistem após recarregar. Conferidas silhueta, posições anatômicas e painéis inferiores. O serviço foi reiniciado apenas para registrar o novo tipo de ator.
+
+## Organização do Cavalo — 0.11.1
+
+Atributos acima da saúde, ocupando cinco colunas; posições anatômicas preservadas. Engrenagem alterna entre edição de todas as perícias com checkboxes e exibição apenas das conhecidas. Truques compartilham linhas, ícone e campo numérico das demais perícias; adição e remoção aparecem durante edição. O livro (página física 55) exige teste de Inteligência para cada perícia inicial, portanto não presume todas treinadas. Configuração permanece manual. Validação no Foundry: abrir/fechar engrenagem, ocultar não treinadas e campos de edição; regressão com 41 testes.

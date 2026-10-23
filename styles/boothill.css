@@ -304,3 +304,11 @@
 .boothill .bh-add-trick button {height:28px;width:28px;min-height:0;border:1px solid var(--bh-rule);border-radius:6px;background:#f6f3ec;color:var(--bh-ink);}
 
 .boothill .bh-horse-skills h3 {font:bold 14px Georgia,serif;margin:18px 0 8px;border-bottom:1px solid var(--bh-rule);padding-bottom:5px;}
+
+.boothill .bh-horse-attribute-panel {grid-column:1/6;}
+.boothill .bh-horse-attributes {border-top:0;padding-top:0;}
+.boothill .bh-horse-skill {grid-template-columns:minmax(0,1fr) 38px;min-height:34px;}
+.boothill .bh-horse-skill.bh-horse-editing {grid-template-columns:16px minmax(0,1fr) 38px;}
+.boothill .bh-horse-trick.bh-horse-editing {grid-template-columns:minmax(0,1fr) 38px 18px;}
+.boothill .bh-horse-skills .bh-roll-name {display:flex;align-items:center;gap:6px;text-align:left;min-width:0;}
+.boothill .bh-horse-skills .bh-roll-name span {overflow-wrap:anywhere;}
