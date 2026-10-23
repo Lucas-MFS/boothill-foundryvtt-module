@@ -180,3 +180,7 @@ A transferência com token alvo conhecido passa a acontecer na seleção da regi
 ## Botão Cavalo — 0.12.3
 
 A seleção de localização mostra Cavalo quando um alvo montado tem algum valor ímpar de perna/abdômen ao alcance do ajuste de perícia. Considera todos os valores alcançáveis, inclusive quando o número original é par. O botão escolhe o ímpar elegível mais próximo e rola d20 para a localização no cavalo, sem novo ajuste; o cartão mostra a silhueta e a região sorteada para resolver gravidade. Não aparece para alvos desmontados, lâminas ou ferimentos já transferidos. Validação: 47 testes, incluindo visibilidade, limites de ajuste e clique que transfere antes da gravidade.
+
+## Escolha exclusiva de Cavalo — 0.12.4
+
+No cavaleiro montado, perna/abdômen só ficam habilitados se houver valor par alcançável para atingir o próprio cavaleiro. Ímpares ficam exclusivamente no botão Cavalo; removida a indicação redundante → Cavalo dos membros. Havendo par e ímpar alcançáveis, o jogador escolhe o membro para o cavaleiro ou Cavalo para a montaria. Mesma validação no clique e no desenho dos botões. Validação: 48 testes.

@@ -2,7 +2,7 @@ import {defectResult,defectCard} from './defects.mjs';
 import {isShotgun,pelletCount,spreadInfo,pelletsCard,spreadCard} from './shotgun.mjs';
 import {registerDamage,requestDamage} from './damage.mjs';
 import {mountedRecipient} from './mounts.mjs';
-import {horseLocationChoice,injuryChoiceShot,injuryCard,locationChoices,injuryResult} from './injury.mjs';
+import {selectableLocationChoices,horseLocationChoice,injuryCard,injuryResult} from './injury.mjs';
 import {needsLuck,succeeds} from './rules.mjs';
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function modifierText(entries=[]) {
@@ -152,8 +152,8 @@ export function registerChatCards() {
               roll=await new Roll('1d20').evaluate();
               next={...next,locationDie:roll.total,locationValue:roll.total,animalTarget:true,riderMounted:false,targetTokenUuid:recipient.uuid,mountResolution:{fromTokenUuid:token.uuid,toTokenUuid:recipient.uuid,fromName:token.name,toName:recipient.name,originalLocation:choice.value,newLocation:roll.total}};
             }
-            else if(current.locationDie&&locationChoices(current.locationDie,injuryChoiceShot(current)).some(r=>r.id===kind&&r.available)) {
-              const value=locationChoices(current.locationDie,injuryChoiceShot(current)).find(r=>r.id===kind).value;
+            else if(current.locationDie&&selectableLocationChoices(current).some(r=>r.id===kind&&r.available)) {
+              const value=selectableLocationChoices(current).find(r=>r.id===kind).value;
               const token=current.targetTokenUuid?await fromUuid(current.targetTokenUuid):null;
               const recipient=token&&!current.mountResolution&&!current.bladeHit?await mountedRecipient(token,kind,value):null;
               if(recipient) {

@@ -59,3 +59,15 @@ test('botão Cavalo só aparece com ímpar alcançável, considerando todo o aju
  assert.equal(horseLocationChoice({...data,mountResolution:{}}),null);
  assert.equal(horseLocationChoice({...data,bladeHit:true}),null);
 });
+
+test('membros do cavaleiro só aceitam pares alcançáveis; Cavalo é a única escolha dos ímpares',async()=>{
+ const {selectableLocationChoices,injuryCard}=await import('../scripts/injury.mjs');
+ const data={locationDie:11,riderMounted:true,targetTokenUuid:'Token.r',shot:{mode:'aimed',range:'short',skill:0}};
+ assert.equal(selectableLocationChoices(data).find(r=>r.id==='abdomen').available,false);
+ const html=injuryCard(data);assert.ok(html.includes('data-bh-injury="horse"'));assert.ok(!html.includes('→ Cavalo'));
+ const adjusted={...data,shot:{...data.shot,skill:1}};
+ const abdomen=selectableLocationChoices(adjusted).find(r=>r.id==='abdomen');assert.equal(abdomen.available,true);assert.equal(abdomen.value,12);
+ const leg={...data,locationDie:1};assert.equal(selectableLocationChoices(leg).find(r=>r.id==='leftLeg').available,false);
+ assert.equal(selectableLocationChoices({...leg,shot:{...leg.shot,skill:1}}).find(r=>r.id==='leftLeg').value,2);
+ assert.equal(selectableLocationChoices({...data,riderMounted:false}).find(r=>r.id==='abdomen').available,true);
+});
