@@ -393,3 +393,4 @@
 .boothill .bh-wild-map .bh-horse-leftLeg {left:69%;top:79%;}
 .boothill .bh-wild-map .bh-horse-rightLeg {left:87%;top:88%;}
 .boothill .bh-wild-sheet .bh-horse-attributes label {font-size:11px;color:var(--bh-muted);}
+.boothill img.bh-portrait {object-fit:cover;cursor:pointer;}

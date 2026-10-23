@@ -262,3 +262,7 @@ Removido painel exclusivo de ataque do animal. Botão compacto Atacar com ícone
 ## Ícones do animal — 0.15.2
 
 Atributos recebem ícones de punho (Força), pata (Ataque), impacto (Ferimentos adicionais) e escudo (Defesa de ferimentos). Título do cartão de ataque no chat também exibe pata. Dois testes do ataque aprovados; alteração apenas visual.
+
+## Edição de retratos — 0.15.3
+
+Retratos de personagem/NPC, cavalo e animal selvagem agora usam o seletor nativo de imagens no clique para quem pode editar. Usuários sem edição mantêm visualização. Cavalo/animal exibem o retrato do ator, permitindo que a alteração apareça imediatamente; configuração de arte do token permanece no controle nativo do token. Arraste de montaria preservado. Armas e munição já possuíam edição de imagem. Conferido no Foundry: clique no retrato abriu o seletor de imagens; nenhum retrato existente alterado na validação.
