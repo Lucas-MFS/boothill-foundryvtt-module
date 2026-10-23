@@ -242,3 +242,7 @@ Recarga pelo personagem/NPC ou pela ficha de arma incorporada desconta apenas as
 Inventários de personagem e cavalo incluem munição, abertura da ficha, remoção, quantidade/peso editáveis e cálculo quantidade × peso unitário. NPC usa o mesmo seletor de armamento e itens incorporados. Munição armazenada num cavalo não é consumida automaticamente por seu cavaleiro. Validação: 58 testes aprovados, incluindo reserva parcial/esgotada, capacidade, recarga lenta, atualização conjunta de arma/reserva e bloqueio de referência fora do ator. Serviço reiniciado para reconhecer o novo tipo de Item; arquivos publicados somente na pasta do sistema.
 
 Conferência no Foundry: novo tipo ammunition disponível na criação, ficha compacta criada como “Munição de teste”, quantidade inicial 50 e seletor Munição abaixo do alcance verificados visualmente. Item de exemplo mantido para o usuário testar; nenhum item existente foi removido.
+
+## Campos de perícia legíveis — 0.14.1
+
+Campos numéricos de perícias de armas/trabalho e perícias/truques de cavalo ampliados para 56 px, com padding horizontal de 3 px. Espaço comporta números de vários algarismos junto às setas nativas de incremento. Mantidos tamanho da fonte, controles e valores. Conferida largura aplicada no Foundry; alteração apenas visual.

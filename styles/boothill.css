@@ -34,7 +34,7 @@
 .boothill .bh-section h2 { display:flex; align-items:baseline; justify-content:space-between; gap:10px; border:0; border-bottom:2px solid var(--bh-ink); margin:0; padding:0 0 5px; font:bold 17px/1.4 Georgia,serif; color:var(--bh-ink); }
 .boothill .bh-section h2 > span { font:10px Arial,sans-serif; color:var(--bh-muted); }
 .boothill .bh-stat-row { display:flex; align-items:center; gap:8px; height:32px; border-bottom:1px solid var(--bh-rule); margin:0; }
-.boothill .bh-stat-row input { width:45px; flex:0 0 45px; text-align:center; border:0; font-weight:bold; }
+.boothill .bh-stat-row input[type=number] { width:56px; flex:0 0 56px; padding:0 3px; text-align:center; border:0; font-weight:bold; }
 .boothill .bh-roll-name { display:flex; align-items:center; gap:9px; flex:1; min-width:0; width:auto; height:auto; min-height:0; margin:0; padding:4px 0; border:0; border-radius:0; background:transparent; box-shadow:none; color:inherit; text-align:left; justify-content:start; font:inherit; cursor:pointer; white-space:normal; }
 .boothill .bh-roll-name i { width:16px; text-align:center; color:var(--bh-muted); font-size:12px; }
 .boothill .bh-weapon-name { flex:1; padding-left:2px; }
@@ -49,7 +49,7 @@
 .boothill .bh-skill-row .bh-roll-name { font-size:11px; line-height:1.3; }
 .boothill .bh-skill-row.bh-trained { color:var(--bh-ink); }
 .boothill .bh-trained .bh-roll-name { font-weight:bold; }
-.boothill .bh-skill-row input { flex:0 0 29px; width:29px; height:25px; text-align:center; border:0; font-size:12px; }
+.boothill .bh-skill-row input[type=number] { flex:0 0 56px; width:56px; padding:0 3px; height:25px; text-align:center; border:0; font-size:12px; }
 .boothill .bh-generate-skill { flex:0 0 20px; width:20px; min-height:0; height:25px; padding:0; border:0; border-radius:0; background:transparent; color:var(--bh-muted); box-shadow:none; font-size:10px; cursor:pointer; opacity:.45; }
 .boothill .bh-skill-row:hover .bh-generate-skill,.boothill .bh-generate-skill:focus-visible { opacity:1; }
 .boothill .bh-creation { border-top:1px solid var(--bh-rule); margin-top:20px; font-size:11px; }
@@ -296,10 +296,10 @@
 .boothill .bh-horse-attributes > div {text-align:center;}
 .boothill .bh-horse-attributes .bh-roll-name {margin:auto;}
 .boothill .bh-horse-attributes input {text-align:center;font:bold 25px Georgia,serif;height:36px;}
-.boothill .bh-horse-skill {display:grid;grid-template-columns:16px minmax(0,1fr) 38px;align-items:center;gap:7px;padding:5px;}
+.boothill .bh-horse-skill {display:grid;grid-template-columns:16px minmax(0,1fr) 56px;align-items:center;gap:7px;padding:5px;}
 .boothill .bh-horse-skill:nth-of-type(even) {background:#302b200b;}
-.boothill .bh-horse-skill input[type=number] {text-align:center;}
-.boothill .bh-horse-trick {grid-template-columns:minmax(0,1fr) 38px 18px;}
+.boothill .bh-horse-skill input[type=number] {width:56px;min-width:56px;padding:0 3px;text-align:center;}
+.boothill .bh-horse-trick {grid-template-columns:minmax(0,1fr) 56px 18px;}
 .boothill .bh-add-trick {display:grid;grid-template-columns:minmax(0,1fr) 28px;gap:6px;}
 .boothill .bh-add-trick button {height:28px;width:28px;min-height:0;border:1px solid var(--bh-rule);border-radius:6px;background:#f6f3ec;color:var(--bh-ink);}
 
@@ -307,9 +307,9 @@
 
 .boothill .bh-horse-attribute-panel {grid-column:1/6;}
 .boothill .bh-horse-attributes {border-top:0;padding-top:0;}
-.boothill .bh-horse-skill {grid-template-columns:minmax(0,1fr) 38px;min-height:34px;}
-.boothill .bh-horse-skill.bh-horse-editing {grid-template-columns:16px minmax(0,1fr) 38px;}
-.boothill .bh-horse-trick.bh-horse-editing {grid-template-columns:minmax(0,1fr) 38px 18px;}
+.boothill .bh-horse-skill {grid-template-columns:minmax(0,1fr) 56px;min-height:34px;}
+.boothill .bh-horse-skill.bh-horse-editing {grid-template-columns:16px minmax(0,1fr) 56px;}
+.boothill .bh-horse-trick.bh-horse-editing {grid-template-columns:minmax(0,1fr) 56px 18px;}
 .boothill .bh-horse-skills .bh-roll-name {display:flex;align-items:center;gap:6px;text-align:left;min-width:0;}
 .boothill .bh-horse-skills .bh-roll-name span {overflow-wrap:anywhere;}
 

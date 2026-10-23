@@ -2,7 +2,7 @@
   "id": "boothill",
   "title": "Boot Hill 3ª Edição — Brasil",
   "description": "Sistema independente de Boot Hill em português brasileiro.",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "compatibility": { "minimum": "13", "verified": "13", "maximum": "13" },
   "authors": [{ "name": "Boot Hill Brasil" }],
   "esmodules": ["scripts/boothill.mjs"],
