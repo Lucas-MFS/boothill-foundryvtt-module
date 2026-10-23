@@ -378,3 +378,16 @@
 .bh-roll-card .bh-roll-weapon {flex:0 0 48px;width:48px;height:48px;object-fit:contain;border:1px solid #b5ac99;border-radius:5px;background:rgba(255,255,255,.25);}
 .boothill .bh-ammunition-fields {grid-template-columns:1fr 1fr 1fr;}
 .boothill .bh-ammunition-fields .bh-ammunition-notes {grid-column:1 / -1;}
+.boothill .bh-animal-attack {grid-column:1 / -1;text-align:center;}
+.boothill .bh-wild-map {height:360px;aspect-ratio:auto;}
+.boothill .bh-wild-map > img {display:block;width:100%;height:100%;}
+.boothill .bh-wild-map .bh-horse-head {left:11%;top:46%;}
+.boothill .bh-wild-map .bh-horse-leftShoulder {left:30%;top:25%;}
+.boothill .bh-wild-map .bh-horse-rightShoulder {left:44%;top:38%;}
+.boothill .bh-wild-map .bh-horse-chest {left:53%;top:18%;}
+.boothill .bh-wild-map .bh-horse-abdomen {left:64%;top:38%;}
+.boothill .bh-wild-map .bh-horse-leftArm {left:22%;top:79%;}
+.boothill .bh-wild-map .bh-horse-rightArm {left:47%;top:88%;}
+.boothill .bh-wild-map .bh-horse-leftLeg {left:69%;top:79%;}
+.boothill .bh-wild-map .bh-horse-rightLeg {left:87%;top:88%;}
+.boothill .bh-wild-sheet .bh-horse-attributes label {font-size:11px;color:var(--bh-muted);}

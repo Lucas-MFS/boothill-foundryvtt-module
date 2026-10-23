@@ -72,3 +72,12 @@ test('remoção de inventário separa armas incorporadas, itens manuais e permis
   await CharacterSheet.removeGear.call(sheet,event,{dataset:{id:'gun',weapon:'true'}});assert.equal(deleted.length,1);
  }
 });
+
+test('animal selvagem possui saúde de quadrúpede e modificadores próprios',async()=>{
+ const {WildAnimalData,WildAnimalSheet}=await import('../scripts/boothill.mjs');
+ const schema=WildAnimalData.defineSchema();
+ assert.deepEqual(Object.keys(schema.animal.fields),['attack','severity','defense']);
+ assert.equal(Object.keys(schema.health.fields.locations.fields).length,9);
+ assert.equal(WildAnimalSheet.DEFAULT_OPTIONS.actions.attackAnimal instanceof Function,true);
+ assert.equal(WildAnimalSheet.PARTS.main.template,'systems/boothill/templates/wild-animal.hbs');
+});

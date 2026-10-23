@@ -66,22 +66,26 @@ export function registerDamage(renderCard) {
     if(recipient) {
      const locationRoll=await new Roll('1d20').evaluate(),severityRoll=await new Roll('1d6').evaluate();
      const id=HIT_REGIONS.find(([,min,max])=>locationRoll.total>=min&&locationRoll.total<=max)[0];
-     data={...data,animalTarget:recipient.actor.type==='horse',locationDie:locationRoll.total,locationValue:locationRoll.total,injury:injuryResult(severityRoll.total,id,data.shot.wound),targetTokenUuid:recipient.uuid,mountResolution:{fromTokenUuid:token.uuid,toTokenUuid:recipient.uuid,fromName:token.name,toName:recipient.name,originalLocation:value,newLocation:locationRoll.total}};
+     data={...data,animalTarget:['horse','wildAnimal'].includes(recipient.actor.type),locationDie:locationRoll.total,locationValue:locationRoll.total,injury:injuryResult(severityRoll.total,id,data.shot.wound),targetTokenUuid:recipient.uuid,mountResolution:{fromTokenUuid:token.uuid,toTokenUuid:recipient.uuid,fromName:token.name,toName:recipient.name,originalLocation:value,newLocation:locationRoll.total}};
      await message.update({'flags.boothill.check':data,content:renderCard(data),rolls:[...message.rolls,locationRoll,severityRoll]});
      token=recipient;
     }
    }
    const actor=token?.actor;
    if(token?.documentName!=='Token'||!supportsHealth(actor)) throw new Error('Alvo sem saúde compatível.');
+   if(actor.type==='wildAnimal'&&!data.animalDefenseApplied) {
+    data={...data,animalDefenseApplied:true,injury:injuryResult(data.injury.die,data.injury.id,(data.shot.wound??0)+actor.system.animal.defense)};
+    await message.update({'flags.boothill.check':data,content:renderCard(data)});
+   }
    let applied=actor.getFlag('boothill',`damageLedger.${message.id}`);
    let luckRoll;
    if(!applied) {
-    if(data.injury.total>=6||(actor.type==='horse'&&data.injury.die===6)) luckRoll=await new Roll('1d20').evaluate();
-    const result=healthDamage(actor.system.health,data.injury,luckRoll?.total,actor.system.attributes?.luck??0,actor.type==='horse');
+    if(data.injury.total>=6||(['horse','wildAnimal'].includes(actor.type)&&data.injury.die===6)) luckRoll=await new Roll('1d20').evaluate();
+    const result=healthDamage(actor.system.health,data.injury,luckRoll?.total,actor.system.attributes?.luck??0,['horse','wildAnimal'].includes(actor.type));
     applied={tokenUuid:token.uuid,name:token.name,points:result.points,severity:result.severity,mortal:result.mortal,...(luckRoll?{luckDie:luckRoll.total,luck:actor.system.attributes?.luck??0}:{})};
     await actor.update({...result.changes,[`flags.boothill.damageLedger.${message.id}`]:applied});
    }
-   const next={...message.getFlag('boothill','check'),animalTarget:actor.type==='horse',applied};
+   const next={...message.getFlag('boothill','check'),animalTarget:['horse','wildAnimal'].includes(actor.type),applied};
    await message.update({'flags.boothill.check':next,content:renderCard(next),...(luckRoll?{rolls:[...message.rolls,luckRoll]}:{})});
    await request.update({'flags.boothill.damageProcessed':true,content:'Dano aplicado ao token selecionado.'});
   } catch(error) {console.error(error);ui.notifications.error(`Não foi possível aplicar o dano: ${error.message}`);}

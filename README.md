@@ -246,3 +246,11 @@ Conferência no Foundry: novo tipo ammunition disponível na criação, ficha co
 ## Campos de perícia legíveis — 0.14.1
 
 Campos numéricos de perícias de armas/trabalho e perícias/truques de cavalo ampliados para 56 px, com padding horizontal de 3 px. Espaço comporta números de vários algarismos junto às setas nativas de incremento. Mantidos tamanho da fonte, controles e valores. Conferida largura aplicada no Foundry; alteração apenas visual.
+
+## Animal selvagem — 0.15.0
+
+Novo ator wildAnimal, genérico, com layout de cavalo, retrato do token e silhueta de urso fornecida pelo usuário. Nove regiões de ferimentos adaptadas ao quadrúpede, pontos reais/temporários editáveis e marcação mortal. Painel superior com Força, modificador de ataque, ferimentos adicionais (seriedade do ataque) e defesa de ferimentos, todos editáveis.
+
+Ataque conforme Animais em Combate/Tabela 19 (PDF físico 46–47): d20 + modificador de ataque + penalidade de ferimentos, resultado de 8 ou mais gera localização aleatória e d6 de gravidade com modificadores de local e seriedade. Não usa o dano temporário de Briga. Shift+clique permite ajuste do Juiz. Alvo marcado recebe aplicação pelo protocolo existente do Juiz; sem alvo, botão Aplicar dano usa token selecionado. Defesa de ferimentos modifica a gravidade recebida; d6 natural 6 contra animal é mortal, mesmo com defesa. Tiros identificam animal selvagem como quadrúpede, com silhueta de urso e nomes de patas. Novo ator não funciona como montaria vinculável.
+
+Validação: 61 testes aprovados, incluindo limite de acerto, geração de localização/gravidade, aplicação manual sem alvo e schema do novo ator. Conferência visual pendente de login de administrador após reinício.

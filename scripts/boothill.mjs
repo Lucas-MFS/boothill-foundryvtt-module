@@ -1,3 +1,4 @@
+import {attackAnimal} from './animal-attack.mjs';
 import {AmmunitionData,AmmunitionSheet} from './ammunition.mjs';
 import {reloadWithReserve,inventoryItems} from './ammunition-rules.mjs';
 import {reportReload} from './reload-chat.mjs';
@@ -373,7 +374,7 @@ export class HorseSheet extends CharacterSheet {
     if(!this.isEditable) return;
     for(const input of this.element.querySelectorAll('input[name]')) input.addEventListener('change',async()=>{
       const value=input.type==='checkbox'?input.checked:input.type==='number'?input.valueAsNumber:input.value;
-      if(input.type==='number'&&(!Number.isFinite(value)||value<0)) return;
+      if(input.type==='number'&&(!Number.isFinite(value)||(value<0&&!input.name.startsWith('system.animal.')))) return;
       await this.actor.update({[input.name]:value});
     });
     for(const input of this.element.querySelectorAll('[data-trick-id]')) input.addEventListener('change',async()=>{
@@ -405,12 +406,27 @@ export class HorseSheet extends CharacterSheet {
   }
   static async removeTrick(event,button) {if(this.isEditable) await this.actor.update({'system.tricks':this.actor.system.tricks.filter(t=>t.id!==button.dataset.id)});}
 }
+export class WildAnimalData extends HorseData {
+ static defineSchema() {
+  const schema=super.defineSchema(),{SchemaField,NumberField}=foundry.data.fields;
+  const modifier=()=>new NumberField({required:true,nullable:false,integer:true,initial:0});
+  schema.animal=new SchemaField({attack:modifier(),severity:modifier(),defense:modifier()});return schema;
+ }
+}
+export class WildAnimalSheet extends HorseSheet {
+ get title() {return `Animal selvagem: ${this.actor.name}`;}
+ static DEFAULT_OPTIONS={classes:['boothill','bh-horse-sheet','bh-wild-sheet'],actions:{attackAnimal}};
+ static PARTS={main:{template:'systems/boothill/templates/wild-animal.hbs',scrollable:['.bh-body']}};
+ async _prepareContext(options) {return {...await super._prepareContext(options),animal:this.actor.system.animal};}
+}
 registerChatCards();
 registerMelee();
 Hooks.once('init',()=>{
   CONFIG.Actor.dataModels.character=CharacterData;
   CONFIG.Actor.dataModels.npc=NpcData;
   CONFIG.Actor.dataModels.horse=HorseData;
+  CONFIG.Actor.dataModels.wildAnimal=WildAnimalData;
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',WildAnimalSheet,{types:['wildAnimal'],makeDefault:true,label:'Boot Hill — Animal selvagem'});
   CONFIG.Item.dataModels.weapon=WeaponData;
   CONFIG.Item.dataModels.ammunition=AmmunitionData;
   foundry.applications.apps.DocumentSheetConfig.registerSheet(Item,'boothill',AmmunitionSheet,{types:['ammunition'],makeDefault:true,label:'Boot Hill — Munição'});

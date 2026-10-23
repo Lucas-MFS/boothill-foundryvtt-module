@@ -1,3 +1,4 @@
+import {animalAttackCard} from './animal-attack.mjs';
 import {playWeaponSound} from './weapon-audio.mjs';
 import {defectResult,defectCard} from './defects.mjs';
 import {isShotgun,pelletCount,spreadInfo,pelletsCard,spreadCard} from './shotgun.mjs';
@@ -11,6 +12,7 @@ export function modifierText(entries=[]) {
   return rows.length?`<small class="bh-roll-modifiers">${rows.map(([label,value])=>`${escape(label)} ${value>0?'+':''}${value}`).join(' · ')}</small>`:'';
 }
 export function rollCard(data) {
+  if(data.animalAttack) return animalAttackCard(data);
   const {title,target,die,luck,luckDie,modifiers=[],note=''}=data;
   const defectPending=!!data.shot&&!data.bladeHit&&!data.secondary&&!data.pelletChild&&die===20&&!data.defectCleared&&!data.defect;
   const blocked=data.defect&&!data.defect.fired;
@@ -140,7 +142,7 @@ export function registerChatCards() {
           } else {
             if(current.die===20&&!current.defectCleared) return;
             if(kind==='location'&&!current.locationDie) {roll=await new Roll('1d20').evaluate();next.locationDie=roll.total;const targets=[...game.user.targets];next.targetTokenUuid=current.secondary?null:(current.pelletChild||current.bladeHit)?(current.targetTokenUuid??null):targets.length===1?targets[0].document.uuid:null;if(next.targetTokenUuid) {
-              const target=await fromUuid(next.targetTokenUuid);next.animalTarget=target?.actor?.type==='horse';
+              const target=await fromUuid(next.targetTokenUuid);next.animalTarget=['horse','wildAnimal'].includes(target?.actor?.type);next.wildTarget=target?.actor?.type==='wildAnimal';
               const mount=target?.actor?.system.mount;
               next.riderMounted=!!mount?.mounted;
               next.mountedHint=mount?.uuid?(mount.mounted?'Alvo montado: perna ou abdômen com localização ímpar transfere o tiro ao cavalo.':'O alvo tem cavalo vinculado, mas está marcado como Desmontado. Confira a ficha do token alvo.'):!next.animalTarget?'O token alvo não está marcado como montado. Em tokens desvinculados, confira o vínculo na ficha do próprio token.':'';
