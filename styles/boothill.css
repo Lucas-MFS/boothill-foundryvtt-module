@@ -341,3 +341,17 @@
 .boothill .bh-character-grid .bh-sheet-column > .bh-creation {border-top:0;}
 .boothill .bh-character-grid .bh-movement {position:relative;padding-top:10px;margin-top:20px;}
 .boothill .bh-character-grid .bh-movement::before {content:'';position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(to right,transparent,rgba(94,85,68,.18) 12%,rgba(94,85,68,.18) 88%,transparent);pointer-events:none;}
+
+.bh-mount-notice {padding:8px;background:#e4dac6;border-left:2px solid #8c7453;font:11px/1.4 Arial,sans-serif;}
+.bh-horse-choice {height:350px;}
+.bh-horse-choice img {width:100%;height:300px;top:20px;}
+.bh-horse-choice button {width:31%;font-size:10px;}
+.bh-horse-choice .bh-choice-head {left:0;top:30px;}
+.bh-horse-choice .bh-choice-leftShoulder {left:16%;right:auto;top:100px;}
+.bh-horse-choice .bh-choice-rightShoulder {left:48%;top:80px;}
+.bh-horse-choice .bh-choice-chest {left:22%;top:165px;}
+.bh-horse-choice .bh-choice-abdomen {left:63%;top:145px;}
+.bh-horse-choice .bh-choice-leftArm {left:5%;right:auto;top:245px;}
+.bh-horse-choice .bh-choice-rightArm {left:36%;top:290px;}
+.bh-horse-choice .bh-choice-leftLeg {left:66%;right:auto;top:290px;}
+.bh-horse-choice .bh-choice-rightLeg {left:69%;top:235px;}

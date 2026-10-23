@@ -1,7 +1,8 @@
 import {defectResult,defectCard} from './defects.mjs';
 import {isShotgun,pelletCount,spreadInfo,pelletsCard,spreadCard} from './shotgun.mjs';
 import {registerDamage,requestDamage} from './damage.mjs';
-import {injuryCard,locationChoices,injuryResult} from './injury.mjs';
+import {mountedRecipient} from './mounts.mjs';
+import {injuryChoiceShot,injuryCard,locationChoices,injuryResult} from './injury.mjs';
 import {needsLuck,succeeds} from './rules.mjs';
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function modifierText(entries=[]) {
@@ -136,13 +137,26 @@ export function registerChatCards() {
             next.defectCleared=true;
           } else {
             if(current.die===20&&!current.defectCleared) return;
-            if(kind==='location'&&!current.locationDie) {roll=await new Roll('1d20').evaluate();next.locationDie=roll.total;const targets=[...game.user.targets];next.targetTokenUuid=current.secondary?null:(current.pelletChild||current.bladeHit)?(current.targetTokenUuid??null):targets.length===1?targets[0].document.uuid:null;if(next.targetTokenUuid) next.animalTarget=(await fromUuid(next.targetTokenUuid))?.actor?.type==='horse';if(targets.length>1) ui.notifications.warn('Mais de um alvo marcado: use Aplicar dano em um token selecionado.');}
-            else if(current.locationDie&&locationChoices(current.locationDie,current.shot).some(r=>r.id===kind&&r.available)) {roll=await new Roll('1d6').evaluate();next.locationValue=locationChoices(current.locationDie,current.shot).find(r=>r.id===kind).value;next.injury=injuryResult(roll.total,kind,current.shot.wound);}
+            if(kind==='location'&&!current.locationDie) {roll=await new Roll('1d20').evaluate();next.locationDie=roll.total;const targets=[...game.user.targets];next.targetTokenUuid=current.secondary?null:(current.pelletChild||current.bladeHit)?(current.targetTokenUuid??null):targets.length===1?targets[0].document.uuid:null;if(next.targetTokenUuid) {
+              const target=await fromUuid(next.targetTokenUuid);next.animalTarget=target?.actor?.type==='horse';
+              const mount=target?.actor?.system.mount;
+              next.riderMounted=!!mount?.mounted;
+              next.mountedHint=mount?.uuid?(mount.mounted?'Alvo montado: perna ou abdômen com localização ímpar transfere o tiro ao cavalo.':'O alvo tem cavalo vinculado, mas está marcado como Desmontado. Confira a ficha do token alvo.'):!next.animalTarget?'O token alvo não está marcado como montado. Em tokens desvinculados, confira o vínculo na ficha do próprio token.':'';
+            }if(targets.length>1) ui.notifications.warn('Mais de um alvo marcado: use Aplicar dano em um token selecionado.');}
+            else if(current.locationDie&&locationChoices(current.locationDie,injuryChoiceShot(current)).some(r=>r.id===kind&&r.available)) {
+              const value=locationChoices(current.locationDie,injuryChoiceShot(current)).find(r=>r.id===kind).value;
+              const token=current.targetTokenUuid?await fromUuid(current.targetTokenUuid):null;
+              const recipient=token&&!current.mountResolution&&!current.bladeHit?await mountedRecipient(token,kind,value):null;
+              if(recipient) {
+                roll=await new Roll('1d20').evaluate();
+                next={...next,locationDie:roll.total,locationValue:roll.total,animalTarget:recipient.actor.type==='horse',riderMounted:false,targetTokenUuid:recipient.uuid,mountResolution:{fromTokenUuid:token.uuid,toTokenUuid:recipient.uuid,fromName:token.name,toName:recipient.name,originalLocation:value,newLocation:roll.total}};
+              } else {roll=await new Roll('1d6').evaluate();next.locationValue=value;next.injury=injuryResult(roll.total,kind,current.shot.wound);}
+            }
             else return;
           }
           await message.update({content:rollCard(next),'flags.boothill.check':next,...(roll?{rolls:[...message.rolls,roll]}:{})});
           if(next.injury&&next.targetTokenUuid&&!next.secondary) await requestDamage(message,next.targetTokenUuid);
-        } catch(error) {console.error(error);ui.notifications.error('Não foi possível registrar o ferimento.');}
+        } catch(error) {console.error(error);ui.notifications.error(error.message||'Não foi possível registrar o ferimento.');}
         finally {resolving.delete(message.id);}
       });
     }
