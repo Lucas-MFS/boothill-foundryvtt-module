@@ -207,7 +207,16 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     if(!name||!Number.isFinite(weight)||weight<0||!Number.isInteger(quantity)||quantity<1) return ui.notifications.warn('Preencha nome, quantidade e peso válidos.');
     await this.actor.update({'system.inventory':[...this.actor.system.inventory,{id:foundry.utils.randomID(),name,weight,quantity}]});
   }
-  static async removeGear(event,button) {if(this.isEditable) await this.actor.update({'system.inventory':this.actor.system.inventory.filter(i=>i.id!==button.dataset.id)});}
+  static async removeGear(event,button) {
+    event.stopPropagation();
+    if(!this.isEditable) return;
+    const id=button.dataset.id;
+    if(button.dataset.weapon==='true') {
+      if(this.actor.items.get(id)?.type!=='weapon') return;
+      await this.actor.deleteEmbeddedDocuments('Item',[id]);
+      this._expandedWeapons?.delete(id);
+    } else await this.actor.update({'system.inventory':(this.actor.system.inventory??[]).filter(i=>i.id!==id)});
+  }
   static async clearMelee() {if(this.isEditable) await this.actor.update({'flags.boothill.meleeState.effects':[],'flags.boothill.meleeState.holds':[]});}
   static async toggleMortal() {if(this.isEditable) await this.actor.update({'system.health.mortal':!this.actor.system.health.mortal});}
   static async swapHands() {

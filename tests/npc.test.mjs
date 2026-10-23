@@ -55,3 +55,20 @@ test('vínculo abre a mesma cópia de montaria usada no deslocamento',async()=>{
  const mount=await sheet.mountContext();assert.equal(mount.health.points,3);assert.equal(mount.sourceUuid,actual.uuid);
  await sheet.openMount();assert.equal(opened,true);
 });
+
+test('remoção de inventário separa armas incorporadas, itens manuais e permissões',async()=>{
+ const {CharacterSheet,HorseSheet}=await import('../scripts/boothill.mjs');
+ for(const Sheet of [CharacterSheet,HorseSheet]) {
+  const deleted=[],updates=[];
+  const sheet=new Sheet();sheet.isEditable=true;
+  sheet.actor={items:new Map([['gun',{type:'weapon'}]]),system:{inventory:[{id:'rope'},{id:'keep'}]},deleteEmbeddedDocuments:async(...args)=>deleted.push(args),update:async data=>updates.push(data)};
+  const event={stopPropagation:()=>{}};
+  await CharacterSheet.removeGear.call(sheet,event,{dataset:{id:'gun',weapon:'true'}});
+  assert.deepEqual(deleted,[['Item',['gun']]]);assert.equal(updates.length,0);
+  await CharacterSheet.removeGear.call(sheet,event,{dataset:{id:'rope',weapon:'false'}});
+  assert.deepEqual(updates,[{'system.inventory':[{id:'keep'}]}]);
+  await CharacterSheet.removeGear.call(sheet,event,{dataset:{id:'missing',weapon:'true'}});assert.equal(deleted.length,1);
+  sheet.isEditable=false;
+  await CharacterSheet.removeGear.call(sheet,event,{dataset:{id:'gun',weapon:'true'}});assert.equal(deleted.length,1);
+ }
+});

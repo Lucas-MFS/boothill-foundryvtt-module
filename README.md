@@ -218,3 +218,9 @@ Validação: 53 testes, reprodução opcional, transmissão única, prévia loca
 Reprodução local separada da transmissão: destinatários explícitos excluem o usuário que iniciou o áudio. Evita receber novamente o próprio som pelo canal remoto. Configuração no alto-falante agora inclui arquivo, volume, seletor e prévia próprios para recarga. A recarga pelo personagem/NPC ou pelo Item toca somente quando munição ou progresso avançam; arma cheia não produz som.
 
 Validação: 54 testes aprovados, incluindo chamada única e destinatários sem o iniciador. No Foundry, prévia de recarga sem erro de áudio, persistência após reabrir e recarga de 0 para 3 verificadas. Arquivo temporário e munição restaurados, preservando o som de disparo existente. Publicado apenas na pasta do sistema.
+
+## Remoção de inventário e rótulos de áudio — 0.13.2
+
+Botões de recarga usam Ouvir e Remover som, com o mesmo ícone da seção Disparo. Inventários de personagem e cavalo exibem lixeira para itens manuais e armas; armamento de personagem/NPC também permite remover a arma. A exclusão usa Item incorporado do ator, preservando o item original e demais cópias. Respeita permissão de edição e atualiza carga e armamento pela renderização normal.
+
+Validação: 55 testes aprovados, incluindo exclusão restrita ao Item incorporado, remoção de item manual, ID inexistente e bloqueio sem permissão. Lixeiras conferidas no Foundry sem remover itens existentes.

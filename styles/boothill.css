@@ -367,3 +367,9 @@
 .boothill .bh-audio-actions {display:flex;gap:7px;}
 .boothill .bh-audio-config button {min-height:28px;border:1px solid var(--bh-rule);border-radius:4px;background:#f6f3ec;color:var(--bh-ink);font:11px Arial,sans-serif;}
 .boothill .bh-audio-config input[type=range] {width:100%;}
+.boothill .bh-inventory td:nth-child(2) > .bh-remove-gear,
+.boothill .bh-armament-table td:first-child > .bh-remove-gear {float:right;width:24px;height:26px;margin:0 0 0 4px;opacity:.65;}
+.boothill .bh-inventory td:nth-child(2) > .bh-roll-name,
+.boothill .bh-armament-table td:first-child > .bh-inventory-name {display:inline-flex;max-width:calc(100% - 30px);}
+.boothill .bh-inventory .bh-remove-gear:hover,
+.boothill .bh-armament-table .bh-remove-gear:hover {opacity:1;color:#823b2d;background:rgba(90,55,30,.08);border-radius:4px;}
