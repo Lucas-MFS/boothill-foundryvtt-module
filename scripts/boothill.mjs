@@ -1,3 +1,5 @@
+import {AmmunitionData,AmmunitionSheet} from './ammunition.mjs';
+import {reloadWithReserve,inventoryItems} from './ammunition-rules.mjs';
 import {reportReload} from './reload-chat.mjs';
 import {playReloadSound,playWeaponSound,shotAudio} from './weapon-audio.mjs';
 import {mountActor} from './mounts.mjs';
@@ -7,7 +9,7 @@ import {pendingMeleeModifier,HOLDS} from './melee-rules.mjs';
 import {postCheck,modifierText,registerChatCards} from './chat.mjs';
 import {ATTRIBUTES,NPC_ATTRIBUTES,SKILLS,generatedNpcScore,generatedScore,creationSummary,isWorkTrained} from './rules.mjs';
 import {WeaponData,WeaponSheet} from './weapon.mjs';
-import {weaponSummary,advanceReload} from './weapon-rules.mjs';
+import {weaponSummary} from './weapon-rules.mjs';
 import {LOCATIONS,SHOTS,MOVEMENTS,movementDistances,rapidity,handsRequired,canHold,healthSummary,shotTarget} from './combat-rules.mjs';
 async function judgeModifier(event,title) {
   if(!event.shiftKey) return 0;
@@ -63,11 +65,12 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     });
     for(const input of this.element.querySelectorAll('[data-inventory-id]')) input.addEventListener('change',async()=>{
       const value=input.valueAsNumber,field=input.dataset.field,id=input.dataset.inventoryId;
-      if(!Number.isFinite(value)||value<0||(field==='quantity'&&(!Number.isInteger(value)||value<1))) return;
-      if(input.dataset.weapon==='true') await this.actor.items.get(id)?.update({'system.weight':value});
+      if(!Number.isFinite(value)||value<0||(field==='quantity'&&(!Number.isInteger(value)||(input.dataset.documentItem!=='true'&&value<1)))) return;
+      if(input.dataset.documentItem==='true') await this.actor.items.get(id)?.update({[`system.${field}`]:value});
       else await this.actor.update({'system.inventory':this.actor.system.inventory.map(i=>i.id===id?{...i,[field]:value}:i)});
     });
     for(const select of this.element.querySelectorAll('[data-weapon-range]')) select.addEventListener('change',()=>this.actor.update({'system.combat.range':select.value}));
+    for(const select of this.element.querySelectorAll('[data-weapon-ammunition]')) select.addEventListener('change',()=>this.actor.items.get(select.dataset.weaponAmmunition)?.update({'system.ammunitionId':select.value}));
     this._ammoChanges??={};
     this._saveAmmo??=foundry.utils.debounce(async()=>{
       const changes=this._ammoChanges;this._ammoChanges={};
@@ -101,8 +104,8 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       const chance=this.chanceFor(i,mode);
       return {mode,...shot,chance:chance?.total,supported:chance!==null,available:chance!==null&&!health.unconscious&&i.system.ammo>0};
     })}));
-    for(const row of armament) {row.expanded=this._expandedWeapons.has(row.id);row.held=held.find(h=>h.id===row.id);row.handLabel=row.held?.hand??'Guardada';row.offhandPenalty=row.held?.hand==='Mão secundária'&&!this.actor.system.identity.ambidextrous;row.ranges=Object.entries({close:'Próximo (até 2 m)',short:`Curto (até ${row.system.short} m)`,long:`Longo (até ${row.system.long} m)`,extreme:`Extremo (até ${row.system.extreme} m)`}).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range}));}
-    const gear=[...this.actor.items.filter(i=>i.type==='weapon').map(i=>({id:i.id,name:i.name,img:i.img,weapon:true,quantity:1,weight:i.system.weight??0})),...(this.actor.system.inventory??[])];
+    for(const row of armament) {row.ammunition=this.actor.items.filter(i=>i.type==='ammunition').map(i=>({id:i.id,label:`${i.name} (${i.system.quantity})`,selected:i.id===row.system.ammunitionId}));row.expanded=this._expandedWeapons.has(row.id);row.held=held.find(h=>h.id===row.id);row.handLabel=row.held?.hand??'Guardada';row.offhandPenalty=row.held?.hand==='Mão secundária'&&!this.actor.system.identity.ambidextrous;row.ranges=Object.entries({close:'Próximo (até 2 m)',short:`Curto (até ${row.system.short} m)`,long:`Longo (até ${row.system.long} m)`,extreme:`Extremo (até ${row.system.extreme} m)`}).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range}));}
+    const gear=[...inventoryItems(this.actor),...(this.actor.system.inventory??[])];
     const totalWeight=gear.reduce((n,i)=>n+i.quantity*i.weight,0);
     const mount=await this.mountContext();
     const ranges={close:'Próximo (até 2 m)',short:'Curto',long:'Longo',extreme:'Extremo'};
@@ -212,8 +215,8 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     event.stopPropagation();
     if(!this.isEditable) return;
     const id=button.dataset.id;
-    if(button.dataset.weapon==='true') {
-      if(this.actor.items.get(id)?.type!=='weapon') return;
+    if(button.dataset.documentItem==='true'||button.dataset.weapon==='true') {
+      if(!['weapon','ammunition'].includes(this.actor.items.get(id)?.type)) return;
       await this.actor.deleteEmbeddedDocuments('Item',[id]);
       this._expandedWeapons?.delete(id);
     } else await this.actor.update({'system.inventory':(this.actor.system.inventory??[]).filter(i=>i.id!==id)});
@@ -276,8 +279,8 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       const pending=this._ammoChanges?.[item.id];
       if(pending!==undefined) delete this._ammoChanges[item.id];
       const previous={ammo:pending??item.system.ammo,reloadProgress:pending===undefined?item.system.reloadProgress:0};
-      const next=advanceReload({...item.system.toObject(),...previous});
-      await item.update({'system.ammo':next.ammo,'system.reloadProgress':next.reloadProgress});
+      const next=await reloadWithReserve(item,previous);
+      if(!next) return;
       if(previous.ammo!==next.ammo||previous.reloadProgress!==next.reloadProgress) await playReloadSound(item.system);
       await reportReload(this.actor,previous.ammo,next.ammo);
     } finally {this._reloading=false;}
@@ -359,7 +362,7 @@ export class HorseSheet extends CharacterSheet {
   async _prepareContext(options) {
     const context=await foundry.applications.sheets.ActorSheetV2.prototype._prepareContext.call(this,options);
     const actor=this.actor,system=actor.system;
-    const gear=[...actor.items.filter(i=>i.type==='weapon').map(i=>({id:i.id,name:i.name,img:i.img,weapon:true,quantity:1,weight:i.system.weight??0})),...system.inventory];
+    const gear=[...inventoryItems(actor),...system.inventory];
     return {...context,actor,tokenImage:this.token?.texture?.src??actor.prototypeToken?.texture?.src??actor.img,editable:this.isEditable,editingSkills:this._editingSkills,hasHorseSkills:Object.values(system.trained).some(Boolean),gear,totalWeight:Math.round(gear.reduce((sum,i)=>sum+i.quantity*i.weight,0)*1000)/1000,health:healthSummary(system.health,system.attributes.strength),locations:Object.entries(HORSE_LOCATIONS).map(([id,label])=>({id,label,...system.health.locations[id]})),attributes:Object.entries(HORSE_ATTRIBUTES).map(([id,label])=>({id,label,icon:{strength:'hand-fist',coordination:'crosshairs',intelligence:'brain',luck:'clover'}[id],value:system.attributes[id]})),skills:Object.entries(HORSE_SKILLS).filter(([id])=>this._editingSkills||system.trained[id]).map(([id,label])=>({id,label,value:system.skills[id],trained:system.trained[id]})),tricks:system.tricks};
   }
   async _onRender(context,options) {
@@ -409,6 +412,8 @@ Hooks.once('init',()=>{
   CONFIG.Actor.dataModels.npc=NpcData;
   CONFIG.Actor.dataModels.horse=HorseData;
   CONFIG.Item.dataModels.weapon=WeaponData;
+  CONFIG.Item.dataModels.ammunition=AmmunitionData;
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item,'boothill',AmmunitionSheet,{types:['ammunition'],makeDefault:true,label:'Boot Hill — Munição'});
   foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',HorseSheet,{types:['horse'],makeDefault:true,label:'Boot Hill — Cavalo'});
   foundry.applications.apps.DocumentSheetConfig.registerSheet(Item,'boothill',WeaponSheet,{types:['weapon'],makeDefault:true,label:'Boot Hill — Arma'});
   foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',CharacterSheet,{types:['character'],makeDefault:true,label:'Boot Hill — Personagem de jogador'});

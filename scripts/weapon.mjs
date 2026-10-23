@@ -1,14 +1,15 @@
+import {reloadWithReserve} from './ammunition-rules.mjs';
 import {reportReload} from './reload-chat.mjs';
 import {playReloadSound} from './weapon-audio.mjs';
 import {WeaponAudioConfig} from './weapon-audio-config.mjs';
-import {WEAPON_MODELS,weaponSummary,advanceReload} from './weapon-rules.mjs';
+import {WEAPON_MODELS,weaponSummary} from './weapon-rules.mjs';
 import {handsRequired} from './combat-rules.mjs';
 
 export class WeaponData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     const {StringField,NumberField,BooleanField}=foundry.data.fields;
     const number=(initial,min=0)=>new NumberField({required:true,nullable:false,integer:true,min,initial});
-    return {reloadSound:new StringField({initial:''}),reloadVolume:new NumberField({min:0,max:1,initial:.6,nullable:false}),shotSound:new StringField({initial:''}),shotVolume:new NumberField({min:0,max:1,initial:.6,nullable:false}),malfunction:new StringField({initial:'',blank:true,choices:['','jam','cleaning']}),jamProgress:number(0),weight:new NumberField({min:0,initial:0}),model:new StringField({required:true,choices:Object.keys(WEAPON_MODELS),initial:'singleAction'}),
+    return {ammunitionId:new StringField({initial:''}),reloadSound:new StringField({initial:''}),reloadVolume:new NumberField({min:0,max:1,initial:.6,nullable:false}),shotSound:new StringField({initial:''}),shotVolume:new NumberField({min:0,max:1,initial:.6,nullable:false}),malfunction:new StringField({initial:'',blank:true,choices:['','jam','cleaning']}),jamProgress:number(0),weight:new NumberField({min:0,initial:0}),model:new StringField({required:true,choices:Object.keys(WEAPON_MODELS),initial:'singleAction'}),
       hands:new NumberField({integer:true,nullable:true,initial:null,choices:[1,2]}),capacity:number(6,1),ammo:number(0),roundsPerLoad:number(3,1),turnsPerLoad:number(1,1),reloadProgress:number(0),
       short:number(10),long:number(20),extreme:number(55),speed:number(1,-2),wound:number(0,-10),
       caliber:new StringField({initial:''}),notes:new StringField({initial:''}),equipped:new BooleanField({initial:false})};
@@ -54,8 +55,8 @@ export class WeaponSheet extends foundry.applications.api.HandlebarsApplicationM
     try {
       await this.submit();
       const previous={ammo:this.document.system.ammo,reloadProgress:this.document.system.reloadProgress};
-      const next=advanceReload(this.document.system);
-      await this.document.update(Object.fromEntries(Object.entries(next).map(([key,value])=>[`system.${key}`,value])));
+      const next=await reloadWithReserve(this.document,previous);
+      if(!next) return;
       if(previous.ammo!==next.ammo||previous.reloadProgress!==next.reloadProgress) await playReloadSound(this.document.system);
       await reportReload(this.document.actor,previous.ammo,next.ammo);
     } finally {this._reloading=false;}

@@ -232,3 +232,13 @@ Novos tiros guardam a imagem e o nome da arma no cartão. Miniatura quadrada de 
 ## Aviso de recarga no combate — 0.13.4
 
 Recarga com combate iniciado publica no chat o nome do ator e a diferença efetivamente carregada: “John recarregou 3 balas.” Aplica-se ao armamento de personagem/NPC e à ficha da arma incorporada. Arma cheia, etapa ainda sem balas e recarga fora de combate não geram aviso. Validação: 56 testes aprovados, incluindo quantidade, singular/plural, escape do nome e condições de envio.
+
+## Munição no inventário — 0.14.0
+
+Novo tipo de Item ammunition com ficha compacta: nome, imagem, quantidade de balas, calibre, peso unitário em kg e observações. Arrastar o item para o ator usa o inventário nativo do Foundry. Abaixo do alcance, cada arma possui seletor próprio de munição do mesmo ator, exibindo a quantidade restante. Calibre é descritivo; a escolha do jogador determina qual reserva usar.
+
+Recarga pelo personagem/NPC ou pela ficha de arma incorporada desconta apenas as balas efetivamente carregadas da reserva selecionada. Respeita capacidade, taxa e progresso de recarga; reserva insuficiente permite carga parcial, vazia ou ausente impede avançar. O tiro continua consumindo apenas as balas já na arma, sem descontar a reserva duas vezes. Som e aviso no chat preservados. Armas soltas na aba Itens continuam permitindo editar/preparar sua carga sem reserva de ator.
+
+Inventários de personagem e cavalo incluem munição, abertura da ficha, remoção, quantidade/peso editáveis e cálculo quantidade × peso unitário. NPC usa o mesmo seletor de armamento e itens incorporados. Munição armazenada num cavalo não é consumida automaticamente por seu cavaleiro. Validação: 58 testes aprovados, incluindo reserva parcial/esgotada, capacidade, recarga lenta, atualização conjunta de arma/reserva e bloqueio de referência fora do ator. Serviço reiniciado para reconhecer o novo tipo de Item; arquivos publicados somente na pasta do sistema.
+
+Conferência no Foundry: novo tipo ammunition disponível na criação, ficha compacta criada como “Munição de teste”, quantidade inicial 50 e seletor Munição abaixo do alcance verificados visualmente. Item de exemplo mantido para o usuário testar; nenhum item existente foi removido.
