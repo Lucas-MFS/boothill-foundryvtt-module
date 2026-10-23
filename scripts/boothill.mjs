@@ -1,3 +1,4 @@
+import {regionalHealthAdjustment} from './health-adjustment.mjs';
 import {mountActor} from './mounts.mjs';
 import {attackMelee} from './melee-actions.mjs';
 import {registerMelee,consumeMeleeModifier} from './melee.mjs';
@@ -45,6 +46,12 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     mountLink?.addEventListener('dblclick',()=>this.openMount());
     mountLink?.addEventListener('keydown',event=>{if(event.key==='Enter') this.openMount();});
     if(!this.isEditable) return;
+    this.element.addEventListener('change',event=>{
+      const input=event.target;
+      if(!input.matches('input[name^="system.health.locations."]')) return;
+      event.preventDefault();event.stopImmediatePropagation();
+      this.adjustRegionalHealth(input);
+    },true);
     if(['character','npc'].includes(this.actor.type)) {
       this.element.addEventListener('dragover',event=>event.preventDefault());
       this.element.addEventListener('drop',async event=>{
@@ -81,11 +88,27 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       const changes=this._healthChanges;this._healthChanges={};
       if(Object.keys(changes).length) await this.actor.update(changes);
     },300);
-    for(const input of this.element.querySelectorAll('.bh-health input[type="number"]')) input.addEventListener('input',()=>{
+    for(const input of this.element.querySelectorAll('.bh-health input[type="number"]:not([name^="system.health.locations."])')) input.addEventListener('input',()=>{
       const value=input.valueAsNumber;
       if(!Number.isInteger(value)||value<0) return;
       this._healthChanges[input.name]=value;this._saveHealth();
     });
+  }
+  async adjustRegionalHealth(input) {
+    if(this._adjustingHealth) {this.render();return;}
+    const [, , ,id,kind]=input.name.split('.');
+    const health=this.actor.system.health,count=input.valueAsNumber,previous=health.locations[id]?.[kind];
+    if(!Number.isInteger(count)||count<0||count===previous) {this.render();return;}
+    this._adjustingHealth=true;
+    try {
+      const delta=count-previous,adding=delta>0,n=Math.abs(delta),label=(this.actor.type==='horse'?HORSE_LOCATIONS:LOCATIONS)[id];
+      const min=adding&&kind==='serious'?3*n:0,max=adding?(kind==='serious'?5:2)*n:health.points;
+      const initial=adding?(kind==='serious'?3:1)*n:Math.min(max,(kind==='serious'?3:1)*n);
+      const points=await foundry.applications.api.DialogV2.prompt({window:{title:adding?'Adicionar ferimento':'Remover ferimento / cura'},content:`<p>${label}: ${n} ferida(s) ${kind==='light'?'leve(s)':'séria(s)'} ${adding?'adicionada(s)':'removida(s)'}. A quantidade de feridas e os pontos de dano são valores diferentes.</p><label>${adding?'Pontos de dano deste ajuste':'Pontos curados neste ajuste'} <input name="points" type="number" min="${min}" max="${max}" step="1" value="${initial}"></label>`,ok:{label:'Aplicar ajuste',callback:(e,b,d)=>Number(d.element.querySelector('[name=points]').value)},rejectClose:false});
+      if(points===null||points===undefined) return;
+      await this.actor.update(regionalHealthAdjustment(this.actor.system.health,id,kind,count,points));
+    } catch(error) {ui.notifications.warn(error.message);}
+    finally {this._adjustingHealth=false;this.render();}
   }
   async _prepareContext(options) {
     const context=await super._prepareContext(options),{attributes,skills,trained}=this.actor.system;

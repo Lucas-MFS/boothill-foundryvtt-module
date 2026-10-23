@@ -56,3 +56,13 @@ test('deslocamento montado usa ferimentos da montaria sem misturar os do cavalei
  const other=fresh();other.locations.chest.serious=1;assert.deepEqual(movementDistances(rider,other,20).slice(4).map(r=>r.combat),[8,8,16]);
  other.points=20;assert.deepEqual(movementDistances(rider,other,20).slice(4).map(r=>r.combat),[0,0,0]);
 });
+test('todas as quatro patas afetam deslocamento montado',()=>{
+ const fresh=()=>({mortal:false,points:0,temporary:0,locations:Object.fromEntries(Object.keys(LOCATIONS).map(id=>[id,{light:0,serious:0}]))});
+ for(const id of ['leftArm','rightArm','leftLeg','rightLeg']) {
+  const rider=fresh(),horse=fresh();horse.locations[id].light=1;
+  assert.deepEqual(movementDistances(rider,horse,20).slice(4).map(r=>r.combat),[4,8,16]);
+  horse.locations[id].serious=1;assert.deepEqual(movementDistances(rider,horse,20).slice(4).map(r=>r.combat),[2,0,0]);
+ }
+ const horse=fresh();horse.locations.leftArm.serious=1;horse.locations.rightLeg.serious=1;
+ assert.deepEqual(movementDistances(fresh(),horse,20).slice(4).map(r=>r.combat),[0,0,0]);
+});

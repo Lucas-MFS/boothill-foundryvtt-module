@@ -192,3 +192,11 @@ Removidas legendas de deslocamento e saúde das fichas de personagem/NPC; armame
 Deslocamento montado passa a consultar saúde da montaria vinculada, priorizando o token escolhido ou o único correspondente na cena. Aplica os fatores de movimento da Tabela 6 às distâncias de montaria; pernas correspondem às patas traseiras conforme a Tabela 10/Animais em Combate. Ferimentos leves em perna reduzem cumulativamente as distâncias; sérios impedem trote/galope e sérios nas duas pernas impedem deslocamento montado. Outros sérios reduzem trote/galope; mortal/desmaio impede movimento. Ferimentos do cavaleiro continuam afetando apenas a pé. Sem montaria vinculada, exibe distâncias base. Fonte: PDF físico 28–30 e 46.
 
 Atualizar a montaria atualiza fichas abertas de cavaleiros. O duplo clique abre a mesma cópia de ator/token usada no cálculo. Validação: 50 testes, incluindo separação entre saúde de cavalo/cavaleiro, restrições por gravidade, impedimento por desmaio e preferência pelo token correto. Limpeza conferida no Foundry; ferimento temporário de teste foi restaurado.
+
+## Quatro patas e ajuste regional de saúde — 0.12.6
+
+Deslocamento montado considera feridas em todas as quatro patas: cada leve/séria divide a distância por dois; uma pata com ferida séria impede trote/galope; duas patas distintas com ferida séria impedem andar. Outros ferimentos sérios continuam reduzindo velocidades rápidas. Essa adaptação evita tratar patas dianteiras como braços humanos para movimento.
+
+Pontos reais passam a ser saída somente de leitura nas três fichas de atores. Campos regionais contam feridas, não pontos: ferida leve pode causar 0–2 e séria 3–5. Tiros continuam aplicando automaticamente os valores exatos. Alterar contagens manualmente abre diálogo de dano/cura; quantidade e pontos são atualizados juntos, com limites e cancelamento sem alteração. Não converte contagens antigas em pontos, pois o dano original não pode ser inferido. Temporários permanecem editáveis e separados.
+
+Validação: 53 testes, todas as patas, gravidade, ajuste manual válido/inválido e cura. No Foundry, adicionar leve na dianteira esquerda com 1 ponto atualizou ambos; remover com cura de 1 restaurou exatamente a saúde inicial.
