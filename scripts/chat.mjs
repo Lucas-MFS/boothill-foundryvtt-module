@@ -2,7 +2,7 @@ import {defectResult,defectCard} from './defects.mjs';
 import {isShotgun,pelletCount,spreadInfo,pelletsCard,spreadCard} from './shotgun.mjs';
 import {registerDamage,requestDamage} from './damage.mjs';
 import {mountedRecipient} from './mounts.mjs';
-import {injuryChoiceShot,injuryCard,locationChoices,injuryResult} from './injury.mjs';
+import {horseLocationChoice,injuryChoiceShot,injuryCard,locationChoices,injuryResult} from './injury.mjs';
 import {needsLuck,succeeds} from './rules.mjs';
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function modifierText(entries=[]) {
@@ -143,6 +143,15 @@ export function registerChatCards() {
               next.riderMounted=!!mount?.mounted;
               next.mountedHint=mount?.uuid?(mount.mounted?'Alvo montado: perna ou abdômen com localização ímpar transfere o tiro ao cavalo.':'O alvo tem cavalo vinculado, mas está marcado como Desmontado. Confira a ficha do token alvo.'):!next.animalTarget?'O token alvo não está marcado como montado. Em tokens desvinculados, confira o vínculo na ficha do próprio token.':'';
             }if(targets.length>1) ui.notifications.warn('Mais de um alvo marcado: use Aplicar dano em um token selecionado.');}
+            else if(kind==='horse') {
+              const choice=horseLocationChoice(current);
+              if(!choice) return;
+              const token=await fromUuid(current.targetTokenUuid);
+              const recipient=await mountedRecipient(token,choice.id,choice.value);
+              if(!recipient||recipient.actor?.type!=='horse') return ui.notifications.warn('O alvo não está montado em um cavalo válido. Confira a ficha do token.');
+              roll=await new Roll('1d20').evaluate();
+              next={...next,locationDie:roll.total,locationValue:roll.total,animalTarget:true,riderMounted:false,targetTokenUuid:recipient.uuid,mountResolution:{fromTokenUuid:token.uuid,toTokenUuid:recipient.uuid,fromName:token.name,toName:recipient.name,originalLocation:choice.value,newLocation:roll.total}};
+            }
             else if(current.locationDie&&locationChoices(current.locationDie,injuryChoiceShot(current)).some(r=>r.id===kind&&r.available)) {
               const value=locationChoices(current.locationDie,injuryChoiceShot(current)).find(r=>r.id===kind).value;
               const token=current.targetTokenUuid?await fromUuid(current.targetTokenUuid):null;

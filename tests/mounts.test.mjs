@@ -32,7 +32,7 @@ test('Juiz transfere uma vez, rola localização/gravidade e só fere o cavalo',
  registerDamage(()=>'<card>');hooks.createChatMessage(request());hooks.createChatMessage(request());await new Promise(resolve=>setImmediate(resolve));
  assert.equal(writes,1);assert.equal(riderWrites,0);assert.equal(rolled,2);assert.equal(data.mountResolution.toTokenUuid,f.h.uuid);assert.equal(data.injury.id,'leftArm');assert.equal(data.applied.name,'h');
 });
-test('seleção de perna transfere antes da gravidade e mostra silhueta do cavalo',async()=>{
+test('botão Cavalo transfere antes da gravidade e mostra silhueta do cavalo',async()=>{
  const {registerChatCards,rollCard}=await import('../scripts/chat.mjs');
  const {injuryChoiceShot}=await import('../scripts/injury.mjs');
  const f=sceneFixture();let hook,click;
@@ -40,11 +40,22 @@ test('seleção de perna transfere antes da gravidade e mostra silhueta do caval
  globalThis.game={user:{isGM:true}};
  globalThis.ui={notifications:{error:m=>{throw new Error(m);}}};
  globalThis.Roll=class {async evaluate(){return {total:7};}};
- const action={dataset:{bhInjury:'leftLeg'},addEventListener:(name,fn)=>{click=fn;}};
+ const action={dataset:{bhInjury:'horse'},addEventListener:(name,fn)=>{click=fn;}};
  const content={innerHTML:'',querySelector:()=>null,querySelectorAll:selector=>selector==='[data-bh-injury]'?[action]:[]};
  const html={classList:{add:()=>{}},querySelector:()=>content};
- let data={title:'Tiro',die:10,target:15,luck:8,shot:{mode:'aimed',skill:6,range:'short',wound:0},locationDie:1,targetTokenUuid:f.r.uuid};
+ let data={title:'Tiro',die:10,target:15,luck:8,shot:{mode:'aimed',skill:6,range:'short',wound:0},locationDie:1,riderMounted:true,targetTokenUuid:f.r.uuid};
  const message={id:'early-transfer',isAuthor:true,isContentVisible:true,rolls:[],getFlag:()=>data,update:async changes=>{data=changes['flags.boothill.check'];}};
  registerChatCards();hook(message,html);await click();
  assert.equal(data.injury,undefined);assert.equal(data.locationDie,7);assert.equal(data.targetTokenUuid,f.h.uuid);assert.equal(data.animalTarget,true);assert.equal(data.mountResolution.originalLocation,1);assert.equal(injuryChoiceShot(data).skill,0);assert.ok(rollCard(data).includes('horse.png'));assert.ok(rollCard(data).includes('O tiro foi transferido'));
+});
+
+test('botão Cavalo só aparece com ímpar alcançável, considerando todo o ajuste',async()=>{
+ const {horseLocationChoice,injuryCard}=await import('../scripts/injury.mjs');
+ const data={locationDie:2,riderMounted:true,targetTokenUuid:'Token.r',shot:{mode:'aimed',range:'short',skill:1}};
+ assert.equal(horseLocationChoice(data).value,1);assert.ok(injuryCard(data).includes('data-bh-injury="horse"'));
+ assert.equal(horseLocationChoice({...data,shot:{...data.shot,skill:0}}),null);
+ assert.equal(horseLocationChoice({...data,riderMounted:false}),null);
+ assert.equal(horseLocationChoice({...data,locationDie:18}),null);
+ assert.equal(horseLocationChoice({...data,mountResolution:{}}),null);
+ assert.equal(horseLocationChoice({...data,bladeHit:true}),null);
 });

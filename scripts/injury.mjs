@@ -15,6 +15,12 @@ export function injuryResult(die,id,weapon=0) {
  return {id,die,location,weapon,total,severity:total<0?'Arranhão':total<=2?'Ferimento leve':total<=5?'Ferimento sério':'Ferimento mortal'};
 }
 export function injuryChoiceShot(data) {return data.mountResolution?{...data.shot,skill:0}:data.shot;}
+export function horseLocationChoice(data) {
+ if(!data.riderMounted||!data.targetTokenUuid||data.mountResolution||data.animalTarget||data.bladeHit||!data.locationDie) return null;
+ const allowance=locationAllowance(data.shot);
+ const values=HIT_REGIONS.filter(([id])=>['leftLeg','rightLeg','abdomen'].includes(id)).flatMap(([id,min,max])=>Array.from({length:max-min+1},(_,i)=>({id,value:min+i}))).filter(r=>r.value%2===1&&Math.abs(r.value-data.locationDie)<=allowance).sort((a,b)=>Math.abs(a.value-data.locationDie)-Math.abs(b.value-data.locationDie)||a.value-b.value);
+ return values[0]??null;
+}
 export function injuryCard(data) {
  if(!data.shot) return '';
  const labels=data.animalTarget?{...LOCATIONS,leftArm:'Pata dianteira esq.',rightArm:'Pata dianteira dir.',leftLeg:'Pata traseira esq.',rightLeg:'Pata traseira dir.'}:LOCATIONS;
@@ -25,5 +31,5 @@ export function injuryCard(data) {
  const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const transfer=data.mountResolution?`<p class="bh-mount-notice">O tiro foi transferido para ${escape(data.mountResolution.toName)}. Nova localização: ${data.locationDie}. Escolha a região indicada para rolar a gravidade.</p>`:'';
  const hint=data.mountedHint?`<p class="bh-mount-notice">${escape(data.mountedHint)}</p>`:'';
- return `<div class="bh-location-choice">${transfer||hint}<p>Localização: ${data.locationDie} · Ajuste permitido: ±${locationAllowance(shot)}</p><div class="bh-choice-map ${data.animalTarget?'bh-horse-choice':''}"><img src="systems/boothill/assets/${data.animalTarget?'horse':'cowboy'}.png" alt="Silhueta para escolher o local atingido">${locationChoices(data.locationDie,shot).map(r=>`<button type="button" class="bh-choice-${r.id}" data-bh-injury="${r.id}" ${r.available?'':'disabled'}>${labels[r.id]}<small>${r.value}${data.riderMounted&&['leftLeg','rightLeg','abdomen'].includes(r.id)&&r.value%2===1?' · → Cavalo':''}</small></button>`).join('')}</div><small>Escolha uma região disponível para rolar a gravidade.</small></div>`;
+ return `<div class="bh-location-choice">${transfer||hint}${horseLocationChoice(data)?'<button type="button" class="bh-horse-target" data-bh-injury="horse"><i class="fas fa-horse" aria-hidden="true"></i> Cavalo</button>':''}<p>Localização: ${data.locationDie} · Ajuste permitido: ±${locationAllowance(shot)}</p><div class="bh-choice-map ${data.animalTarget?'bh-horse-choice':''}"><img src="systems/boothill/assets/${data.animalTarget?'horse':'cowboy'}.png" alt="Silhueta para escolher o local atingido">${locationChoices(data.locationDie,shot).map(r=>`<button type="button" class="bh-choice-${r.id}" data-bh-injury="${r.id}" ${r.available?'':'disabled'}>${labels[r.id]}<small>${r.value}${data.riderMounted&&['leftLeg','rightLeg','abdomen'].includes(r.id)&&r.value%2===1?' · → Cavalo':''}</small></button>`).join('')}</div><small>Escolha uma região disponível para rolar a gravidade.</small></div>`;
 }

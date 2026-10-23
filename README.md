@@ -176,3 +176,7 @@ Validação: 45 testes, incluindo paridade nas duas direções, resolução de c
 ## Localização em montaria — 0.12.2
 
 A transferência com token alvo conhecido passa a acontecer na seleção da região, antes da gravidade: nova localização sem ajuste e silhueta do destinatário (cavalo ou cavaleiro). O cartão mostra estado montado/desmontado e indica → Cavalo nos valores ímpares elegíveis. Sem token marcado, mantém a resolução no Aplicar dano pelo Juiz. Tokens desvinculados precisam do vínculo/estado montado na ficha do próprio token. Validação: 46 testes, incluindo seleção de perna que redireciona antes de causar ferimento e renderiza horse.png.
+
+## Botão Cavalo — 0.12.3
+
+A seleção de localização mostra Cavalo quando um alvo montado tem algum valor ímpar de perna/abdômen ao alcance do ajuste de perícia. Considera todos os valores alcançáveis, inclusive quando o número original é par. O botão escolhe o ímpar elegível mais próximo e rola d20 para a localização no cavalo, sem novo ajuste; o cartão mostra a silhueta e a região sorteada para resolver gravidade. Não aparece para alvos desmontados, lâminas ou ferimentos já transferidos. Validação: 47 testes, incluindo visibilidade, limites de ajuste e clique que transfere antes da gravidade.
