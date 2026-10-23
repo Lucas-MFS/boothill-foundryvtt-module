@@ -1,4 +1,4 @@
-import {playWeaponSound,shotAudio} from './weapon-audio.mjs';
+import {playReloadSound,playWeaponSound,shotAudio} from './weapon-audio.mjs';
 import {mountActor} from './mounts.mjs';
 import {attackMelee} from './melee-actions.mjs';
 import {registerMelee,consumeMeleeModifier} from './melee.mjs';
@@ -265,8 +265,10 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       if(item?.type!=='weapon') return;
       const pending=this._ammoChanges?.[item.id];
       if(pending!==undefined) delete this._ammoChanges[item.id];
-      const next=advanceReload({...item.system.toObject(),ammo:pending??item.system.ammo,reloadProgress:pending===undefined?item.system.reloadProgress:0});
+      const previous={ammo:pending??item.system.ammo,reloadProgress:pending===undefined?item.system.reloadProgress:0};
+      const next=advanceReload({...item.system.toObject(),...previous});
       await item.update({'system.ammo':next.ammo,'system.reloadProgress':next.reloadProgress});
+      if(previous.ammo!==next.ammo||previous.reloadProgress!==next.reloadProgress) await playReloadSound(item.system);
     } finally {this._reloading=false;}
   }
   static async openWeapon(event,button) { this.actor.items.get(button.dataset.id)?.sheet.render(true); }

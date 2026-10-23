@@ -212,3 +212,9 @@ Alto-falante no cabeçalho da ficha de arma, ao lado de fechar, abre configuraç
 O disparo pelo painel de armamento reproduz uma vez para os clientes conectados, no canal de efeitos de interface e sem repetição. No 20 natural, aguarda o defeito: sem defeito/trava/explosão reproduz som; falha de munição não reproduz. Guardado snapshot do áudio no disparo para verificação posterior de defeito. Localização, ferimentos e dispersão não repetem áudio. Arquivo ausente informa erro sem interromper o ataque. Prévia usa apenas o cliente atual.
 
 Validação: 53 testes, reprodução opcional, transmissão única, prévia local e tolerância a erro. No Foundry, alto-falante, navegador de áudio, prévia de sounds/lock.wav sem erros e persistência após salvar/reabrir; som de teste removido ao concluir. Nenhuma munição/saúde alterada na conferência visual. API de áudio consultada em modo leitura na instalação v13; nenhum arquivo nativo alterado.
+
+## Áudio único e som de recarga — 0.13.1
+
+Reprodução local separada da transmissão: destinatários explícitos excluem o usuário que iniciou o áudio. Evita receber novamente o próprio som pelo canal remoto. Configuração no alto-falante agora inclui arquivo, volume, seletor e prévia próprios para recarga. A recarga pelo personagem/NPC ou pelo Item toca somente quando munição ou progresso avançam; arma cheia não produz som.
+
+Validação: 54 testes aprovados, incluindo chamada única e destinatários sem o iniciador. No Foundry, prévia de recarga sem erro de áudio, persistência após reabrir e recarga de 0 para 3 verificadas. Arquivo temporário e munição restaurados, preservando o som de disparo existente. Publicado apenas na pasta do sistema.

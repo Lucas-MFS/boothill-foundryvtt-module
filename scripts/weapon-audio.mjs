@@ -5,6 +5,11 @@ export function shotAudio(data) {
 }
 export async function playWeaponSound(data,broadcast=true) {
  const audio=shotAudio(data);if(!audio.src) return false;
- try {await foundry.audio.AudioHelper.play({...audio,loop:false,channel:'interface'},broadcast);return true;}
+ try {
+  const recipients=broadcast?[...(globalThis.game?.users??[])].filter(user=>user.active&&user.id!==game.user.id).map(user=>user.id):[];
+  await foundry.audio.AudioHelper.play({...audio,loop:false,channel:'interface'},recipients.length?{recipients}:false);return true;
+ }
  catch(error) {console.error(error);ui.notifications.warn('Não foi possível reproduzir o som da arma. Confira o arquivo de áudio.');return false;}
 }
+export function reloadAudio(data) {return shotAudio({src:data?.reloadSound,volume:data?.reloadVolume??.6});}
+export async function playReloadSound(data) {return playWeaponSound(reloadAudio(data));}
