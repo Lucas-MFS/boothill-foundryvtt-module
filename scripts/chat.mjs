@@ -1,3 +1,4 @@
+import {defectResult,defectCard} from './defects.mjs';
 import {isShotgun,pelletCount,spreadInfo,pelletsCard,spreadCard} from './shotgun.mjs';
 import {registerDamage,requestDamage} from './damage.mjs';
 import {injuryCard,locationChoices,injuryResult} from './injury.mjs';
@@ -9,10 +10,12 @@ export function modifierText(entries=[]) {
 }
 export function rollCard(data) {
   const {title,target,die,luck,luckDie,modifiers=[],note=''}=data;
-  const pending=!data.bladeHit&&needsLuck(die,target)&&!Number.isInteger(luckDie);
-  const success=data.bladeHit||succeeds(die,target,luckDie,luck);
-  const state=pending?'pending':success?'success':'failure';
-  return `<article class="bh-roll-card bh-roll-${state}"><header><span>BOOT HILL</span><h3>${escape(title)}</h3></header><div class="bh-roll-score" aria-label="Chance ${target}; rolagem ${die}"><strong>${target}</strong><span>/</span><strong>${die}</strong></div><div class="bh-roll-captions"><span>${data.bladeHit?'Total ajustado':'Chance de acerto'}</span><span>Rolagem · d20</span></div><p class="bh-roll-outcome">${pending?'Aguardando Sorte':success?'Sucesso':'Falha'}</p>${modifierText(modifiers)}${pending?`<button type="button" data-bh-luck><i class="fas fa-clover" aria-hidden="true"></i> Rolar Sorte <span>${luck}</span></button>`:''}${Number.isInteger(luckDie)?`<div class="bh-luck-result">Sorte <strong>${luck} / ${luckDie}</strong> · ${luckDie<=luck?'Sucesso':'Falha'}</div>`:''}${!pending&&success?(isShotgun(data)&&!data.pelletChild?pelletsCard(data):injuryCard(data)):''}${spreadCard(data)}${note?`<small class="bh-roll-note">${escape(note)}</small>`:''}</article>`;
+  const defectPending=!!data.shot&&!data.bladeHit&&!data.secondary&&!data.pelletChild&&die===20&&!data.defectCleared&&!data.defect;
+  const blocked=data.defect&&!data.defect.fired;
+  const pending=!blocked&&!data.bladeHit&&needsLuck(die,target)&&!Number.isInteger(luckDie);
+  const success=!blocked&&(data.bladeHit||succeeds(die,target,luckDie,luck));
+  const state=pending||defectPending?'pending':success?'success':'failure';
+  return `<article class="bh-roll-card bh-roll-${state}"><header><span>BOOT HILL</span><h3>${escape(title)}</h3></header><div class="bh-roll-score" aria-label="Chance ${target}; rolagem ${die}"><strong>${target}</strong><span>/</span><strong>${die}</strong></div><div class="bh-roll-captions"><span>${data.bladeHit?'Total ajustado':'Chance de acerto'}</span><span>Rolagem · d20</span></div><p class="bh-roll-outcome">${defectPending?'Aguardando verificação de defeito':pending?'Aguardando Sorte':success?'Sucesso':'Falha'}</p>${modifierText(modifiers)}${defectCard(data)}${pending?`<button type="button" data-bh-luck><i class="fas fa-clover" aria-hidden="true"></i> Rolar Sorte <span>${luck}</span></button>`:''}${Number.isInteger(luckDie)?`<div class="bh-luck-result">Sorte <strong>${luck} / ${luckDie}</strong> · ${luckDie<=luck?'Sucesso':'Falha'}</div>`:''}${!defectPending&&!pending&&success?(isShotgun(data)&&!data.pelletChild?pelletsCard(data):injuryCard(data)):''}${!defectPending&&!blocked?spreadCard(data):''}${note?`<small class="bh-roll-note">${escape(note)}</small>`:''}</article>`;
 }
 export async function postCheck(actor,{title,target,roll,modifiers=[],note='',shot=null,whisper=null}) {
   const check={title,target,die:roll.total,luck:actor.system.attributes.luck,modifiers,note,shot};
@@ -28,6 +31,50 @@ export function registerChatCards() {
     const content=html.querySelector('.message-content');
     if(!content) return;
     content.innerHTML=rollCard(data);
+    for(const action of content.querySelectorAll?.('[data-bh-defect],[data-bh-explosion]')??[]) {
+      action.disabled=!(message.isAuthor||game.user.isGM)||resolving.has(message.id);
+      action.addEventListener('click',async()=>{
+        if(!(message.isAuthor||game.user.isGM)||resolving.has(message.id)) return;
+        resolving.add(message.id);
+        try {
+          const current=message.getFlag('boothill','check');
+          if(!current.shot||current.bladeHit||current.secondary||current.pelletChild||current.die!==20) return;
+          if(action.hasAttribute('data-bh-defect')) {
+            if(current.defect||current.defectCleared) return;
+            let item=current.shot.weaponUuid?await fromUuid(current.shot.weaponUuid):null;
+            if(!item&&!current.shot.weaponUuid) {
+              const actor=game.actors.get(message.speaker.actor);
+              const weapons=actor?.items.filter(i=>i.type==='weapon')??[];
+              if(!weapons.length) return ui.notifications.warn('Arma original indisponível.');
+              const choice=await foundry.applications.api.DialogV2.prompt({window:{title:'Disparo antigo · identificar arma'},content:`<label>Arma <select name="weapon">${weapons.map(w=>`<option value="${escape(w.id)}">${escape(w.name)}</option>`).join('')}</select></label><label>Balas antes deste tiro <input type="number" name="ammo" min="1" step="1" value="2"></label>`,ok:{label:'Verificar defeito',callback:(e,b,d)=>({id:d.element.querySelector('[name=weapon]').value,ammo:Number(d.element.querySelector('[name=ammo]').value)})},rejectClose:false});
+              if(!choice||!Number.isInteger(choice.ammo)||choice.ammo<1) return;
+              item=actor.items.get(choice.id);
+              if(!item) return;
+              current.shot={...current.shot,weaponUuid:item.uuid,actorUuid:actor.uuid,ammoBefore:choice.ammo,model:item.system.model};
+            }
+            if(!item||!item.isOwner) return ui.notifications.warn('É necessário ter acesso à arma original para resolver seu defeito.');
+            const roll=await new Roll('1d20').evaluate();
+            const defect=defectResult(current.shot.model,roll.total,current.shot.ammoBefore??2);
+            const next={...current,defect,defectCleared:defect.fired,note:current.note?.startsWith('20 natural:')?'':current.note};
+            await message.update({content:rollCard(next),'flags.boothill.check':next,rolls:[...message.rolls,roll]});
+            if(defect.blocked) await item.update({'system.malfunction':defect.blocked,'system.jamProgress':0});
+            if(defect.kind==='explosion') await item.update({'system.ammo':0,'system.reloadProgress':0});
+          } else {
+            if(current.defect?.kind!=='explosion'||current.explosionMessage) return;
+            const actor=await fromUuid(current.shot.actorUuid);
+            if(!actor?.isOwner) return;
+            const hand=await foundry.applications.api.DialogV2.prompt({window:{title:'Mão atingida pela explosão'},content:'<label>Mão <select name="hand"><option value="rightArm">Direita</option><option value="leftArm">Esquerda</option></select></label>',ok:{label:'Rolar gravidade',callback:(e,b,d)=>d.element.querySelector('[name=hand]').value},rejectClose:false});
+            if(!['leftArm','rightArm'].includes(hand)) return;
+            const roll=await new Roll('1d6').evaluate();
+            const next={title:'Explosão · Ferimento na mão',target:1,die:1,luck:actor.system.attributes.luck,bladeHit:true,defectCleared:true,shot:{wound:current.defect.bonus},injury:injuryResult(roll.total,hand,current.defect.bonus),note:'Mão representada pela região do braço. Aplique ao token do atirador.'};
+            const created=await ChatMessage.create({speaker:ChatMessage.getSpeaker({actor}),whisper:message.whisper,blind:message.blind,style:CONST.CHAT_MESSAGE_STYLES.ROLL,rolls:[roll],content:rollCard(next),flags:{boothill:{check:next}}});
+            const updated={...current,explosionMessage:created.id};
+            await message.update({content:rollCard(updated),'flags.boothill.check':updated});
+          }
+        } catch(error) {console.error(error);ui.notifications.error('Não foi possível resolver o defeito.');}
+        finally {resolving.delete(message.id);}
+      });
+    }
     for(const action of content.querySelectorAll?.('[data-bh-pellets]')??[]) {
       if(action.disabled) continue;
       action.disabled=!(message.isAuthor||game.user.isGM)||resolving.has(message.id);
@@ -36,7 +83,7 @@ export function registerChatCards() {
         resolving.add(message.id);
         try {
           const current=message.getFlag('boothill','check'),kind=action.dataset.bhPellets;
-          if(!isShotgun(current)) return;
+          if(!isShotgun(current)||current.defect&&!current.defect.fired) return;
           if(kind==='secondary') {
             const info=spreadInfo(current);if(!info) return;
             if(current.die===20&&!current.defectCleared) {
@@ -78,6 +125,7 @@ export function registerChatCards() {
       action.addEventListener('click',async()=>{
         if(!(message.isAuthor||game.user.isGM)||resolving.has(message.id)) return;
         const current=message.getFlag('boothill','check');
+        if(current.defect&&!current.defect.fired) return;
         if(!current.shot||current.injury||!(current.bladeHit||succeeds(current.die,current.target,current.luckDie,current.luck))) return;
         const kind=action.dataset.bhInjury;
         resolving.add(message.id);

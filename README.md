@@ -138,3 +138,13 @@ Briga e Faca/Espada começam recolhidas. Clique no nome para mostrar ou esconder
 ## Inventário e deslocamento — 0.9.2
 
 Colunas independentes eliminam o vazio entre deslocamento e inventário. Botão de adicionar compacto com +, cantos arredondados e carga próxima da tabela. Deslocamento alterna entre Em pé e Montado sem publicar movimento nem alterar penalidades ao trocar de aba; a escolha é preservada nas atualizações da ficha. Personagens e NPCs compartilham o layout e os controles, mantendo NPC sem inventário. Validado visualmente nas duas fichas no Foundry; 36 testes passaram.
+
+## Defeitos de armas — 0.10.0
+
+Todo 20 natural de tiro permite Verificar defeito no cartão, inclusive se o ataque errou. Consulta a Tabela 5 (PDF físico 25–26), usando modelo e munição anteriores ao disparo. Falha ou explosão impedem acerto mesmo com Sorte; trava permite resolver a bala disparada, mas bloqueia novos tiros. Sem defeito preserva a regra de Sorte. Dispersão não cria verificações adicionais. Disparos antigos pedem identificação da arma e munição anterior; novos guardam esses dados automaticamente.
+
+A ficha da arma permite destravar um turno por clique: três turnos, ou dois com Criar Armas treinada e teste bem-sucedido. Falha nas armas de carga dianteira/cano liso e rifles de cilindro exige confirmação de desmontagem/limpeza fora do tiroteio. Falha simples em revólveres não bloqueia o cilindro inteiro. A contagem de tempo é manual; não avança o combate automaticamente.
+
+Explosão na última bala é Sem defeito; caso contrário esvazia o cilindro e oferece gravidade d6 na mão escolhida, +1 com quatro ou mais balas antes do disparo. Mão usa a região de braço correspondente (modificador local −1). O cartão de ferimento permite Aplicar dano ao token selecionado do atirador, incluindo Sorte para ferimento mortal. Não aplica dano explosivo automaticamente a alvos marcados.
+
+Validação: 39 testes, limites da tabela, bloqueio de dano/dispersão e execução do botão com permissão e prevenção de clique repetido. No Foundry, um disparo antigo com 20 foi resolvido: defeito d20=4, Sem defeito; Sorte já falhada manteve o erro. Nenhuma saúde ou munição foi alterada nesse teste.

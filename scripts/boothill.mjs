@@ -165,18 +165,20 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       if(healthSummary(this.actor.system.health,this.actor.system.attributes.strength).unconscious) return ui.notifications.warn('O personagem atingiu o limite de ferimentos e está desmaiado.');
       const chance=this.chanceFor(item,mode);
       if(!chance) return ui.notifications.warn('Empunhadura inválida ou tipo de tiro indisponível para esta arma.');
+      if(item.system.malfunction) return ui.notifications.warn('A arma precisa ser destravada ou limpa pela ficha do item.');
       if(!item.system.ammo) return ui.notifications.warn('A arma está descarregada.');
       const modifier=await judgeModifier(event,`${SHOTS[mode].label} — ${item.name}`);
       if(modifier===null||modifier===undefined||!Number.isInteger(modifier)) return;
       if(!item.system.ammo||!item.system.equipped) return;
       const current=this.chanceFor(item,mode);
       if(!current||healthSummary(this.actor.system.health,this.actor.system.attributes.strength).unconscious) return;
+      const ammoBefore=item.system.ammo;
       const target=current.total+modifier,roll=await new Roll('1d20').evaluate();
       await consumeMeleeModifier(this.actor);
       await item.update({'system.ammo':item.system.ammo-1,'system.reloadProgress':0});
       await postCheck(this.actor,{title:`${item.name} · ${SHOTS[mode].label}`,target,roll,
         modifiers:[['Perícia',current.training],['Duas armas',current.twoWeapons],['Mão inábil',current.offhand],['Ferimentos',current.woundPenalty],['Alcance',current.distance],['Dispersão',current.spread],['Movimento',current.movementPenalty],['Efeito de briga',current.effect],['Juiz',modifier]],
-        shot:{model:item.system.model,mode,range:this.actor.system.combat.range,skill:this.actor.system.skills[weaponSummary(item.system).skill==='Rifle'?'rifle':'pistola'],wound:item.system.wound},note:roll.total===20?'20 natural: o Juiz deve verificar defeito antes de resolver o ferimento.':''});
+        shot:{weaponUuid:item.uuid,actorUuid:this.actor.uuid,ammoBefore,model:item.system.model,mode,range:this.actor.system.combat.range,skill:this.actor.system.skills[weaponSummary(item.system).skill==='Rifle'?'rifle':'pistola'],wound:item.system.wound},note:''});
     } finally {this._firing=false;}
   }
   rapidityFor(item) {

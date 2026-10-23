@@ -43,6 +43,7 @@ export function registerDamage(renderCard) {
   if(assigned?.active ? assigned.id!==game.user.id : damageAuthority()?.id!==game.user.id) return;
   if(!req||request.getFlag('boothill','damageProcessed')) return;
   const message=game.messages.get(req.messageId),data=message?.getFlag('boothill','check');
+  if(data?.defect&&!data.defect.fired) return;
   if(!data?.injury||!data.shot||!(data.bladeHit||succeeds(data.die,data.target,data.luckDie,data.luck))||(data.die===20&&!data.defectCleared)) return;
   // Respect private/blind rolls when another player clicks a damage card.
   const user=request.author;

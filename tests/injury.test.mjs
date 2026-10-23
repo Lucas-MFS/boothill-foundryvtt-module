@@ -23,6 +23,6 @@ test('apenas tiro acertado e confirmado libera localização; 20 exige Juiz',()=
  assert.ok(rollCard(data).includes('Determinar localização'));
  assert.ok(!rollCard({...data,die:15}).includes('Determinar localização'));
  assert.ok(!rollCard({...data,target:25,die:20}).includes('Determinar localização'));
- assert.ok(rollCard({...data,target:25,die:20,luckDie:3}).includes('confirmar arma sem defeito'));
+ assert.ok(rollCard({...data,target:25,die:20,luckDie:3}).includes('data-bh-defect'));
  assert.ok(injuryCard({...data,locationDie:15}).includes('bh-choice-map'));
 });

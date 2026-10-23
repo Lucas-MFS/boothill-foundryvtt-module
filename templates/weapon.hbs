@@ -25,6 +25,7 @@
         <label>Rapidez<input type="number" name="system.speed" value="{{system.speed}}" min="-2" max="2" step="1"></label><label>Ferimento<input type="number" name="system.wound" value="{{system.wound}}" min="-10" step="1"></label>
       </fieldset>
     </section>
+    {{#if system.malfunction}}<p class="bh-note">Defeito: {{#if system.jamProgress}}{{system.jamProgress}} turno(s) de limpeza concluído(s).{{/if}} <button type="button" data-action="clearDefect" {{#unless editable}}disabled{{/unless}}>Destravar (1 turno) / confirmar limpeza</button></p>{{/if}}
     <details class="bh-weapon-notes"><summary>Observações</summary><textarea aria-label="Observações" name="system.notes" rows="2" {{#unless editable}}disabled{{/unless}}>{{system.notes}}</textarea></details>
   </div>
 </section>
