@@ -258,3 +258,7 @@ Validação: 61 testes aprovados, incluindo limite de acerto, geração de local
 ## Botão de ataque integrado — 0.15.1
 
 Removido painel exclusivo de ataque do animal. Botão compacto Atacar com ícone de pata fica no cabeçalho dos atributos; tooltip mantém dica de Shift+clique. Conferido no Foundry. Mecânica de dano permanece automática para um alvo marcado, via Juiz conectado; fallback Aplicar dano usa token selecionado.
+
+## Ícones do animal — 0.15.2
+
+Atributos recebem ícones de punho (Força), pata (Ataque), impacto (Ferimentos adicionais) e escudo (Defesa de ferimentos). Título do cartão de ataque no chat também exibe pata. Dois testes do ataque aprovados; alteração apenas visual.

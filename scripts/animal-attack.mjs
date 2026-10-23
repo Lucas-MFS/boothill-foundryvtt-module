@@ -5,7 +5,7 @@ const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 export function animalAttackResult(die,modifier) {return {total:die+modifier,hit:die+modifier>=8};}
 export function animalAttackCard(data) {
  const hit=data.attackTotal>=8;
- return `<article class="bh-roll-card bh-roll-${hit?'success':'failure'}"><header><span>BOOT HILL</span><h3>${escape(data.title)}</h3></header><div class="bh-roll-score"><strong>${data.attackTotal}</strong><span>/</span><strong>8</strong></div><div class="bh-roll-captions"><span>Resultado do ataque</span><span>Mínimo para ferir</span></div><p class="bh-roll-outcome">${hit?'Acertou':'Errou'}</p><small class="bh-roll-modifiers">d20 ${data.attackDie} · Ataque ${data.attackModifier>=0?'+':''}${data.attackModifier}</small>${hit?injuryCard(data):''}</article>`;
+ return `<article class="bh-roll-card bh-roll-${hit?'success':'failure'}"><header><span>BOOT HILL</span><h3><i class="fas fa-paw" aria-hidden="true"></i> ${escape(data.title)}</h3></header><div class="bh-roll-score"><strong>${data.attackTotal}</strong><span>/</span><strong>8</strong></div><div class="bh-roll-captions"><span>Resultado do ataque</span><span>Mínimo para ferir</span></div><p class="bh-roll-outcome">${hit?'Acertou':'Errou'}</p><small class="bh-roll-modifiers">d20 ${data.attackDie} · Ataque ${data.attackModifier>=0?'+':''}${data.attackModifier}</small>${hit?injuryCard(data):''}</article>`;
 }
 export async function attackAnimal(event) {
  if(!this.isEditable||this._animalAttacking) return;
