@@ -228,3 +228,7 @@ Validação: 55 testes aprovados, incluindo exclusão restrita ao Item incorpora
 ## Imagem da arma nas rolagens — 0.13.3
 
 Novos tiros guardam a imagem e o nome da arma no cartão. Miniatura quadrada de 48 px aparece ao lado do título, preservando a proporção da imagem. Os cartões derivados de dispersão e ferimentos conservam a mesma imagem. Mensagens antigas sem imagem continuam compatíveis. Validação: 55 testes aprovados.
+
+## Aviso de recarga no combate — 0.13.4
+
+Recarga com combate iniciado publica no chat o nome do ator e a diferença efetivamente carregada: “John recarregou 3 balas.” Aplica-se ao armamento de personagem/NPC e à ficha da arma incorporada. Arma cheia, etapa ainda sem balas e recarga fora de combate não geram aviso. Validação: 56 testes aprovados, incluindo quantidade, singular/plural, escape do nome e condições de envio.

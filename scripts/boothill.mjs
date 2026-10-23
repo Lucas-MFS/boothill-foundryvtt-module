@@ -1,3 +1,4 @@
+import {reportReload} from './reload-chat.mjs';
 import {playReloadSound,playWeaponSound,shotAudio} from './weapon-audio.mjs';
 import {mountActor} from './mounts.mjs';
 import {attackMelee} from './melee-actions.mjs';
@@ -278,6 +279,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       const next=advanceReload({...item.system.toObject(),...previous});
       await item.update({'system.ammo':next.ammo,'system.reloadProgress':next.reloadProgress});
       if(previous.ammo!==next.ammo||previous.reloadProgress!==next.reloadProgress) await playReloadSound(item.system);
+      await reportReload(this.actor,previous.ammo,next.ammo);
     } finally {this._reloading=false;}
   }
   static async openWeapon(event,button) { this.actor.items.get(button.dataset.id)?.sheet.render(true); }

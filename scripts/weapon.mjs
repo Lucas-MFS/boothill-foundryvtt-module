@@ -1,3 +1,4 @@
+import {reportReload} from './reload-chat.mjs';
 import {playReloadSound} from './weapon-audio.mjs';
 import {WeaponAudioConfig} from './weapon-audio-config.mjs';
 import {WEAPON_MODELS,weaponSummary,advanceReload} from './weapon-rules.mjs';
@@ -56,6 +57,7 @@ export class WeaponSheet extends foundry.applications.api.HandlebarsApplicationM
       const next=advanceReload(this.document.system);
       await this.document.update(Object.fromEntries(Object.entries(next).map(([key,value])=>[`system.${key}`,value])));
       if(previous.ammo!==next.ammo||previous.reloadProgress!==next.reloadProgress) await playReloadSound(this.document.system);
+      await reportReload(this.document.actor,previous.ammo,next.ammo);
     } finally {this._reloading=false;}
   }
   static async clearDefect() {
