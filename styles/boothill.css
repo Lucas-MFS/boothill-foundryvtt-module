@@ -373,3 +373,6 @@
 .boothill .bh-armament-table td:first-child > .bh-inventory-name {display:inline-flex;max-width:calc(100% - 30px);}
 .boothill .bh-inventory .bh-remove-gear:hover,
 .boothill .bh-armament-table .bh-remove-gear:hover {opacity:1;color:#823b2d;background:rgba(90,55,30,.08);border-radius:4px;}
+.bh-roll-card .bh-roll-title {display:flex;align-items:center;justify-content:center;gap:10px;margin-top:7px;}
+.bh-roll-card .bh-roll-title h3 {margin:0;}
+.bh-roll-card .bh-roll-weapon {flex:0 0 48px;width:48px;height:48px;object-fit:contain;border:1px solid #b5ac99;border-radius:5px;background:rgba(255,255,255,.25);}

@@ -249,7 +249,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       if(roll.total!==20) await playWeaponSound(item.system);
       await postCheck(this.actor,{title:`${item.name} · ${SHOTS[mode].label}`,target,roll,
         modifiers:[['Perícia',current.training],['Duas armas',current.twoWeapons],['Mão inábil',current.offhand],['Ferimentos',current.woundPenalty],['Alcance',current.distance],['Dispersão',current.spread],['Movimento',current.movementPenalty],['Efeito de briga',current.effect],['Juiz',modifier]],
-        shot:{audio:shotAudio(item.system),weaponUuid:item.uuid,actorUuid:this.actor.uuid,ammoBefore,model:item.system.model,mode,range:this.actor.system.combat.range,skill:this.actor.system.skills[weaponSummary(item.system).skill==='Rifle'?'rifle':'pistola'],wound:item.system.wound},note:''});
+        shot:{img:item.img,weaponName:item.name,audio:shotAudio(item.system),weaponUuid:item.uuid,actorUuid:this.actor.uuid,ammoBefore,model:item.system.model,mode,range:this.actor.system.combat.range,skill:this.actor.system.skills[weaponSummary(item.system).skill==='Rifle'?'rifle':'pistola'],wound:item.system.wound},note:''});
     } finally {this._firing=false;}
   }
   rapidityFor(item) {

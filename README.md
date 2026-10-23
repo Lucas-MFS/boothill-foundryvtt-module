@@ -224,3 +224,7 @@ Validação: 54 testes aprovados, incluindo chamada única e destinatários sem 
 Botões de recarga usam Ouvir e Remover som, com o mesmo ícone da seção Disparo. Inventários de personagem e cavalo exibem lixeira para itens manuais e armas; armamento de personagem/NPC também permite remover a arma. A exclusão usa Item incorporado do ator, preservando o item original e demais cópias. Respeita permissão de edição e atualiza carga e armamento pela renderização normal.
 
 Validação: 55 testes aprovados, incluindo exclusão restrita ao Item incorporado, remoção de item manual, ID inexistente e bloqueio sem permissão. Lixeiras conferidas no Foundry sem remover itens existentes.
+
+## Imagem da arma nas rolagens — 0.13.3
+
+Novos tiros guardam a imagem e o nome da arma no cartão. Miniatura quadrada de 48 px aparece ao lado do título, preservando a proporção da imagem. Os cartões derivados de dispersão e ferimentos conservam a mesma imagem. Mensagens antigas sem imagem continuam compatíveis. Validação: 55 testes aprovados.
