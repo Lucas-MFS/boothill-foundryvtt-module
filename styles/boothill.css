@@ -1,7 +1,7 @@
 @import url('./character-panels.css');
 /* Sheet styles are scoped to the Boot Hill application. */
 .boothill { --bh-paper:#eeece4; --bh-ink:#292923; --bh-muted:#77756b; --bh-rule:#c4c1b5; --bh-accent:#5e392b; --color-text-primary:var(--bh-ink); --color-text-secondary:var(--bh-muted); }
-.boothill .window-content { padding:0; background:var(--bh-paper); color:var(--bh-ink); overflow:hidden; }
+.boothill .window-content { padding:0; background-color:var(--bh-paper); background-image:linear-gradient(rgba(238,236,228,.85),rgba(238,236,228,.85)),url('../assets/paper-texture.webp'); background-size:cover; background-position:center; background-repeat:no-repeat; color:var(--bh-ink); overflow:hidden; }
 .boothill .bh-page { display:flex; flex-direction:column; min-height:0; height:100%; font:13px/1.4 Arial,sans-serif; }
 .boothill .bh-header { display:flex; gap:18px; padding:20px 24px 16px; flex:0 0 auto; }
 .boothill .bh-portrait { padding:0; width:88px; height:100px; min-height:0; flex:0 0 88px; border:1px solid var(--bh-rule); border-radius:0; background:#dedcd2; overflow:hidden; }
