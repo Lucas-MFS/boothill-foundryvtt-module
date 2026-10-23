@@ -312,3 +312,5 @@
 .boothill .bh-horse-trick.bh-horse-editing {grid-template-columns:minmax(0,1fr) 38px 18px;}
 .boothill .bh-horse-skills .bh-roll-name {display:flex;align-items:center;gap:6px;text-align:left;min-width:0;}
 .boothill .bh-horse-skills .bh-roll-name span {overflow-wrap:anywhere;}
+
+.boothill .bh-horse-attributes .bh-roll-name {display:flex;align-items:center;justify-content:center;gap:6px;}
