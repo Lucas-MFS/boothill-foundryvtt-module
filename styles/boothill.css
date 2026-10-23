@@ -314,3 +314,20 @@
 .boothill .bh-horse-skills .bh-roll-name span {overflow-wrap:anywhere;}
 
 .boothill .bh-horse-attributes .bh-roll-name {display:flex;align-items:center;justify-content:center;gap:6px;}
+
+.boothill .bh-mount-slot {display:flex;align-items:center;gap:7px;min-height:36px;margin-top:8px;border-top:1px solid var(--bh-rule);padding-top:7px;}
+.boothill .bh-mount-placeholder {color:var(--bh-muted);font-size:10px;}
+.boothill .bh-mount-placeholder i {margin-right:6px;}
+.boothill .bh-mount-link {display:flex;align-items:center;gap:7px;min-width:0;flex:1;cursor:pointer;font:12px Georgia,serif;}
+.boothill .bh-mount-link img {width:30px;height:30px;object-fit:cover;border:1px solid var(--bh-rule);border-radius:3px;}
+.boothill .bh-mount-link small {display:block;font:9px Arial,sans-serif;color:var(--bh-muted);}
+.boothill .bh-mount-state,.boothill .bh-mount-token {width:auto;height:26px;min-height:0;margin:0;padding:3px 7px;background:#f6f3ec;border:1px solid var(--bh-rule);border-radius:4px;color:var(--bh-ink);font:10px Arial,sans-serif;}
+.boothill .bh-mount-state[aria-pressed=true] {background:#e4dac6;}
+
+.boothill .bh-personal {gap:10px;align-items:center;}
+.boothill .bh-personal .bh-mount-slot {flex:0 1 280px;min-width:190px;margin:0;padding:0;border:0;gap:4px;}
+.boothill .bh-personal .bh-mount-link img {width:24px;height:24px;}
+.boothill .bh-personal .bh-mount-link {font-size:11px;}
+.boothill .bh-personal .bh-mount-link small {display:none;}
+.boothill .bh-personal .bh-mount-placeholder {font-size:9px;}
+.boothill .bh-personal .bh-mount-state {font-size:9px;padding:3px 5px;}

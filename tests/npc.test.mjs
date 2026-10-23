@@ -35,3 +35,12 @@ test('Cavalo tem atributos próprios, inventário e regiões compatíveis com da
  const context=await sheet._prepareContext();assert.equal(context.totalWeight,3);assert.equal(context.health.total,3);assert.equal(context.locations.find(l=>l.id==='leftArm').label,'Dianteira esq.');assert.equal(context.locations.find(l=>l.id==='rightLeg').label,'Traseira dir.');assert.equal(context.attributes.length,Object.keys(HORSE_ATTRIBUTES).length);
  assert.equal(context.skills.length,0);sheet._editingSkills=true;assert.equal((await sheet._prepareContext({})).skills.length,4);sheet._editingSkills=false;sheet.actor.system.trained.herding=true;assert.deepEqual((await sheet._prepareContext({})).skills.map(s=>s.id),['herding']);
 });
+
+test('soltar Cavalo cria referência sem copiar ator e inicia desmontado',async()=>{
+ const {CharacterSheet}=await import('../scripts/boothill.mjs');
+ const sheet=new CharacterSheet();sheet.isEditable=true;let change;
+ sheet.actor={type:'character',update:async value=>{change=value;}};
+ const horse={type:'horse',uuid:'Actor.horse',token:{uuid:'Scene.s.Token.h'}};
+ assert.equal(await sheet._onDropActor(null,horse),horse);
+ assert.deepEqual(change,{'system.mount':{uuid:'Actor.horse',tokenUuid:'Scene.s.Token.h',mounted:false}});
+});

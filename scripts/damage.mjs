@@ -1,4 +1,6 @@
 import {succeeds} from './rules.mjs';
+import {mountedRecipient} from './mounts.mjs';
+import {injuryResult} from './injury.mjs';
 import {HIT_REGIONS} from './injury.mjs';
 export function supportsHealth(actor) {
  const h=actor?.system?.health;
@@ -42,7 +44,8 @@ export function registerDamage(renderCard) {
   const assigned=req?.processorId&&game.users.get?.(req.processorId);
   if(assigned?.active ? assigned.id!==game.user.id : damageAuthority()?.id!==game.user.id) return;
   if(!req||request.getFlag('boothill','damageProcessed')) return;
-  const message=game.messages.get(req.messageId),data=message?.getFlag('boothill','check');
+  const message=game.messages.get(req.messageId);
+  let data=message?.getFlag('boothill','check');
   if(data?.defect&&!data.defect.fired) return;
   if(!data?.injury||!data.shot||!(data.bladeHit||succeeds(data.die,data.target,data.luckDie,data.luck))||(data.die===20&&!data.defectCleared)) return;
   // Respect private/blind rolls when another player clicks a damage card.
@@ -52,7 +55,23 @@ export function registerDamage(renderCard) {
   if(busy.has(message.id)) return;
   busy.add(message.id);
   try {
-   const token=await fromUuid(req.tokenUuid),actor=token?.actor;
+   let token=await fromUuid(req.tokenUuid);
+   if(data.mountResolution) {
+    if(![data.mountResolution.fromTokenUuid,data.mountResolution.toTokenUuid].includes(req.tokenUuid)) throw new Error('Este ferimento já foi transferido para outra montaria/cavaleiro.');
+    token=await fromUuid(data.mountResolution.toTokenUuid);
+   } else if(token?.actor&&!data.bladeHit&&data.locationDie) {
+    const region=HIT_REGIONS.find(([id])=>id===data.injury.id);
+    const value=data.locationValue??Math.max(region[1],Math.min(region[2],data.locationDie));
+    const recipient=await mountedRecipient(token,data.injury.id,value);
+    if(recipient) {
+     const locationRoll=await new Roll('1d20').evaluate(),severityRoll=await new Roll('1d6').evaluate();
+     const id=HIT_REGIONS.find(([,min,max])=>locationRoll.total>=min&&locationRoll.total<=max)[0];
+     data={...data,animalTarget:recipient.actor.type==='horse',locationDie:locationRoll.total,locationValue:locationRoll.total,injury:injuryResult(severityRoll.total,id,data.shot.wound),targetTokenUuid:recipient.uuid,mountResolution:{fromTokenUuid:token.uuid,toTokenUuid:recipient.uuid,fromName:token.name,toName:recipient.name,originalLocation:value,newLocation:locationRoll.total}};
+     await message.update({'flags.boothill.check':data,content:renderCard(data),rolls:[...message.rolls,locationRoll,severityRoll]});
+     token=recipient;
+    }
+   }
+   const actor=token?.actor;
    if(token?.documentName!=='Token'||!supportsHealth(actor)) throw new Error('Alvo sem saúde compatível.');
    let applied=actor.getFlag('boothill',`damageLedger.${message.id}`);
    let luckRoll;
@@ -62,7 +81,7 @@ export function registerDamage(renderCard) {
     applied={tokenUuid:token.uuid,name:token.name,points:result.points,severity:result.severity,mortal:result.mortal,...(luckRoll?{luckDie:luckRoll.total,luck:actor.system.attributes?.luck??0}:{})};
     await actor.update({...result.changes,[`flags.boothill.damageLedger.${message.id}`]:applied});
    }
-   const next={...message.getFlag('boothill','check'),applied};
+   const next={...message.getFlag('boothill','check'),animalTarget:actor.type==='horse',applied};
    await message.update({'flags.boothill.check':next,content:renderCard(next),...(luckRoll?{rolls:[...message.rolls,luckRoll]}:{})});
    await request.update({'flags.boothill.damageProcessed':true,content:'Dano aplicado ao token selecionado.'});
   } catch(error) {console.error(error);ui.notifications.error(`Não foi possível aplicar o dano: ${error.message}`);}

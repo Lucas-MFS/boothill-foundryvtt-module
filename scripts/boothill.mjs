@@ -1,3 +1,4 @@
+import {mountActor} from './mounts.mjs';
 import {attackMelee} from './melee-actions.mjs';
 import {registerMelee,consumeMeleeModifier} from './melee.mjs';
 import {pendingMeleeModifier,HOLDS} from './melee-rules.mjs';
@@ -16,7 +17,7 @@ class CharacterData extends foundry.abstract.TypeDataModel {
     const level=()=>new NumberField({required:true,nullable:false,integer:true,min:0,initial:0});
     const health=new SchemaField({mortal:new BooleanField({initial:false}),mortalLocation:new StringField({initial:''}),points:level(),temporary:level(),locations:new SchemaField(Object.fromEntries(Object.keys(LOCATIONS).map(id=>[id,new SchemaField({light:level(),serious:level()})])))});
     const combat=new SchemaField({stronger:new BooleanField({initial:false}),bladeReady:new BooleanField({initial:false}),movement:new StringField({initial:'still',choices:Object.keys(MOVEMENTS)}),movementRound:new NumberField({nullable:true,initial:null}),movementCombat:new StringField({initial:''}),primaryWeapon:new StringField({initial:''}),dualFire:new BooleanField({initial:true}),range:new StringField({initial:'short',choices:['close','short','long','extreme']})});
-    return {health,combat,inventory:new ArrayField(new SchemaField({id:new StringField(),name:new StringField(),quantity:new NumberField({min:1,integer:true,initial:1}),weight:new NumberField({min:0,initial:0})}),{initial:[]}),carryCapacity:new NumberField({min:0,initial:0}),identity:new SchemaField({player:new StringField({initial:''}),age:level(),xp:level(),ambidextrous:new BooleanField({initial:false})}),attributes:new SchemaField(Object.fromEntries(Object.keys(ATTRIBUTES).map(id=>[id,level()]))),skills:new SchemaField(Object.fromEntries(SKILLS.map(s=>[s.id,level()]))),trained:new SchemaField(Object.fromEntries(SKILLS.filter(s=>s.kind==='work').map(s=>[s.id,new BooleanField({nullable:true,initial:null})])))};
+    return {mount:new SchemaField({uuid:new StringField({initial:''}),tokenUuid:new StringField({initial:''}),mounted:new BooleanField({initial:false})}),health,combat,inventory:new ArrayField(new SchemaField({id:new StringField(),name:new StringField(),quantity:new NumberField({min:1,integer:true,initial:1}),weight:new NumberField({min:0,initial:0})}),{initial:[]}),carryCapacity:new NumberField({min:0,initial:0}),identity:new SchemaField({player:new StringField({initial:''}),age:level(),xp:level(),ambidextrous:new BooleanField({initial:false})}),attributes:new SchemaField(Object.fromEntries(Object.keys(ATTRIBUTES).map(id=>[id,level()]))),skills:new SchemaField(Object.fromEntries(SKILLS.map(s=>[s.id,level()]))),trained:new SchemaField(Object.fromEntries(SKILLS.filter(s=>s.kind==='work').map(s=>[s.id,new BooleanField({nullable:true,initial:null})])))};
   }
 }
 class NpcData extends CharacterData {
@@ -36,11 +37,25 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
   _expandedWeapons=new Set();
   _expandedSkills=new Set();
   _movementTab="foot";
-  static DEFAULT_OPTIONS={classes:['boothill'],tag:'form',position:{width:912,height:960},form:{submitOnChange:true,closeOnSubmit:false},actions:{check:CharacterSheet.check,generate:CharacterSheet.generate,generateSkill:CharacterSheet.generateSkill,toggleSkills:CharacterSheet.toggleSkills,openWeapon:CharacterSheet.openWeapon,toggleWeapon:CharacterSheet.toggleWeapon,createWeapon:CharacterSheet.createWeapon,shoot:CharacterSheet.shoot,swapHands:CharacterSheet.swapHands,reloadWeapon:CharacterSheet.reloadWeapon,reportRapidity:CharacterSheet.reportRapidity,toggleDetails:CharacterSheet.toggleDetails,toggleSkillDetails:CharacterSheet.toggleSkillDetails,movementTab:CharacterSheet.movementTab,move:CharacterSheet.move,clearMovement:CharacterSheet.clearMovement,addGear:CharacterSheet.addGear,removeGear:CharacterSheet.removeGear,toggleMortal:CharacterSheet.toggleMortal,melee:attackMelee,clearMelee:CharacterSheet.clearMelee}};
+  static DEFAULT_OPTIONS={classes:['boothill'],tag:'form',position:{width:912,height:960},form:{submitOnChange:true,closeOnSubmit:false},actions:{chooseMount:CharacterSheet.chooseMount,toggleMount:CharacterSheet.toggleMount,removeMount:CharacterSheet.removeMount,chooseMountToken:CharacterSheet.chooseMountToken,check:CharacterSheet.check,generate:CharacterSheet.generate,generateSkill:CharacterSheet.generateSkill,toggleSkills:CharacterSheet.toggleSkills,openWeapon:CharacterSheet.openWeapon,toggleWeapon:CharacterSheet.toggleWeapon,createWeapon:CharacterSheet.createWeapon,shoot:CharacterSheet.shoot,swapHands:CharacterSheet.swapHands,reloadWeapon:CharacterSheet.reloadWeapon,reportRapidity:CharacterSheet.reportRapidity,toggleDetails:CharacterSheet.toggleDetails,toggleSkillDetails:CharacterSheet.toggleSkillDetails,movementTab:CharacterSheet.movementTab,move:CharacterSheet.move,clearMovement:CharacterSheet.clearMovement,addGear:CharacterSheet.addGear,removeGear:CharacterSheet.removeGear,toggleMortal:CharacterSheet.toggleMortal,melee:attackMelee,clearMelee:CharacterSheet.clearMelee}};
   static PARTS={main:{template:'systems/boothill/templates/character.hbs',scrollable:['.bh-body']}};
   async _onRender(context,options) {
     await super._onRender(context,options);
+    const mountLink=this.element.querySelector('[data-mount-link]');
+    mountLink?.addEventListener('dblclick',()=>this.openMount());
+    mountLink?.addEventListener('keydown',event=>{if(event.key==='Enter') this.openMount();});
     if(!this.isEditable) return;
+    if(['character','npc'].includes(this.actor.type)) {
+      this.element.addEventListener('dragover',event=>event.preventDefault());
+      this.element.addEventListener('drop',async event=>{
+        let data;try {data=JSON.parse(event.dataTransfer.getData('text/plain'));} catch {return;}
+        if(data.type!=='Actor'||!data.uuid) return;
+        event.preventDefault();event.stopPropagation();
+        const document=await fromUuid(data.uuid);
+        const actor=document?.documentName==='Token'?document.actor:document;
+        if(actor) await this._onDropActor(event,actor);
+      });
+    }
     for(const row of this.element.querySelectorAll('tr[data-action="toggleDetails"]')) row.addEventListener('keydown',event=>{
       if(event.target===row&&['Enter',' '].includes(event.key)) {event.preventDefault();CharacterSheet.toggleDetails.call(this,event,row);}
     });
@@ -87,8 +102,50 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     for(const row of armament) {row.expanded=this._expandedWeapons.has(row.id);row.held=held.find(h=>h.id===row.id);row.handLabel=row.held?.hand??'Guardada';row.offhandPenalty=row.held?.hand==='Mão secundária'&&!this.actor.system.identity.ambidextrous;row.ranges=Object.entries({close:'Próximo (até 2 m)',short:`Curto (até ${row.system.short} m)`,long:`Longo (até ${row.system.long} m)`,extreme:`Extremo (até ${row.system.extreme} m)`}).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range}));}
     const gear=[...this.actor.items.filter(i=>i.type==='weapon').map(i=>({id:i.id,name:i.name,img:i.img,weapon:true,quantity:1,weight:i.system.weight??0})),...(this.actor.system.inventory??[])];
     const totalWeight=gear.reduce((n,i)=>n+i.quantity*i.weight,0);
+    const mount=await this.mountContext();
     const ranges={close:'Próximo (até 2 m)',short:'Curto',long:'Longo',extreme:'Extremo'};
-    return {...context,mountedTab:this._movementTab==='mounted',meleeEffect:pendingMeleeModifier(this.actor),meleeHolds:(this.actor.getFlag('boothill','meleeState')?.holds??[]).map(h=>HOLDS[h.kind]).join(' · '),outgoingHold:this.actor.getFlag('boothill','meleeState')?.outgoing,isNpc:this.isNpc,canGenerate:!this.isNpc||game.user.isGM,extraAttributes:this.isNpc&&game.user.isGM?['greed','bravery'].map(id=>({id,label:NPC_ATTRIBUTES[id],value:attributes[id]})):[],gear,totalWeight:Math.round(totalWeight*1000)/1000,movementActive:this.actor.system.combat.movement!=='still',movements:Object.entries(MOVEMENTS).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.movement})),distances:movementDistances(this.actor.system.health).map((r,index)=>({...r,group:index<4?'foot':'mounted',visible:(index<4?'foot':'mounted')===this._movementTab,id:['crawl','walk','dodge','run','horseWalk','trot','gallop'][index],combat:r.combat?`${r.combat.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—',firefight:r.firefight?`${r.firefight.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—'})),actor:this.actor,editable:this.isEditable,editingSkills:this._editingSkills,hasWork:work.length>0,work,held,hasTwo:held.length===2,health,locations:Object.entries(LOCATIONS).map(([id,label])=>({id,label,...this.actor.system.health.locations[id]})),ranges:Object.entries(ranges).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range})),armament,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,icon:icons[id],value:attributes[id]})),weapons:rows.filter(s=>s.kind==='weapon').map(s=>({...s,brawl:s.id==='briga',blade:s.id==='faca-espada',expandable:['briga','faca-espada'].includes(s.id),expanded:this._expandedSkills.has(s.id)})),summary:creationSummary(attributes,skills,trained)};
+    return {...context,mount,mountedTab:this._movementTab==='mounted',meleeEffect:pendingMeleeModifier(this.actor),meleeHolds:(this.actor.getFlag('boothill','meleeState')?.holds??[]).map(h=>HOLDS[h.kind]).join(' · '),outgoingHold:this.actor.getFlag('boothill','meleeState')?.outgoing,isNpc:this.isNpc,canGenerate:!this.isNpc||game.user.isGM,extraAttributes:this.isNpc&&game.user.isGM?['greed','bravery'].map(id=>({id,label:NPC_ATTRIBUTES[id],value:attributes[id]})):[],gear,totalWeight:Math.round(totalWeight*1000)/1000,movementActive:this.actor.system.combat.movement!=='still',movements:Object.entries(MOVEMENTS).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.movement})),distances:movementDistances(this.actor.system.health).map((r,index)=>({...r,group:index<4?'foot':'mounted',visible:(index<4?'foot':'mounted')===this._movementTab,id:['crawl','walk','dodge','run','horseWalk','trot','gallop'][index],combat:r.combat?`${r.combat.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—',firefight:r.firefight?`${r.firefight.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—'})),actor:this.actor,editable:this.isEditable,editingSkills:this._editingSkills,hasWork:work.length>0,work,held,hasTwo:held.length===2,health,locations:Object.entries(LOCATIONS).map(([id,label])=>({id,label,...this.actor.system.health.locations[id]})),ranges:Object.entries(ranges).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range})),armament,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,icon:icons[id],value:attributes[id]})),weapons:rows.filter(s=>s.kind==='weapon').map(s=>({...s,brawl:s.id==='briga',blade:s.id==='faca-espada',expandable:['briga','faca-espada'].includes(s.id),expanded:this._expandedSkills.has(s.id)})),summary:creationSummary(attributes,skills,trained)};
+  }
+  async mountContext() {
+    const link=this.actor.system.mount;
+    if(!link?.uuid) return null;
+    const horse=await mountActor(link);
+    const token=link.tokenUuid?await fromUuid(link.tokenUuid):null;
+    return {name:horse?.name??'Montaria indisponível',img:horse?.img??'icons/svg/horse.svg',mounted:link.mounted,tokenName:token?.name??'Automático (se único na cena)'};
+  }
+  async openMount() {
+    const horse=await mountActor(this.actor.system.mount);
+    if(!horse) return ui.notifications.warn('Montaria não encontrada.');
+    horse.sheet.render(true);
+  }
+  async _onDropActor(event,actor) {
+    if(!this.isEditable||!['character','npc'].includes(this.actor.type)||actor.type!=='horse') {ui.notifications.warn('Arraste um cavalo para a ficha de personagem ou NPC.');return null;}
+    await this.actor.update({'system.mount':{uuid:actor.uuid,tokenUuid:actor.token?.uuid??'',mounted:false}});
+    return actor;
+  }
+  static async chooseMount() {
+    if(!this.isEditable) return;
+    const horses=game.actors.filter(actor=>actor.type==='horse'&&actor.testUserPermission(game.user,'LIMITED'));
+    if(!horses.length) return ui.notifications.warn('Crie um cavalo na aba Atores primeiro.');
+    const id=await foundry.applications.api.DialogV2.prompt({window:{title:'Vincular montaria'},content:`<label>Cavalo <select name="horse">${horses.map(h=>`<option value="${h.id}">${foundry.utils.escapeHTML(h.name)}</option>`).join('')}</select></label>`,ok:{label:'Vincular',callback:(e,b,d)=>d.element.querySelector('[name=horse]').value},rejectClose:false});
+    const horse=horses.find(h=>h.id===id);
+    if(horse) await this._onDropActor(null,horse);
+  }
+  static async toggleMount() {
+    if(!this.isEditable||!this.actor.system.mount?.uuid) return;
+    await this.actor.update({'system.mount.mounted':!this.actor.system.mount.mounted});
+  }
+  static async removeMount() {
+    if(this.isEditable) await this.actor.update({'system.mount':{uuid:'',tokenUuid:'',mounted:false}});
+  }
+  static async chooseMountToken() {
+    if(!this.isEditable) return;
+    const horse=await mountActor(this.actor.system.mount);
+    const tokens=[...(canvas.scene?.tokens??[])].filter(t=>t.actor?.type==='horse'&&t.actor.id===horse?.id);
+    if(!tokens.length) return ui.notifications.warn('Coloque o cavalo nesta cena antes de selecionar seu token.');
+    const id=await foundry.applications.api.DialogV2.prompt({window:{title:'Token da montaria nesta cena'},content:`<label>Montaria <select name="mount-token">${tokens.map(t=>`<option value="${t.id}">${foundry.utils.escapeHTML(t.name)} (${t.id.slice(-4)})</option>`).join('')}</select></label>`,ok:{label:'Vincular token',callback:(e,b,d)=>d.element.querySelector('[name=mount-token]').value},rejectClose:false});
+    const token=tokens.find(t=>t.id===id);
+    if(token) await this.actor.update({'system.mount.tokenUuid':token.uuid});
   }
   heldWeapons() {
     return this.actor.items.filter(i=>i.type==='weapon'&&i.system.equipped).sort((a,b)=>Number(b.id===this.actor.system.combat.primaryWeapon)-Number(a.id===this.actor.system.combat.primaryWeapon)||a.sort-b.sort||a.id.localeCompare(b.id));
@@ -285,10 +342,13 @@ export class HorseSheet extends CharacterSheet {
     const context=await foundry.applications.sheets.ActorSheetV2.prototype._prepareContext.call(this,options);
     const actor=this.actor,system=actor.system;
     const gear=[...actor.items.filter(i=>i.type==='weapon').map(i=>({id:i.id,name:i.name,img:i.img,weapon:true,quantity:1,weight:i.system.weight??0})),...system.inventory];
-    return {...context,actor,editable:this.isEditable,editingSkills:this._editingSkills,hasHorseSkills:Object.values(system.trained).some(Boolean),gear,totalWeight:Math.round(gear.reduce((sum,i)=>sum+i.quantity*i.weight,0)*1000)/1000,health:healthSummary(system.health,system.attributes.strength),locations:Object.entries(HORSE_LOCATIONS).map(([id,label])=>({id,label,...system.health.locations[id]})),attributes:Object.entries(HORSE_ATTRIBUTES).map(([id,label])=>({id,label,icon:{strength:'hand-fist',coordination:'crosshairs',intelligence:'brain',luck:'clover'}[id],value:system.attributes[id]})),skills:Object.entries(HORSE_SKILLS).filter(([id])=>this._editingSkills||system.trained[id]).map(([id,label])=>({id,label,value:system.skills[id],trained:system.trained[id]})),tricks:system.tricks};
+    return {...context,actor,tokenImage:this.token?.texture?.src??actor.prototypeToken?.texture?.src??actor.img,editable:this.isEditable,editingSkills:this._editingSkills,hasHorseSkills:Object.values(system.trained).some(Boolean),gear,totalWeight:Math.round(gear.reduce((sum,i)=>sum+i.quantity*i.weight,0)*1000)/1000,health:healthSummary(system.health,system.attributes.strength),locations:Object.entries(HORSE_LOCATIONS).map(([id,label])=>({id,label,...system.health.locations[id]})),attributes:Object.entries(HORSE_ATTRIBUTES).map(([id,label])=>({id,label,icon:{strength:'hand-fist',coordination:'crosshairs',intelligence:'brain',luck:'clover'}[id],value:system.attributes[id]})),skills:Object.entries(HORSE_SKILLS).filter(([id])=>this._editingSkills||system.trained[id]).map(([id,label])=>({id,label,value:system.skills[id],trained:system.trained[id]})),tricks:system.tricks};
   }
   async _onRender(context,options) {
     await super._onRender(context,options);
+    this.element.querySelector('[data-horse-drag]')?.addEventListener('dragstart',event=>{
+      event.dataTransfer.setData('text/plain',JSON.stringify({type:'Actor',uuid:this.actor.uuid}));
+    });
     if(!this.isEditable) return;
     for(const input of this.element.querySelectorAll('input[name]')) input.addEventListener('change',async()=>{
       const value=input.type==='checkbox'?input.checked:input.type==='number'?input.valueAsNumber:input.value;
