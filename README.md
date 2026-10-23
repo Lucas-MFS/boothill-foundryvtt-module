@@ -200,3 +200,7 @@ Deslocamento montado considera feridas em todas as quatro patas: cada leve/séri
 Pontos reais passam a ser saída somente de leitura nas três fichas de atores. Campos regionais contam feridas, não pontos: ferida leve pode causar 0–2 e séria 3–5. Tiros continuam aplicando automaticamente os valores exatos. Alterar contagens manualmente abre diálogo de dano/cura; quantidade e pontos são atualizados juntos, com limites e cancelamento sem alteração. Não converte contagens antigas em pontos, pois o dano original não pode ser inferido. Temporários permanecem editáveis e separados.
 
 Validação: 53 testes, todas as patas, gravidade, ajuste manual válido/inválido e cura. No Foundry, adicionar leve na dianteira esquerda com 1 ponto atualizou ambos; remover com cura de 1 restaurou exatamente a saúde inicial.
+
+## Edição direta da saúde restaurada — 0.12.7
+
+Por solicitação do usuário, pontos de ferimento voltam a ser editáveis diretamente em personagem, NPC e cavalo. Removido diálogo de dano/cura ao editar contagens regionais; essas contagens e os pontos são ajustados separadamente, como antes. Dano por tiros continua somando automaticamente. Mantida correção de movimento pelas quatro patas.

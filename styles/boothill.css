@@ -357,5 +357,3 @@
 .bh-horse-choice .bh-choice-rightLeg {left:69%;top:235px;}
 
 .bh-roll-card .bh-horse-target {display:flex;align-items:center;justify-content:center;gap:7px;width:100%;min-height:32px;margin:8px 0;background:#e4dac6;color:#302b24;border:1px solid #b5ac99;border-radius:4px;}
-
-.boothill .bh-health-points output {display:block;min-height:27px;padding:4px;text-align:center;border-bottom:1px solid var(--bh-rule);font:inherit;color:var(--bh-ink);}
