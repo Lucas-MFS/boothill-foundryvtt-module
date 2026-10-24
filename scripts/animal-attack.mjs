@@ -15,7 +15,7 @@ export async function attackAnimal(event) {
   const health=healthSummary(actor.system.health,actor.system.attributes.strength);
   if(actor.system.attributes.strength<=0||health.unconscious) return ui.notifications.warn('O animal está incapacitado.');
   let judge=0;
-  if(event.shiftKey) judge=await foundry.applications.api.DialogV2.prompt({window:{title:'Ataque do animal'},content:'<label>Modificador do Juiz<input name="modifier" type="number" value="0"></label>',ok:{label:'Atacar',callback:(e,b,d)=>Number(d.element.querySelector('[name=modifier]').value)},rejectClose:false});
+  if(event.shiftKey) judge=await foundry.applications.api.DialogV2.prompt({window:{title:'Ataque do animal'},content:'<label>Modificador<input name="modifier" type="number" value="0"></label>',ok:{label:'Atacar',callback:(e,b,d)=>Number(d.element.querySelector('[name=modifier]').value)},rejectClose:false});
   if(!Number.isInteger(judge)) return;
   const targets=[...game.user.targets];if(targets.length>1) return ui.notifications.warn('Marque apenas um alvo.');
   const token=targets[0]?.document;if(token&&token.actor?.uuid===actor.uuid) return ui.notifications.warn('Escolha outro alvo.');

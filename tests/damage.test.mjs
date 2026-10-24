@@ -42,3 +42,19 @@ test('animal: d6 natural 6 é mortal mesmo com total reduzido; Sorte ainda pode 
  const saved=healthDamage(health,injury,1,5,true);assert.equal(saved.points,1);assert.equal(saved.severity,'Ferimento leve');
  assert.equal(healthDamage(health,injury,undefined,5,false).mortal,false);
 });
+
+test('Juiz aplica ajuste de cobertura e proteção rígida sem dano nem Sorte',async()=>{
+ for(const blocked of [false,true]) {
+  const hooks={},ledger={};globalThis.Hooks={on:(name,fn)=>hooks[name]=fn,once:()=>{}};
+  globalThis.game={user:{id:'gm'},users:{activeGM:{id:'gm'}},messages:new Map()};
+  const h=health();let points=h.points;
+  const actor={type:'character',system:{health:h},getFlag:(s,key)=>ledger[key],update:async changes=>{if('system.health.points' in changes) points=changes['system.health.points'];for(const [key,value] of Object.entries(changes)) if(key.startsWith('flags.boothill.')) ledger[key.slice(15)]=value;}};
+  globalThis.fromUuid=async()=>({documentName:'Token',uuid:'Token.t',name:'Alvo',actor});
+  let data={secondary:true,shot:{wound:0},target:12,die:8,injury:{id:'leftLeg',die:blocked?6:4,location:-1,weapon:0,total:blocked?6:3,severity:'Ferimento sério'}};
+  const source={id:'adjusted',whisper:[],rolls:[],getFlag:()=>data,update:async changes=>{if(changes['flags.boothill.check']) data=changes['flags.boothill.check'];}};game.messages.set(source.id,source);
+  const req={author:{id:'gm',isGM:true},getFlag:(s,key)=>key==='damageRequest'?{messageId:source.id,tokenUuid:'Token.t',adjustment:{cover:blocked?'blocked':'-2',modifier:1}}:false,setFlag:async()=>{},update:async()=>{}};
+  registerDamage(()=>'<card>');hooks.createChatMessage(req);await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(points,blocked?h.points:h.points+2);assert.equal(data.applied.points,blocked?0:2);
+  assert.match(data.applied.severity,blocked?/bloqueado/:/leve/);
+ }
+});

@@ -1,3 +1,4 @@
+import {damageAdjustment} from './damage-adjustment.mjs';
 import {succeeds} from './rules.mjs';
 import {mountedRecipient} from './mounts.mjs';
 import {injuryResult} from './injury.mjs';
@@ -29,14 +30,14 @@ export function damageAuthority() {
 const busy=new Set();
 let queue=Promise.resolve();
 export function queueWorldUpdate(work) {queue=queue.then(work).catch(console.error);return queue;}
-export async function requestDamage(message,tokenUuid) {
+export async function requestDamage(message,tokenUuid,adjustment=null) {
  if(message.getFlag('boothill','check')?.applied) return;
  if(!tokenUuid) return ui.notifications.warn('Selecione exatamente um token para aplicar o dano.');
  const token=await fromUuid(tokenUuid);
  if(token?.documentName!=='Token'||!supportsHealth(token.actor)) return ui.notifications.warn('O token precisa ter uma ficha com saúde compatível.');
  const gm=damageAuthority();
  if(!gm) return ui.notifications.warn('É necessário um Juiz conectado para aplicar o dano. O botão continua disponível.');
- await ChatMessage.create({content:'Aplicação de dano solicitada ao Juiz.',whisper:[game.user.id,gm.id],flags:{boothill:{damageRequest:{messageId:message.id,tokenUuid,processorId:gm.id}}}});
+ await ChatMessage.create({content:'Aplicação de dano solicitada ao Juiz.',whisper:[game.user.id,gm.id],flags:{boothill:{damageRequest:{messageId:message.id,tokenUuid,processorId:gm.id,...(adjustment?{adjustment:damageAdjustment(adjustment)}:{})}}}});
 }
 export function registerDamage(renderCard) {
  const process=async request=>{
@@ -73,15 +74,18 @@ export function registerDamage(renderCard) {
    }
    const actor=token?.actor;
    if(token?.documentName!=='Token'||!supportsHealth(actor)) throw new Error('Alvo sem saúde compatível.');
-   if(actor.type==='wildAnimal'&&!data.animalDefenseApplied) {
-    data={...data,animalDefenseApplied:true,injury:injuryResult(data.injury.die,data.injury.id,(data.shot.wound??0)+actor.system.animal.defense)};
+   const adjustment=damageAdjustment(req.adjustment);
+   const defense=actor.type==='wildAnimal'?actor.system.animal.defense:0;
+   if(req.adjustment||defense) {
+    const base=data.unadjustedInjury??data.injury,total=base.total+adjustment.total+defense;
+    data={...data,unadjustedInjury:base,damageAdjustment:adjustment,defenseAdjustment:defense,injury:{...base,total,severity:total<0?'Arranhão':total<=2?'Ferimento leve':total<=5?'Ferimento sério':'Ferimento mortal'}};
     await message.update({'flags.boothill.check':data,content:renderCard(data)});
    }
    let applied=actor.getFlag('boothill',`damageLedger.${message.id}`);
    let luckRoll;
    if(!applied) {
-    if(data.injury.total>=6||(['horse','wildAnimal'].includes(actor.type)&&data.injury.die===6)) luckRoll=await new Roll('1d20').evaluate();
-    const result=healthDamage(actor.system.health,data.injury,luckRoll?.total,actor.system.attributes?.luck??0,['horse','wildAnimal'].includes(actor.type));
+    if(!adjustment.blocked&&(data.injury.total>=6||(['horse','wildAnimal'].includes(actor.type)&&data.injury.die===6))) luckRoll=await new Roll('1d20').evaluate();
+    const result=adjustment.blocked?{changes:{},points:0,severity:'Proteção rígida: tiro bloqueado',mortal:false}:healthDamage(actor.system.health,data.injury,luckRoll?.total,actor.system.attributes?.luck??0,['horse','wildAnimal'].includes(actor.type));
     applied={tokenUuid:token.uuid,name:token.name,points:result.points,severity:result.severity,mortal:result.mortal,...(luckRoll?{luckDie:luckRoll.total,luck:actor.system.attributes?.luck??0}:{})};
     await actor.update({...result.changes,[`flags.boothill.damageLedger.${message.id}`]:applied});
    }

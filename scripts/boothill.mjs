@@ -14,7 +14,7 @@ import {weaponSummary} from './weapon-rules.mjs';
 import {LOCATIONS,SHOTS,MOVEMENTS,movementDistances,rapidity,handsRequired,canHold,healthSummary,shotTarget} from './combat-rules.mjs';
 async function judgeModifier(event,title) {
   if(!event.shiftKey) return 0;
-  return foundry.applications.api.DialogV2.prompt({window:{title},content:'<label>Modificador do Juiz <input name="modifier" type="number" step="1" value="0"></label>',ok:{label:'Confirmar',callback:(e,b,d)=>Number(d.element.querySelector('[name="modifier"]').value)},rejectClose:false});
+  return foundry.applications.api.DialogV2.prompt({window:{title},content:'<label>Modificador <input name="modifier" type="number" step="1" value="0"></label>',ok:{label:'Confirmar',callback:(e,b,d)=>Number(d.element.querySelector('[name="modifier"]').value)},rejectClose:false});
 }
 class CharacterData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
@@ -332,7 +332,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     if(secret&&!game.user.isGM) return;
     let target=this.actor.system[group][id];
     if(group==='skills'&&!isWorkTrained(id,this.actor.system.skills,this.actor.system.trained)) return ui.notifications.warn('Perícia não treinada.');
-    const modifier=await judgeModifier(event,'Modificador do Juiz');
+    const modifier=await judgeModifier(event,'Modificador');
     if(modifier===null||modifier===undefined||!Number.isInteger(modifier)) return;
     const effect=pendingMeleeModifier(this.actor);
     target+=modifier+effect;

@@ -1,3 +1,4 @@
+import {promptDamageAdjustment} from './damage-adjustment.mjs';
 import {animalAttackCard} from './animal-attack.mjs';
 import {playWeaponSound} from './weapon-audio.mjs';
 import {defectResult,defectCard} from './defects.mjs';
@@ -179,7 +180,10 @@ export function registerChatCards() {
       const selected=canvas.tokens.controlled;
       if(selected.length!==1) return ui.notifications.warn('Selecione exatamente um token (não apenas um alvo).');
       damageButton.disabled=true;
-      try {await requestDamage(message,selected[0].document.uuid);} finally {damageButton.disabled=false;}
+      try {
+        const adjustment=await promptDamageAdjustment(message,selected[0].document);
+        if(adjustment) await requestDamage(message,selected[0].document.uuid,adjustment);
+      } finally {damageButton.disabled=false;}
     });
     const button=content.querySelector('[data-bh-luck]');
     if(!button) return;
