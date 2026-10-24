@@ -20,17 +20,19 @@ test('resolve token único, exige escolha em cópias e encontra cavaleiro',async
  f.rider.system.mount.tokenUuid=f.h.uuid;assert.equal(await mountedToken(f.r),f.h);
  f.rider.system.mount.mounted=false;assert.equal(await mountedRecipient(f.r,'leftLeg',1),null);
 });
-test('Juiz transfere uma vez, rola localização/gravidade e só fere o cavalo',async()=>{
+test('Juiz transfere tiro e dispersão manual uma vez, ferindo apenas o cavalo',async()=>{
+ for(const secondary of [false,true]) {
  const f=sceneFixture(),hooks={},ledger={};let writes=0,riderWrites=0,rolled=0;
  f.horse.system={attributes:{luck:10},health:{points:0,locations:Object.fromEntries(Object.keys(LOCATIONS).map(id=>[id,{light:0,serious:0}]))}};
  f.horse.getFlag=(s,key)=>ledger[key];f.horse.update=async change=>{writes++;for(const [k,v] of Object.entries(change)) if(k.startsWith('flags.boothill.')) ledger[k.slice(15)]=v;};f.rider.update=async()=>riderWrites++;
  globalThis.Hooks={on:(key,fn)=>hooks[key]=fn,once:()=>{}};globalThis.game={user:{id:'gm'},users:{activeGM:{id:'gm'}},messages:new Map()};globalThis.ui={notifications:{error:m=>{throw new Error(m);}}};
  globalThis.Roll=class {constructor(formula){this.formula=formula;}async evaluate(){rolled++;this.total=this.formula==='1d20'?5:2;return this;}};
- let data={target:15,die:10,shot:{wound:0},locationDie:1,locationValue:1,injury:{id:'leftLeg',die:3,total:2,severity:'Ferimento leve'}};
+ let data={secondary,pelletChild:true,target:15,die:10,shot:{model:'sawedOff',wound:0},locationDie:1,locationValue:1,injury:{id:'leftLeg',die:3,total:2,severity:'Ferimento leve'}};
  const message={id:'mounted-source',whisper:[],rolls:[],getFlag:()=>data,update:async change=>{if(change['flags.boothill.check']) data=change['flags.boothill.check'];if(change.rolls) message.rolls=change.rolls;}};game.messages.set(message.id,message);
  const request=()=>({author:{id:'gm',isGM:true},getFlag:(s,key)=>key==='damageRequest'?{messageId:message.id,tokenUuid:f.r.uuid}:false,setFlag:async()=>{},update:async()=>{}});
  registerDamage(()=>'<card>');hooks.createChatMessage(request());hooks.createChatMessage(request());await new Promise(resolve=>setImmediate(resolve));
  assert.equal(writes,1);assert.equal(riderWrites,0);assert.equal(rolled,2);assert.equal(data.mountResolution.toTokenUuid,f.h.uuid);assert.equal(data.injury.id,'leftArm');assert.equal(data.applied.name,'h');
+ }
 });
 test('botão Cavalo transfere antes da gravidade e mostra silhueta do cavalo',async()=>{
  const {registerChatCards,rollCard}=await import('../scripts/chat.mjs');

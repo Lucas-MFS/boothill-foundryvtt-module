@@ -1,3 +1,4 @@
+import {HIT_REGIONS,injuryResult} from './injury.mjs';
 export function isShotgun(data) {return ['shotgun','sawedOff'].includes(data.shot?.model);}
 export function pelletCount(die,range) {
  if(!Number.isInteger(die)||die<1||die>6) throw new Error('Esperado d6.');
@@ -16,4 +17,17 @@ export function pelletsCard(data) {
 export function spreadCard(data) {
  const info=spreadInfo(data);
  return info?`<section class="bh-spread"><h4>Dispersão</h4><p>Alvos até ${info.radius} m do alvo original · Chance secundária ${info.target}.</p><small>O Juiz determina quem está na área. Localização sem ajuste. Nenhum dano secundário é aplicado automaticamente.</small><button type="button" data-bh-pellets="secondary">Rolar contra alvo secundário</button></section>`:'';
+}
+
+export function pelletContext(data) {
+ if(!data.pelletChild) return '';
+ if(!data.secondary) return '<p class="bh-pellet-context"><strong>Alvo original</strong> · localização ajustável</p>';
+ const radius=data.shot?.range==='long'?2:data.shot?.range==='extreme'?5:null;
+ return `<p class="bh-pellet-context"><strong>Alvo adicional</strong>${radius?` · até ${radius} m do alvo original`:''}</p>`;
+}
+export async function resolveSecondaryPellet(data) {
+ if(!data.secondary) return {data,rolls:[]};
+ const location=await new Roll('1d20').evaluate(),severity=await new Roll('1d6').evaluate();
+ const id=HIT_REGIONS.find(([,min,max])=>location.total>=min&&location.total<=max)[0];
+ return {data:{...data,targetTokenUuid:null,locationDie:location.total,locationValue:location.total,injury:injuryResult(severity.total,id,data.shot.wound)},rolls:[location,severity]};
 }

@@ -266,3 +266,9 @@ Atributos recebem ícones de punho (Força), pata (Ataque), impacto (Ferimentos 
 ## Edição de retratos — 0.15.3
 
 Retratos de personagem/NPC, cavalo e animal selvagem agora usam o seletor nativo de imagens no clique para quem pode editar. Usuários sem edição mantêm visualização. Cavalo/animal exibem o retrato do ator, permitindo que a alteração apareça imediatamente; configuração de arte do token permanece no controle nativo do token. Arraste de montaria preservado. Armas e munição já possuíam edição de imagem. Conferido no Foundry: clique no retrato abriu o seletor de imagens; nenhum retrato existente alterado na validação.
+
+## Dispersão com ferimento direto — 0.15.4
+
+PDF físico 39: cada ferimento no alvo original mantém ajuste de localização; apenas locais em alvos adicionais não podem ser modificados. Ao resolver ferimento adicional, d20 de localização e d6 de gravidade são rolados juntos e o cartão mostra diretamente o resultado com Aplicar dano, sem etapa de escolha de membro e sem aplicação automática. Cartões identificam Alvo original/localização ajustável ou Alvo adicional/até 2 m (longo) ou 5 m (extremo) do alvo original. Os vários ferimentos de uma rolagem adicional pertencem ao mesmo alvo; o raio não muda por ferimento.
+
+PDF físico 46: mantida transferência por paridade em montarias. Ao aplicar manualmente ao token de cavaleiro montado, perna/abdômen ímpar transfere para o cavalo, com nova localização, uma única vez. Teste de integração cobre tiro original e ferimento adicional, com escrita apenas na saúde do cavalo e sem repetição. Validação: 62 testes aprovados; 11 testes específicos de dispersão/montaria aprovados após ajuste do caso adicional.

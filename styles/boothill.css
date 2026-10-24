@@ -394,3 +394,4 @@
 .boothill .bh-wild-map .bh-horse-rightLeg {left:87%;top:88%;}
 .boothill .bh-wild-sheet .bh-horse-attributes label {font-size:11px;color:var(--bh-muted);}
 .boothill img.bh-portrait {object-fit:cover;cursor:pointer;}
+.bh-roll-card .bh-pellet-context {margin:10px 0 0;padding:7px;border:1px solid #b5ac99;border-radius:3px;background:#e4dac6;color:#514128;font:12px/1.4 Georgia,serif;}

@@ -1,7 +1,7 @@
 import {animalAttackCard} from './animal-attack.mjs';
 import {playWeaponSound} from './weapon-audio.mjs';
 import {defectResult,defectCard} from './defects.mjs';
-import {isShotgun,pelletCount,spreadInfo,pelletsCard,spreadCard} from './shotgun.mjs';
+import {isShotgun,pelletCount,spreadInfo,pelletsCard,spreadCard,pelletContext,resolveSecondaryPellet} from './shotgun.mjs';
 import {registerDamage,requestDamage} from './damage.mjs';
 import {mountedRecipient} from './mounts.mjs';
 import {selectableLocationChoices,horseLocationChoice,injuryCard,injuryResult} from './injury.mjs';
@@ -19,7 +19,7 @@ export function rollCard(data) {
   const pending=!blocked&&!data.bladeHit&&needsLuck(die,target)&&!Number.isInteger(luckDie);
   const success=!blocked&&(data.bladeHit||succeeds(die,target,luckDie,luck));
   const state=pending||defectPending?'pending':success?'success':'failure';
-  return `<article class="bh-roll-card bh-roll-${state}"><header><span>BOOT HILL</span><div class="bh-roll-title">${data.shot?.img?`<img class="bh-roll-weapon" src="${escape(data.shot.img)}" alt="${escape(data.shot.weaponName??title)}" width="48" height="48">`:''}<h3>${escape(title)}</h3></div></header><div class="bh-roll-score" aria-label="Chance ${target}; rolagem ${die}"><strong>${target}</strong><span>/</span><strong>${die}</strong></div><div class="bh-roll-captions"><span>${data.bladeHit?'Total ajustado':'Chance de acerto'}</span><span>Rolagem · d20</span></div><p class="bh-roll-outcome">${defectPending?'Aguardando verificação de defeito':pending?'Aguardando Sorte':success?'Sucesso':'Falha'}</p>${modifierText(modifiers)}${defectCard(data)}${pending?`<button type="button" data-bh-luck><i class="fas fa-clover" aria-hidden="true"></i> Rolar Sorte <span>${luck}</span></button>`:''}${Number.isInteger(luckDie)?`<div class="bh-luck-result">Sorte <strong>${luck} / ${luckDie}</strong> · ${luckDie<=luck?'Sucesso':'Falha'}</div>`:''}${!defectPending&&!pending&&success?(isShotgun(data)&&!data.pelletChild?pelletsCard(data):injuryCard(data)):''}${!defectPending&&!blocked?spreadCard(data):''}${note?`<small class="bh-roll-note">${escape(note)}</small>`:''}</article>`;
+  return `<article class="bh-roll-card bh-roll-${state}"><header><span>BOOT HILL</span><div class="bh-roll-title">${data.shot?.img?`<img class="bh-roll-weapon" src="${escape(data.shot.img)}" alt="${escape(data.shot.weaponName??title)}" width="48" height="48">`:''}<h3>${escape(title)}</h3></div></header><div class="bh-roll-score" aria-label="Chance ${target}; rolagem ${die}"><strong>${target}</strong><span>/</span><strong>${die}</strong></div><div class="bh-roll-captions"><span>${data.bladeHit?'Total ajustado':'Chance de acerto'}</span><span>Rolagem · d20</span></div><p class="bh-roll-outcome">${defectPending?'Aguardando verificação de defeito':pending?'Aguardando Sorte':success?'Sucesso':'Falha'}</p>${pelletContext(data)}${modifierText(modifiers)}${defectCard(data)}${pending?`<button type="button" data-bh-luck><i class="fas fa-clover" aria-hidden="true"></i> Rolar Sorte <span>${luck}</span></button>`:''}${Number.isInteger(luckDie)?`<div class="bh-luck-result">Sorte <strong>${luck} / ${luckDie}</strong> · ${luckDie<=luck?'Sucesso':'Falha'}</div>`:''}${!defectPending&&!pending&&success?(isShotgun(data)&&!data.pelletChild?pelletsCard(data):injuryCard(data)):''}${!defectPending&&!blocked?spreadCard(data):''}${note?`<small class="bh-roll-note">${escape(note)}</small>`:''}</article>`;
 }
 export async function postCheck(actor,{title,target,roll,modifiers=[],note='',shot=null,whisper=null}) {
   const check={title,target,die:roll.total,luck:actor.system.attributes.luck,modifiers,note,shot};
@@ -115,8 +115,9 @@ export function registerChatCards() {
           } else if(kind==='wound') {
             const index=Number(action.dataset.index);
             if(!Number.isInteger(index)||index<0||index>=current.pelletsCount||current.pelletMessages?.[index]) return;
-            const child={title:`${current.title} · Ferimento ${index+1}/${current.pelletsCount}`,target:current.target,die:current.die,luck:current.luck,...(current.luckDie!==undefined?{luckDie:current.luckDie}:{}),shot:{...current.shot},pelletChild:true,secondary:!!current.secondary,targetTokenUuid:current.targetTokenUuid??null,defectCleared:current.defectCleared??false,modifiers:[],note:current.secondary?'Alvo secundário: dano manual pelo Juiz.':''};
-            const created=await ChatMessage.create({speaker:message.speaker,whisper:message.whisper,blind:message.blind,style:CONST.CHAT_MESSAGE_STYLES.ROLL,rolls:[],content:rollCard(child),flags:{boothill:{check:child}}});
+            const child={title:`${current.title} · Ferimento ${index+1}/${current.pelletsCount}`,target:current.target,die:current.die,luck:current.luck,...(current.luckDie!==undefined?{luckDie:current.luckDie}:{}),shot:{...current.shot},pelletChild:true,secondary:!!current.secondary,targetTokenUuid:current.targetTokenUuid??null,defectCleared:current.defectCleared??false,modifiers:[],note:current.secondary?'Ferimento do mesmo alvo adicional desta rolagem. Ao aplicar, a regra de montaria pode transferi-lo ao cavalo.':''};
+            const resolved=await resolveSecondaryPellet(child);
+            const created=await ChatMessage.create({speaker:message.speaker,whisper:message.whisper,blind:message.blind,style:CONST.CHAT_MESSAGE_STYLES.ROLL,rolls:resolved.rolls,content:rollCard(resolved.data),flags:{boothill:{check:resolved.data}}});
             next.pelletMessages={...current.pelletMessages,[index]:created.id};
           } else return;
           await message.update({content:rollCard(next),'flags.boothill.check':next,...(roll?{rolls:[...message.rolls,roll]}:{})});

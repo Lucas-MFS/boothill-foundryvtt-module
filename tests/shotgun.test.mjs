@@ -32,3 +32,15 @@ test('cada ferimento ganha cartão próprio, secundários sem ajuste e com aplic
  assert.equal((parent.match(/data-bh-pellets="wound"/g)||[]).length,3);
  assert.ok(parent.includes('Criado no chat'));
 });
+
+test('adicionais resolvem localização e gravidade diretamente e exibem raio de dispersão',async()=>{
+ const {resolveSecondaryPellet,pelletContext}=await import('../scripts/shotgun.mjs');
+ const dice=[11,3];globalThis.Roll=class {async evaluate(){return {total:dice.shift()};}};
+ const child={title:'Ferimento adicional',target:10,die:4,luck:7,pelletChild:true,secondary:true,shot:{model:'sawedOff',range:'long',wound:0,mode:'fan',skill:0}};
+ const resolved=await resolveSecondaryPellet(child);
+ assert.equal(resolved.data.locationValue,11);assert.equal(resolved.data.injury.id,'abdomen');assert.equal(resolved.data.injury.total,3);assert.equal(resolved.data.targetTokenUuid,null);
+ const card=rollCard(resolved.data);assert.match(card,/até 2 m do alvo original/);assert.match(card,/data-bh-damage/);assert.doesNotMatch(card,/data-bh-injury/);
+ assert.match(pelletContext({...child,shot:{range:'extreme'}}),/até 5 m/);
+ const primary={...child,secondary:false,shot:{...child.shot,mode:'aimed',skill:5}};
+ assert.equal((await resolveSecondaryPellet(primary)).data,primary);assert.equal(locationAllowance(primary.shot),2);assert.match(pelletContext(primary),/localização ajustável/);
+});
