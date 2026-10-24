@@ -176,13 +176,16 @@ export function registerChatCards() {
       });
     }
     const damageButton=content.querySelector('[data-bh-damage]');
-    damageButton?.addEventListener('click',async()=>{
+    if(damageButton) damageButton.title='Aplicar dano · Shift+clique para ajustar a gravidade';
+    damageButton?.addEventListener('click',async event=>{
       const selected=canvas.tokens.controlled;
       if(selected.length!==1) return ui.notifications.warn('Selecione exatamente um token (não apenas um alvo).');
       damageButton.disabled=true;
       try {
-        const adjustment=await promptDamageAdjustment(message,selected[0].document);
-        if(adjustment) await requestDamage(message,selected[0].document.uuid,adjustment);
+        if(event.shiftKey) {
+          const adjustment=await promptDamageAdjustment(message,selected[0].document);
+          if(adjustment) await requestDamage(message,selected[0].document.uuid,adjustment);
+        } else await requestDamage(message,selected[0].document.uuid);
       } finally {damageButton.disabled=false;}
     });
     const button=content.querySelector('[data-bh-luck]');
