@@ -1,8 +1,10 @@
 # Boot Hill para FoundryVTT
 
-Sistema de jogo independente de Boot Hill 3ª edição, em português brasileiro, para **FoundryVTT 13**.
+Sistema de jogo independente de Boot Hill 3ª edição, em português brasileiro, para **FoundryVTT 14**.
 
 Inclui fichas de personagem, NPC, cavalo e animal selvagem; armas e munição; inventário, ferimentos e rolagens de combate no chat.
+
+Para Foundry 13, use a versão preservada na tag [v0.15.6-foundry13](https://github.com/Lucas-MFS/boothill-foundryvtt-module/tree/v0.15.6-foundry13).
 
 ## Instalação
 
@@ -16,6 +18,6 @@ Crie os atores e arraste armas e munições da aba Itens para suas fichas. No ar
 
 ## Desenvolvimento
 
-Execute `npm test` com Node.js 20 ou superior. Consulte o [histórico resumido](CHANGELOG.md).
+Execute `npm test` com Node.js 24 ou superior. Consulte o [histórico resumido](CHANGELOG.md).
 
 O livro de regras não é distribuído neste repositório.

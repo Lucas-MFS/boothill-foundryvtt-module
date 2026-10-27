@@ -125,7 +125,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     const context=await this.mountContext();
     const horse=context?.sourceUuid?await fromUuid(context.sourceUuid):await mountActor(this.actor.system.mount);
     if(!horse) return ui.notifications.warn('Montaria não encontrada.');
-    horse.sheet.render(true);
+    horse.sheet.render({force:true});
   }
   async _onDropActor(event,actor) {
     if(!this.isEditable||!['character','npc'].includes(this.actor.type)||actor.type!=='horse') {ui.notifications.warn('Arraste um cavalo para a ficha de personagem ou NPC.');return null;}
@@ -286,7 +286,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       await reportReload(this.actor,previous.ammo,next.ammo);
     } finally {this._reloading=false;}
   }
-  static async openWeapon(event,button) { this.actor.items.get(button.dataset.id)?.sheet.render(true); }
+  static async openWeapon(event,button) { this.actor.items.get(button.dataset.id)?.sheet.render({force:true}); }
   static async toggleWeapon(event,button) {
     if(!this.isEditable) return;
     const item=this.actor.items.get(button.dataset.id);
@@ -295,7 +295,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
   static async createWeapon() {
     if(!this.isEditable) return;
     const [item]=await this.actor.createEmbeddedDocuments('Item',[{name:'Nova arma',type:'weapon',img:'icons/svg/sword.svg'}]);
-    item.sheet.render(true);
+    item.sheet.render({force:true});
   }
   static async toggleSkills() {
     if(!this.isEditable) return;
