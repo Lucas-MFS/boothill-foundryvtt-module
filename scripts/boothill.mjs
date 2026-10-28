@@ -1,3 +1,4 @@
+import {remainingHealth,registerHealthResource} from './health-resource.mjs';
 import {attackAnimal} from './animal-attack.mjs';
 import {AmmunitionData,AmmunitionSheet} from './ammunition.mjs';
 import {reloadWithReserve,inventoryItems} from './ammunition-rules.mjs';
@@ -17,6 +18,9 @@ async function judgeModifier(event,title) {
   return foundry.applications.api.DialogV2.prompt({window:{title},content:'<label>Modificador <input name="modifier" type="number" step="1" value="0"></label>',ok:{label:'Confirmar',callback:(e,b,d)=>Number(d.element.querySelector('[name="modifier"]').value)},rejectClose:false});
 }
 class CharacterData extends foundry.abstract.TypeDataModel {
+  prepareDerivedData() {
+    this.hp=remainingHealth(this);
+  }
   static defineSchema() {
     const {SchemaField,NumberField,StringField,BooleanField,ArrayField}=foundry.data.fields;
     const level=()=>new NumberField({required:true,nullable:false,integer:true,min:0,initial:0});
@@ -435,6 +439,8 @@ Hooks.once('init',()=>{
   foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',CharacterSheet,{types:['character'],makeDefault:true,label:'Boot Hill — Personagem de jogador'});
   foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',CharacterSheet,{types:['npc'],makeDefault:true,label:'Boot Hill — NPC'});
 });
+
+registerHealthResource();
 
 // Keep hand limits consistent for both the actor sheet and the embedded item sheet.
 Hooks.on('preUpdateItem',(item,changes)=>{

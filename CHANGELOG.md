@@ -1,6 +1,7 @@
 # Histórico resumido
 
 ## 0.16.0
+- Recurso calculado de saúde restante e configuração automática das barras de tokens e do rastreador de combate.
 - Shift+clique em Rapidez permite escolher Surpreso (−2) ou Completamente surpreso (−4).
 - Compatibilidade declarada com FoundryVTT 14 e chamadas de abertura de fichas atualizadas.
 - Versão 0.15.6 preservada na tag `v0.15.6-foundry13`, sem release publicado.
