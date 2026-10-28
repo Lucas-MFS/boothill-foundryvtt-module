@@ -266,10 +266,10 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     await this.submit();
     const item=this.actor.items.get(button.dataset.id);
     if(item?.type!=='weapon') return;
-    const modifier=await judgeModifier(event,'Rapidez — modificador do Juiz');
+    const modifier=event.shiftKey?await foundry.applications.api.DialogV2.prompt({window:{title:'Rapidez — modificadores'},content:'<div class="form-group"><label><input type="radio" name="surprise" value="-2"> Surpreso (−2)</label></div><div class="form-group"><label><input type="radio" name="surprise" value="-4"> Completamente surpreso (−4)</label></div>',ok:{label:'Confirmar',callback:(e,b,d)=>Number(d.element.querySelector('[name="surprise"]:checked')?.value??0)},rejectClose:false}):0;
     if(!Number.isInteger(modifier)) return;
     const r=this.rapidityFor(item);
-    await ChatMessage.create({speaker:ChatMessage.getSpeaker({actor:this.actor}),content:`<article class="bh-roll-card"><header><span>BOOT HILL</span><h3>Rapidez · ${foundry.utils.escapeHTML(item.name)}</h3></header><div class="bh-rapidity-score">${r.total+modifier}</div>${modifierText([['Arma',r.weapon],['Ferimentos',r.wounds],['Movimento',r.motion],['Duas armas',r.dual],['Juiz',modifier]])}</article>`});
+    await ChatMessage.create({speaker:ChatMessage.getSpeaker({actor:this.actor}),content:`<article class="bh-roll-card"><header><span>BOOT HILL</span><h3>Rapidez · ${foundry.utils.escapeHTML(item.name)}</h3></header><div class="bh-rapidity-score">${r.total+modifier}</div>${modifierText([['Arma',r.weapon],['Ferimentos',r.wounds],['Movimento',r.motion],['Duas armas',r.dual],[modifier===-4?'Completamente surpreso':'Surpreso',modifier]])}</article>`});
   }
   static async reloadWeapon(event,button) {
     if(!this.isEditable||this._reloading) return;
