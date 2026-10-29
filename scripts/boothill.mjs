@@ -1,4 +1,5 @@
 import {remainingHealth,registerHealthResource} from './health-resource.mjs';
+import {registerMovementRuler} from './movement-ruler.mjs';
 import {attackAnimal} from './animal-attack.mjs';
 import {AmmunitionData,AmmunitionSheet} from './ammunition.mjs';
 import {reloadWithReserve,inventoryItems} from './ammunition-rules.mjs';
@@ -441,6 +442,7 @@ Hooks.once('init',()=>{
 });
 
 registerHealthResource();
+registerMovementRuler();
 
 // Keep hand limits consistent for both the actor sheet and the embedded item sheet.
 Hooks.on('preUpdateItem',(item,changes)=>{
