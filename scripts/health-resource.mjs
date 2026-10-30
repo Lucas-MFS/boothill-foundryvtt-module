@@ -1,3 +1,4 @@
+import {t} from './localization.mjs';
 // Derived display resource: the sheet's wound totals remain the source of truth.
 export const HEALTH_BAR='hp';
 export const HEALTH_RESOURCE='hp.value';
@@ -38,7 +39,7 @@ export function registerHealthResource() {
       }
     } catch(error) {
       console.error('Boot Hill | Configuração do recurso de saúde',error);
-      ui.notifications.error('Não foi possível configurar o recurso de saúde dos tokens. Consulte o console.');
+      ui.notifications.error(t("Não foi possível configurar o recurso de saúde dos tokens. Consulte o console."));
     }
   });
 }

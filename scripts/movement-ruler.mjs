@@ -1,3 +1,4 @@
+import {t} from './localization.mjs';
 import {movementDistances,healthSummary} from './combat-rules.mjs';
 const IDS=['crawl','walk','dodge','run','horseWalk','trot','gallop'];
 export const WITHIN=0x299b58,BEYOND=0xd74444;
@@ -68,7 +69,7 @@ export function createMovementRuler(Base) {
 }
 export function registerMovementRuler() {
   Hooks.on('init',()=>{
-    game.settings.register('boothill','movementPeriod',{name:'Régua: duração da rodada',hint:'Define qual coluna de deslocamento limita a indicação verde. O vermelho apenas avisa; não bloqueia o movimento.',scope:'world',config:true,type:String,choices:{combat:'Combate · 6 segundos',firefight:'Tiroteio · 1 segundo'},default:'combat'});
+    game.settings.register('boothill','movementPeriod',{name:t("Régua: duração da rodada"),hint:t("Define qual coluna de deslocamento limita a indicação verde. O vermelho apenas avisa; não bloqueia o movimento."),scope:'world',config:true,type:String,choices:{combat:t("Combate · 6 segundos"),firefight:t("Tiroteio · 1 segundo")},default:'combat'});
     CONFIG.Token.rulerClass=createMovementRuler(CONFIG.Token.rulerClass);
   });
 }

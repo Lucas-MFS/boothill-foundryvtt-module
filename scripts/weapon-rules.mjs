@@ -1,6 +1,7 @@
+import {t,localized} from './localization.mjs';
 // Table 14, Portuguese reference PDF, physical pages 40–41.
 const model=(label,category,capacity,roundsPerLoad,turnsPerLoad,short,long,extreme,speed=0,wound=0)=>({label,category,capacity,roundsPerLoad,turnsPerLoad,short,long,extreme,speed,wound,hands:['rifle','shotgun'].includes(category)?2:1});
-export const WEAPON_MODELS={
+export const WEAPON_MODELS=localized({
   singleAction:model('Revólver de ação simples','revolver',6,3,1,10,20,55,1),
   doubleAction:model('Revólver de ação dupla','revolver',6,3,1,10,20,55),
   capBall:model('Revólver de cápsula embutida','revolver',6,1,3,10,20,55,1),
@@ -19,13 +20,13 @@ export const WEAPON_MODELS={
   buffalo:model('Rifle búfalo','rifle',1,1,1,30,185,550,-2,1),
   shotgun:model('Espingarda','shotgun',2,2,1,10,40,100,-1),
   sawedOff:model('Escopeta','shotgun',2,2,1,7,15,30)
-};
-export const CATEGORIES={revolver:'Revólver',pistol:'Pistola',rifle:'Rifle / carabina',shotgun:'Espingarda / escopeta'};
+});
+export const CATEGORIES=localized({revolver:'Revólver',pistol:'Pistola',rifle:'Rifle / carabina',shotgun:'Espingarda / escopeta'});
 export function reloadTurns(capacity,roundsPerLoad,turnsPerLoad) { return Math.ceil(capacity/roundsPerLoad)*turnsPerLoad; }
 export function weaponSummary(data) {
   const model=WEAPON_MODELS[data.model];
   const missing=Math.max(0,data.capacity-data.ammo);
-  return {category:CATEGORIES[model.category],skill:['rifle','shotgun'].includes(model.category)?'Rifle':'Pistola',
+  return {category:CATEGORIES[model.category],skill:['rifle','shotgun'].includes(model.category)?'Rifle':t("Pistola"),
     fullTurns:reloadTurns(data.capacity,data.roundsPerLoad,data.turnsPerLoad),
     remainingTurns:missing?Math.max(0,reloadTurns(missing,data.roundsPerLoad,data.turnsPerLoad)-data.reloadProgress):0};
 }

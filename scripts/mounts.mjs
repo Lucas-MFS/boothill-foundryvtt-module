@@ -1,3 +1,4 @@
+import {t} from './localization.mjs';
 // Mounted hits: reference PDF physical page 46. Actors remain independent.
 export function transferMountedHit(type,region,value) {
  if(!Number.isInteger(value)) return false;
@@ -12,15 +13,15 @@ export async function mountedToken(riderToken) {
  const link=riderToken.actor?.system.mount;
  if(!link?.mounted) return null;
  const horse=await mountActor(link);
- if(horse?.type!=='horse') throw new Error('Montaria vinculada não encontrada. Corrija o vínculo na ficha.');
+ if(horse?.type!=='horse') throw new Error(t("Montaria vinculada não encontrada. Corrija o vínculo na ficha."));
  const tokens=[...(riderToken.parent?.tokens??[])];
  const specific=link.tokenUuid?await fromUuid(link.tokenUuid):horse.token;
  if(specific) {
-  if(specific.parent?.id!==riderToken.parent?.id||specific.actor?.type!=='horse'||specific.actor.id!==horse.id) throw new Error('O token da montaria não está nesta cena. Escolha o token correto na ficha.');
+  if(specific.parent?.id!==riderToken.parent?.id||specific.actor?.type!=='horse'||specific.actor.id!==horse.id) throw new Error(t("O token da montaria não está nesta cena. Escolha o token correto na ficha."));
   return specific;
  }
  const matches=tokens.filter(t=>t.actor?.type==='horse'&&t.actor.id===horse.id);
- if(matches.length!==1) throw new Error('Escolha o token exato da montaria na ficha do cavaleiro.');
+ if(matches.length!==1) throw new Error(t("Escolha o token exato da montaria na ficha do cavaleiro."));
  return matches[0];
 }
 export async function mountedRecipient(token,region,value) {
@@ -33,6 +34,6 @@ export async function mountedRecipient(token,region,value) {
   if(horse?.id!==token.actor.id) continue;
   if((await mountedToken(rider))?.uuid===token.uuid) riders.push(rider);
  }
- if(riders.length>1) throw new Error('Mais de um cavaleiro está marcado como montado neste cavalo. Corrija os vínculos.');
+ if(riders.length>1) throw new Error(t("Mais de um cavaleiro está marcado como montado neste cavalo. Corrija os vínculos."));
  return riders[0]??null;
 }

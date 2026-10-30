@@ -2,10 +2,14 @@
   "id": "boothill",
   "title": "Boot Hill 3ª Edição — Brasil",
   "description": "Sistema independente de Boot Hill em português brasileiro.",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "compatibility": { "minimum": "14", "verified": "14", "maximum": "14" },
   "authors": [{ "name": "Boot Hill Brasil" }],
   "esmodules": ["scripts/boothill.mjs"],
   "styles": ["styles/boothill.css"],
+  "languages": [
+    {"lang":"pt-BR","name":"Português (Brasil)","path":"lang/pt-BR.json"},
+    {"lang":"en","name":"English","path":"lang/en.json"}
+  ],
   "documentTypes": { "Actor": { "character": {}, "npc": {}, "horse": {}, "wildAnimal": {} }, "Item": { "weapon": {}, "ammunition": {} } }
 }

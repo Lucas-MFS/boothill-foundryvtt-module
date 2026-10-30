@@ -1,3 +1,4 @@
+import {t} from './localization.mjs';
 import {advanceReload} from './weapon-rules.mjs';
 export function reloadPlan(weapon,quantity) {
  if(weapon.ammo>=weapon.capacity) return {...advanceReload(weapon),used:0};
@@ -17,9 +18,9 @@ export async function reloadWithReserve(item,previous) {
  try {
   const data={...item.system.toObject(),...previous};
   const reserve=actor.items.get(item.system.ammunitionId);
-  if(data.ammo<data.capacity&&reserve?.type!=='ammunition') {ui.notifications.warn('Selecione a munição desta arma no painel de armamento.');return null;}
+  if(data.ammo<data.capacity&&reserve?.type!=='ammunition') {ui.notifications.warn(t("Selecione a munição desta arma no painel de armamento."));return null;}
   const next=reloadPlan(data,reserve?.system.quantity??0);
-  if(!next) {ui.notifications.warn('A munição selecionada acabou.');return null;}
+  if(!next) {ui.notifications.warn(t("A munição selecionada acabou."));return null;}
   await actor.updateEmbeddedDocuments('Item',[
    {_id:item.id,'system.ammo':next.ammo,'system.reloadProgress':next.reloadProgress},
    ...(next.used?[{_id:reserve.id,'system.quantity':reserve.system.quantity-next.used}]:[])

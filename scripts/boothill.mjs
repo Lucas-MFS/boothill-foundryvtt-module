@@ -1,3 +1,4 @@
+import {t,localized} from './localization.mjs';
 import {remainingHealth,registerHealthResource} from './health-resource.mjs';
 import {registerMovementRuler} from './movement-ruler.mjs';
 import {attackAnimal} from './animal-attack.mjs';
@@ -16,7 +17,7 @@ import {weaponSummary} from './weapon-rules.mjs';
 import {LOCATIONS,SHOTS,MOVEMENTS,movementDistances,rapidity,handsRequired,canHold,healthSummary,shotTarget} from './combat-rules.mjs';
 async function judgeModifier(event,title) {
   if(!event.shiftKey) return 0;
-  return foundry.applications.api.DialogV2.prompt({window:{title},content:'<label>Modificador <input name="modifier" type="number" step="1" value="0"></label>',ok:{label:'Confirmar',callback:(e,b,d)=>Number(d.element.querySelector('[name="modifier"]').value)},rejectClose:false});
+  return foundry.applications.api.DialogV2.prompt({window:{title},content:`<label>${t("Modificador")} <input name="modifier" type="number" step="1" value="0"></label>`,ok:{label:t("Confirmar"),callback:(e,b,d)=>Number(d.element.querySelector('[name="modifier"]').value)},rejectClose:false});
 }
 class CharacterData extends foundry.abstract.TypeDataModel {
   prepareDerivedData() {
@@ -42,7 +43,7 @@ class NpcData extends CharacterData {
 export class CharacterSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
   get isNpc() {return this.actor.type==='npc';}
   get attributeLabels() {return this.isNpc?NPC_ATTRIBUTES:ATTRIBUTES;}
-  get title() { return `${this.isNpc?'NPC':'Personagem'}: ${this.actor.name}`; }
+  get title() { return `${this.isNpc?'NPC':t("Personagem")}: ${this.actor.name}`; }
   _editingSkills=false;
   _expandedWeapons=new Set();
   _expandedSkills=new Set();
@@ -106,16 +107,16 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     const health=healthSummary(this.actor.system.health,attributes.strength);
     const equipped=this.heldWeapons();
     const armament=this.actor.items.filter(i=>i.type==='weapon').map(i=>({id:i.id,name:i.name,img:i.img,system:i.system,hands:handsRequired(i.system),...weaponSummary(i.system)}));
-    const held=equipped.map((i,index)=>({...armament.find(a=>a.id===i.id),rapidity:this.rapidityFor(i).total,hand:handsRequired(i.system)===2?'Duas mãos':index===0?'Mão principal':'Mão secundária',shots:Object.entries(SHOTS).map(([mode,shot])=>{
+    const held=equipped.map((i,index)=>({...armament.find(a=>a.id===i.id),rapidity:this.rapidityFor(i).total,hand:handsRequired(i.system)===2?t("Duas mãos"):index===0?t("Mão principal"):t("Mão secundária"),shots:Object.entries(SHOTS).map(([mode,shot])=>{
       const chance=this.chanceFor(i,mode);
       return {mode,...shot,chance:chance?.total,supported:chance!==null,available:chance!==null&&!health.unconscious&&i.system.ammo>0};
     })}));
-    for(const row of armament) {row.ammunition=this.actor.items.filter(i=>i.type==='ammunition').map(i=>({id:i.id,label:`${i.name} (${i.system.quantity})`,selected:i.id===row.system.ammunitionId}));row.expanded=this._expandedWeapons.has(row.id);row.held=held.find(h=>h.id===row.id);row.handLabel=row.held?.hand??'Guardada';row.offhandPenalty=row.held?.hand==='Mão secundária'&&!this.actor.system.identity.ambidextrous;row.ranges=Object.entries({close:'Próximo (até 2 m)',short:`Curto (até ${row.system.short} m)`,long:`Longo (até ${row.system.long} m)`,extreme:`Extremo (até ${row.system.extreme} m)`}).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range}));}
+    for(const row of armament) {row.ammunition=this.actor.items.filter(i=>i.type==='ammunition').map(i=>({id:i.id,label:`${i.name} (${i.system.quantity})`,selected:i.id===row.system.ammunitionId}));row.expanded=this._expandedWeapons.has(row.id);row.held=held.find(h=>h.id===row.id);row.handLabel=row.held?.hand??t("Guardada");row.offhandPenalty=row.held?.hand===t("Mão secundária")&&!this.actor.system.identity.ambidextrous;row.ranges=Object.entries({close:t("Próximo (até 2 m)"),short:`${t("Curto (até")} ${row.system.short} m)`,long:`${t("Longo (até")} ${row.system.long} m)`,extreme:`${t("Extremo (até")} ${row.system.extreme} m)`}).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range}));}
     const gear=[...inventoryItems(this.actor),...(this.actor.system.inventory??[])];
     const totalWeight=gear.reduce((n,i)=>n+i.quantity*i.weight,0);
     const mount=await this.mountContext();
-    const ranges={close:'Próximo (até 2 m)',short:'Curto',long:'Longo',extreme:'Extremo'};
-    return {...context,mount,mountedTab:this._movementTab==='mounted',meleeEffect:pendingMeleeModifier(this.actor),meleeHolds:(this.actor.getFlag('boothill','meleeState')?.holds??[]).map(h=>HOLDS[h.kind]).join(' · '),outgoingHold:this.actor.getFlag('boothill','meleeState')?.outgoing,isNpc:this.isNpc,canGenerate:!this.isNpc||game.user.isGM,extraAttributes:this.isNpc&&game.user.isGM?['greed','bravery'].map(id=>({id,label:NPC_ATTRIBUTES[id],value:attributes[id]})):[],gear,totalWeight:Math.round(totalWeight*1000)/1000,movementActive:this.actor.system.combat.movement!=='still',movements:Object.entries(MOVEMENTS).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.movement})),distances:movementDistances(this.actor.system.health,mount?.health,mount?.strength).map((r,index)=>({...r,group:index<4?'foot':'mounted',visible:(index<4?'foot':'mounted')===this._movementTab,id:['crawl','walk','dodge','run','horseWalk','trot','gallop'][index],combat:r.combat?`${r.combat.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—',firefight:r.firefight?`${r.firefight.toLocaleString('pt-BR',{maximumFractionDigits:3})} m`:'—'})),actor:this.actor,editable:this.isEditable,editingSkills:this._editingSkills,hasWork:work.length>0,work,held,hasTwo:held.length===2,health,locations:Object.entries(LOCATIONS).map(([id,label])=>({id,label,...this.actor.system.health.locations[id]})),ranges:Object.entries(ranges).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range})),armament,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,icon:icons[id],value:attributes[id]})),weapons:rows.filter(s=>s.kind==='weapon').map(s=>({...s,brawl:s.id==='briga',blade:s.id==='faca-espada',expandable:['briga','faca-espada'].includes(s.id),expanded:this._expandedSkills.has(s.id)})),summary:creationSummary(attributes,skills,trained)};
+    const ranges={close:t("Próximo (até 2 m)"),short:t("Curto"),long:t("Longo"),extreme:t("Extremo")};
+    return {...context,mount,mountedTab:this._movementTab==='mounted',meleeEffect:pendingMeleeModifier(this.actor),meleeHolds:(this.actor.getFlag('boothill','meleeState')?.holds??[]).map(h=>HOLDS[h.kind]).join(' · '),outgoingHold:this.actor.getFlag('boothill','meleeState')?.outgoing,isNpc:this.isNpc,canGenerate:!this.isNpc||game.user.isGM,extraAttributes:this.isNpc&&game.user.isGM?['greed','bravery'].map(id=>({id,label:NPC_ATTRIBUTES[id],value:attributes[id]})):[],gear,totalWeight:Math.round(totalWeight*1000)/1000,movementActive:this.actor.system.combat.movement!=='still',movements:Object.entries(MOVEMENTS).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.movement})),distances:movementDistances(this.actor.system.health,mount?.health,mount?.strength).map((r,index)=>({...r,group:index<4?'foot':'mounted',visible:(index<4?'foot':'mounted')===this._movementTab,id:['crawl','walk','dodge','run','horseWalk','trot','gallop'][index],combat:r.combat?`${r.combat.toLocaleString(globalThis.game?.i18n?.lang??'pt-BR',{maximumFractionDigits:3})} m`:'—',firefight:r.firefight?`${r.firefight.toLocaleString(globalThis.game?.i18n?.lang??'pt-BR',{maximumFractionDigits:3})} m`:'—'})),actor:this.actor,editable:this.isEditable,editingSkills:this._editingSkills,hasWork:work.length>0,work,held,hasTwo:held.length===2,health,locations:Object.entries(LOCATIONS).map(([id,label])=>({id,label,...this.actor.system.health.locations[id]})),ranges:Object.entries(ranges).map(([id,label])=>({id,label,selected:id===this.actor.system.combat.range})),armament,attributes:Object.entries(ATTRIBUTES).map(([id,label])=>({id,label,icon:icons[id],value:attributes[id]})),weapons:rows.filter(s=>s.kind==='weapon').map(s=>({...s,brawl:s.id==='briga',blade:s.id==='faca-espada',expandable:['briga','faca-espada'].includes(s.id),expanded:this._expandedSkills.has(s.id)})),summary:creationSummary(attributes,skills,trained)};
   }
   async mountContext() {
     const link=this.actor.system.mount;
@@ -124,24 +125,24 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     const token=link.tokenUuid?await fromUuid(link.tokenUuid):null;
     const candidates=[...(globalThis.canvas?.scene?.tokens??[])].filter(t=>t.actor?.type==='horse'&&t.actor.id===horse?.id);
     const source=token?.actor?.id===horse?.id?token.actor:horse?.token?horse:candidates.length===1?candidates[0].actor:horse;
-    return {name:horse?.name??'Montaria indisponível',img:horse?.img??'icons/svg/horse.svg',mounted:link.mounted,tokenName:token?.name??'Automático (se único na cena)',health:source?.system?.health,strength:source?.system?.attributes?.strength,sourceUuid:source?.uuid};
+    return {name:horse?.name??t("Montaria indisponível"),img:horse?.img??'icons/svg/horse.svg',mounted:link.mounted,tokenName:token?.name??t("Automático (se único na cena)"),health:source?.system?.health,strength:source?.system?.attributes?.strength,sourceUuid:source?.uuid};
   }
   async openMount() {
     const context=await this.mountContext();
     const horse=context?.sourceUuid?await fromUuid(context.sourceUuid):await mountActor(this.actor.system.mount);
-    if(!horse) return ui.notifications.warn('Montaria não encontrada.');
+    if(!horse) return ui.notifications.warn(t("Montaria não encontrada."));
     horse.sheet.render({force:true});
   }
   async _onDropActor(event,actor) {
-    if(!this.isEditable||!['character','npc'].includes(this.actor.type)||actor.type!=='horse') {ui.notifications.warn('Arraste um cavalo para a ficha de personagem ou NPC.');return null;}
+    if(!this.isEditable||!['character','npc'].includes(this.actor.type)||actor.type!=='horse') {ui.notifications.warn(t("Arraste um cavalo para a ficha de personagem ou NPC."));return null;}
     await this.actor.update({'system.mount':{uuid:actor.uuid,tokenUuid:actor.token?.uuid??'',mounted:false}});
     return actor;
   }
   static async chooseMount() {
     if(!this.isEditable) return;
     const horses=game.actors.filter(actor=>actor.type==='horse'&&actor.testUserPermission(game.user,'LIMITED'));
-    if(!horses.length) return ui.notifications.warn('Crie um cavalo na aba Atores primeiro.');
-    const id=await foundry.applications.api.DialogV2.prompt({window:{title:'Vincular montaria'},content:`<label>Cavalo <select name="horse">${horses.map(h=>`<option value="${h.id}">${foundry.utils.escapeHTML(h.name)}</option>`).join('')}</select></label>`,ok:{label:'Vincular',callback:(e,b,d)=>d.element.querySelector('[name=horse]').value},rejectClose:false});
+    if(!horses.length) return ui.notifications.warn(t("Crie um cavalo na aba Atores primeiro."));
+    const id=await foundry.applications.api.DialogV2.prompt({window:{title:t("Vincular montaria")},content:`<label>${t("Cavalo")} <select name="horse">${horses.map(h=>`<option value="${h.id}">${foundry.utils.escapeHTML(h.name)}</option>`).join('')}</select></label>`,ok:{label:t("Vincular"),callback:(e,b,d)=>d.element.querySelector('[name=horse]').value},rejectClose:false});
     const horse=horses.find(h=>h.id===id);
     if(horse) await this._onDropActor(null,horse);
   }
@@ -156,8 +157,8 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     if(!this.isEditable) return;
     const horse=await mountActor(this.actor.system.mount);
     const tokens=[...(canvas.scene?.tokens??[])].filter(t=>t.actor?.type==='horse'&&t.actor.id===horse?.id);
-    if(!tokens.length) return ui.notifications.warn('Coloque o cavalo nesta cena antes de selecionar seu token.');
-    const id=await foundry.applications.api.DialogV2.prompt({window:{title:'Token da montaria nesta cena'},content:`<label>Montaria <select name="mount-token">${tokens.map(t=>`<option value="${t.id}">${foundry.utils.escapeHTML(t.name)} (${t.id.slice(-4)})</option>`).join('')}</select></label>`,ok:{label:'Vincular token',callback:(e,b,d)=>d.element.querySelector('[name=mount-token]').value},rejectClose:false});
+    if(!tokens.length) return ui.notifications.warn(t("Coloque o cavalo nesta cena antes de selecionar seu token."));
+    const id=await foundry.applications.api.DialogV2.prompt({window:{title:t("Token da montaria nesta cena")},content:`<label>${t("Montaria")} <select name="mount-token">${tokens.map(t=>`<option value="${t.id}">${foundry.utils.escapeHTML(t.name)} (${t.id.slice(-4)})</option>`).join('')}</select></label>`,ok:{label:t("Vincular token"),callback:(e,b,d)=>d.element.querySelector('[name=mount-token]').value},rejectClose:false});
     const token=tokens.find(t=>t.id===id);
     if(token) await this.actor.update({'system.mount.tokenUuid':token.uuid});
   }
@@ -207,14 +208,14 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     if(!Object.hasOwn(MOVEMENTS,id)) return;
     const combat=game.combat;
     await this.actor.update({'system.combat.movement':id,'system.combat.movementRound':combat?.round??null,'system.combat.movementCombat':combat?.id??''});
-    const verb={crawl:'rastejando',walk:'andando',dodge:'esquivando',run:'correndo',horseWalk:'andando a cavalo',trot:'trotando',gallop:'galopando'}[id];
-    await ChatMessage.create({speaker:ChatMessage.getSpeaker({actor:this.actor}),content:`${foundry.utils.escapeHTML(this.actor.name)} está ${verb}.`});
+    const verb={crawl:t("rastejando"),walk:t("andando"),dodge:t("esquivando"),run:t("correndo"),horseWalk:t("andando a cavalo"),trot:t("trotando"),gallop:t("galopando")}[id];
+    await ChatMessage.create({speaker:ChatMessage.getSpeaker({actor:this.actor}),content:`${foundry.utils.escapeHTML(this.actor.name)} ${t("está")} ${verb}.`});
   }
   static async clearMovement() {if(this.isEditable) await this.actor.update({'system.combat.movement':'still','system.combat.movementRound':null,'system.combat.movementCombat':''});}
   static async addGear() {
     if(!this.isEditable) return;
     const name=this.element.querySelector('[data-gear-name]').value.trim(),weight=Number(this.element.querySelector('[data-gear-weight]').value),quantity=Number(this.element.querySelector('[data-gear-quantity]').value);
-    if(!name||!Number.isFinite(weight)||weight<0||!Number.isInteger(quantity)||quantity<1) return ui.notifications.warn('Preencha nome, quantidade e peso válidos.');
+    if(!name||!Number.isFinite(weight)||weight<0||!Number.isInteger(quantity)||quantity<1) return ui.notifications.warn(t("Preencha nome, quantidade e peso válidos."));
     await this.actor.update({'system.inventory':[...this.actor.system.inventory,{id:foundry.utils.randomID(),name,weight,quantity}]});
   }
   static async removeGear(event,button) {
@@ -242,11 +243,11 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       await this.submit();
       const item=this.actor.items.get(button.dataset.id),mode=button.dataset.mode;
       if(item?.type!=='weapon'||!Object.hasOwn(SHOTS,mode)) return;
-      if(healthSummary(this.actor.system.health,this.actor.system.attributes.strength).unconscious) return ui.notifications.warn('O personagem atingiu o limite de ferimentos e está desmaiado.');
+      if(healthSummary(this.actor.system.health,this.actor.system.attributes.strength).unconscious) return ui.notifications.warn(t("O personagem atingiu o limite de ferimentos e está desmaiado."));
       const chance=this.chanceFor(item,mode);
-      if(!chance) return ui.notifications.warn('Empunhadura inválida ou tipo de tiro indisponível para esta arma.');
-      if(item.system.malfunction) return ui.notifications.warn('A arma precisa ser destravada ou limpa pela ficha do item.');
-      if(!item.system.ammo) return ui.notifications.warn('A arma está descarregada.');
+      if(!chance) return ui.notifications.warn(t("Empunhadura inválida ou tipo de tiro indisponível para esta arma."));
+      if(item.system.malfunction) return ui.notifications.warn(t("A arma precisa ser destravada ou limpa pela ficha do item."));
+      if(!item.system.ammo) return ui.notifications.warn(t("A arma está descarregada."));
       const modifier=await judgeModifier(event,`${SHOTS[mode].label} — ${item.name}`);
       if(modifier===null||modifier===undefined||!Number.isInteger(modifier)) return;
       if(!item.system.ammo||!item.system.equipped) return;
@@ -258,7 +259,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       await item.update({'system.ammo':item.system.ammo-1,'system.reloadProgress':0});
       if(roll.total!==20) await playWeaponSound(item.system);
       await postCheck(this.actor,{title:`${item.name} · ${SHOTS[mode].label}`,target,roll,
-        modifiers:[['Perícia',current.training],['Duas armas',current.twoWeapons],['Mão inábil',current.offhand],['Ferimentos',current.woundPenalty],['Alcance',current.distance],['Dispersão',current.spread],['Movimento',current.movementPenalty],['Efeito de briga',current.effect],['Juiz',modifier]],
+        modifiers:[[t("Perícia"),current.training],[t("Duas armas"),current.twoWeapons],[t("Mão inábil"),current.offhand],[t("Ferimentos"),current.woundPenalty],[t("Alcance"),current.distance],[t("Dispersão"),current.spread],[t("Movimento"),current.movementPenalty],[t("Efeito de briga"),current.effect],[t("Juiz"),modifier]],
         shot:{img:item.img,weaponName:item.name,audio:shotAudio(item.system),weaponUuid:item.uuid,actorUuid:this.actor.uuid,ammoBefore,model:item.system.model,mode,range:this.actor.system.combat.range,skill:this.actor.system.skills[weaponSummary(item.system).skill==='Rifle'?'rifle':'pistola'],wound:item.system.wound},note:''});
     } finally {this._firing=false;}
   }
@@ -271,10 +272,10 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     await this.submit();
     const item=this.actor.items.get(button.dataset.id);
     if(item?.type!=='weapon') return;
-    const modifier=event.shiftKey?await foundry.applications.api.DialogV2.prompt({window:{title:'Rapidez — modificadores'},content:'<div class="form-group"><label><input type="radio" name="surprise" value="-2"> Surpreso (−2)</label></div><div class="form-group"><label><input type="radio" name="surprise" value="-4"> Completamente surpreso (−4)</label></div>',ok:{label:'Confirmar',callback:(e,b,d)=>Number(d.element.querySelector('[name="surprise"]:checked')?.value??0)},rejectClose:false}):0;
+    const modifier=event.shiftKey?await foundry.applications.api.DialogV2.prompt({window:{title:t("Rapidez — modificadores")},content:`<div class="form-group"><label><input type="radio" name="surprise" value="-2"> ${t("Surpreso (−2)")}</label></div><div class="form-group"><label><input type="radio" name="surprise" value="-4"> ${t("Completamente surpreso (−4)")}</label></div>`,ok:{label:t("Confirmar"),callback:(e,b,d)=>Number(d.element.querySelector('[name="surprise"]:checked')?.value??0)},rejectClose:false}):0;
     if(!Number.isInteger(modifier)) return;
     const r=this.rapidityFor(item);
-    await ChatMessage.create({speaker:ChatMessage.getSpeaker({actor:this.actor}),content:`<article class="bh-roll-card"><header><span>BOOT HILL</span><h3>Rapidez · ${foundry.utils.escapeHTML(item.name)}</h3></header><div class="bh-rapidity-score">${r.total+modifier}</div>${modifierText([['Arma',r.weapon],['Ferimentos',r.wounds],['Movimento',r.motion],['Duas armas',r.dual],[modifier===-4?'Completamente surpreso':'Surpreso',modifier]])}</article>`});
+    await ChatMessage.create({speaker:ChatMessage.getSpeaker({actor:this.actor}),content:`<article class="bh-roll-card"><header><span>BOOT HILL</span><h3>${t("Rapidez ·")} ${foundry.utils.escapeHTML(item.name)}</h3></header><div class="bh-rapidity-score">${r.total+modifier}</div>${modifierText([[t("Arma"),r.weapon],[t("Ferimentos"),r.wounds],[t("Movimento"),r.motion],[t("Duas armas"),r.dual],[modifier===-4?t("Completamente surpreso"):t("Surpreso"),modifier]])}</article>`});
   }
   static async reloadWeapon(event,button) {
     if(!this.isEditable||this._reloading) return;
@@ -299,7 +300,7 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
   }
   static async createWeapon() {
     if(!this.isEditable) return;
-    const [item]=await this.actor.createEmbeddedDocuments('Item',[{name:'Nova arma',type:'weapon',img:'icons/svg/sword.svg'}]);
+    const [item]=await this.actor.createEmbeddedDocuments('Item',[{name:t("Nova arma"),type:'weapon',img:'icons/svg/sword.svg'}]);
     item.sheet.render({force:true});
   }
   static async toggleSkills() {
@@ -310,13 +311,13 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
   }
   static async generate() {
     if(!this.isEditable||(this.isNpc&&!game.user.isGM)) return;
-    if(Object.values(this.actor.system.attributes).some(n=>n>0)&&!await foundry.applications.api.DialogV2.confirm({window:{title:'Gerar atributos'},content:`<p>${this.isNpc?'Substituir os atributos do NPC por novas rolagens de 2d10?':'Substituir os cinco atributos pelo método 1?'}</p>`})) return;
+    if(Object.values(this.actor.system.attributes).some(n=>n>0)&&!await foundry.applications.api.DialogV2.confirm({window:{title:t("Gerar atributos")},content:`<p>${this.isNpc?t("Substituir os atributos do NPC por novas rolagens de 2d10?"):t("Substituir os cinco atributos pelo método 1?")}</p>`})) return;
     const update={};
     for(const id of Object.keys(this.attributeLabels)) {
       const roll=await new Roll('2d10').evaluate();
       const value=(this.isNpc?generatedNpcScore:generatedScore)(roll.total,['stature','luck'].includes(id));
       update[`system.attributes.${id}`]=value;
-      await roll.toMessage({speaker:ChatMessage.getSpeaker({actor:this.actor}),flavor:`Geração: ${this.attributeLabels[id]} → ${value}`,...(this.isNpc?{whisper:game.users.filter(u=>u.isGM).map(u=>u.id)}:{})});
+      await roll.toMessage({speaker:ChatMessage.getSpeaker({actor:this.actor}),flavor:`${t("Geração:")} ${this.attributeLabels[id]} → ${value}`,...(this.isNpc?{whisper:game.users.filter(u=>u.isGM).map(u=>u.id)}:{})});
     }
     await this.actor.update(update);
   }
@@ -324,10 +325,10 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     if(!this.isEditable) return;
     const skill=SKILLS.find(s=>s.id===button.dataset.id&&s.kind==='work');
     if(!skill) return;
-    if(this.actor.system.skills[skill.id]>0&&!await foundry.applications.api.DialogV2.confirm({window:{title:skill.label},content:'<p>Substituir o nível atual?</p>'})) return;
+    if(this.actor.system.skills[skill.id]>0&&!await foundry.applications.api.DialogV2.confirm({window:{title:skill.label},content:`<p>${t("Substituir o nível atual?")}</p>`})) return;
     const roll=await new Roll('2d10').evaluate(),value=(this.isNpc?generatedNpcScore:generatedScore)(roll.total);
     await this.actor.update({[`system.skills.${skill.id}`]:value,[`system.trained.${skill.id}`]:true});
-    await roll.toMessage({speaker:ChatMessage.getSpeaker({actor:this.actor}),flavor:`Nível: ${skill.label} → ${value}`});
+    await roll.toMessage({speaker:ChatMessage.getSpeaker({actor:this.actor}),flavor:`${t("Nível:")} ${skill.label} → ${value}`});
   }
   static async check(event,button) {
     if(!this.isEditable) return;
@@ -336,19 +337,19 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     const secret=this.isNpc&&group==='attributes'&&['greed','bravery'].includes(id);
     if(secret&&!game.user.isGM) return;
     let target=this.actor.system[group][id];
-    if(group==='skills'&&!isWorkTrained(id,this.actor.system.skills,this.actor.system.trained)) return ui.notifications.warn('Perícia não treinada.');
-    const modifier=await judgeModifier(event,'Modificador');
+    if(group==='skills'&&!isWorkTrained(id,this.actor.system.skills,this.actor.system.trained)) return ui.notifications.warn(t("Perícia não treinada."));
+    const modifier=await judgeModifier(event,t("Modificador"));
     if(modifier===null||modifier===undefined||!Number.isInteger(modifier)) return;
     const effect=pendingMeleeModifier(this.actor);
     target+=modifier+effect;
     const roll=await new Roll('1d20').evaluate();
     await consumeMeleeModifier(this.actor);
-    await postCheck(this.actor,{title:group==='attributes'?this.attributeLabels[id]:skill.label,target,roll,modifiers:[['Efeito de briga',effect],['Juiz',modifier]],...(secret?{whisper:game.users.filter(u=>u.isGM).map(u=>u.id)}:{})});
+    await postCheck(this.actor,{title:group==='attributes'?this.attributeLabels[id]:skill.label,target,roll,modifiers:[[t("Efeito de briga"),effect],[t("Juiz"),modifier]],...(secret?{whisper:game.users.filter(u=>u.isGM).map(u=>u.id)}:{})});
   }
 }
-export const HORSE_ATTRIBUTES={strength:'Força',coordination:'Coordenação',intelligence:'Inteligência',luck:'Sorte'};
-export const HORSE_SKILLS={herding:'Pastoreio',cutting:'Corte',swimming:'Natação',gunfire:'Explosão'};
-export const HORSE_LOCATIONS={head:'Cabeça',leftShoulder:'Ombro esq.',rightShoulder:'Ombro dir.',chest:'Peito',abdomen:'Abdômen',leftArm:'Dianteira esq.',rightArm:'Dianteira dir.',leftLeg:'Traseira esq.',rightLeg:'Traseira dir.'};
+export const HORSE_ATTRIBUTES=localized({strength:'Força',coordination:'Coordenação',intelligence:'Inteligência',luck:'Sorte'});
+export const HORSE_SKILLS=localized({herding:'Pastoreio',cutting:'Corte',swimming:'Natação',gunfire:'Explosão'});
+export const HORSE_LOCATIONS=localized({head:'Cabeça',leftShoulder:'Ombro esq.',rightShoulder:'Ombro dir.',chest:'Peito',abdomen:'Abdômen',leftArm:'Dianteira esq.',rightArm:'Dianteira dir.',leftLeg:'Traseira esq.',rightLeg:'Traseira dir.'});
 export class HorseData extends CharacterData {
   static defineSchema() {
     const schema=super.defineSchema(),{SchemaField,NumberField,BooleanField,ArrayField,StringField}=foundry.data.fields;
@@ -362,7 +363,7 @@ export class HorseData extends CharacterData {
   }
 }
 export class HorseSheet extends CharacterSheet {
-  get title() {return `Cavalo: ${this.actor.name}`;}
+  get title() {return `${t("Cavalo:")} ${this.actor.name}`;}
   static DEFAULT_OPTIONS={classes:['boothill','bh-horse-sheet'],position:{width:912,height:960},actions:{check:HorseSheet.check,addTrick:HorseSheet.addTrick,removeTrick:HorseSheet.removeTrick}};
   static PARTS={main:{template:'systems/boothill/templates/horse.hbs',scrollable:['.bh-body']}};
   async _prepareContext(options) {
@@ -398,10 +399,10 @@ export class HorseSheet extends CharacterSheet {
       title=HORSE_SKILLS[id];target=trained[id]?skills[id]:id==='swimming'?Math.ceil(attributes.strength/2):id==='gunfire'?attributes.intelligence:null;
       if(id==='gunfire'&&trained[id]&&attributes.intelligence>=target) target=attributes.intelligence+3;
     } else if(group==='tricks') {const trick=tricks.find(t=>t.id===id);target=trick?.level;title=trick?.name;}
-    if(!Number.isFinite(target)) return ui.notifications.warn('Marque esta perícia como treinada para rolá-la.');
+    if(!Number.isFinite(target)) return ui.notifications.warn(t("Marque esta perícia como treinada para rolá-la."));
     const modifier=await judgeModifier(event,title);
     if(!Number.isInteger(modifier)) return;
-    await postCheck(this.actor,{title,target:target+modifier,roll:await new Roll('1d20').evaluate(),modifiers:[['Juiz',modifier]]});
+    await postCheck(this.actor,{title,target:target+modifier,roll:await new Roll('1d20').evaluate(),modifiers:[[t("Juiz"),modifier]]});
   }
   static async addTrick() {
     if(!this.isEditable) return;
@@ -419,7 +420,7 @@ export class WildAnimalData extends HorseData {
  }
 }
 export class WildAnimalSheet extends HorseSheet {
- get title() {return `Animal selvagem: ${this.actor.name}`;}
+ get title() {return `${t("Animal selvagem:")} ${this.actor.name}`;}
  static DEFAULT_OPTIONS={classes:['boothill','bh-horse-sheet','bh-wild-sheet'],actions:{attackAnimal}};
  static PARTS={main:{template:'systems/boothill/templates/wild-animal.hbs',scrollable:['.bh-body']}};
  async _prepareContext(options) {return {...await super._prepareContext(options),animal:this.actor.system.animal};}
@@ -431,14 +432,14 @@ Hooks.once('init',()=>{
   CONFIG.Actor.dataModels.npc=NpcData;
   CONFIG.Actor.dataModels.horse=HorseData;
   CONFIG.Actor.dataModels.wildAnimal=WildAnimalData;
-  foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',WildAnimalSheet,{types:['wildAnimal'],makeDefault:true,label:'Boot Hill — Animal selvagem'});
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',WildAnimalSheet,{types:['wildAnimal'],makeDefault:true,label:t("Boot Hill — Animal selvagem")});
   CONFIG.Item.dataModels.weapon=WeaponData;
   CONFIG.Item.dataModels.ammunition=AmmunitionData;
-  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item,'boothill',AmmunitionSheet,{types:['ammunition'],makeDefault:true,label:'Boot Hill — Munição'});
-  foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',HorseSheet,{types:['horse'],makeDefault:true,label:'Boot Hill — Cavalo'});
-  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item,'boothill',WeaponSheet,{types:['weapon'],makeDefault:true,label:'Boot Hill — Arma'});
-  foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',CharacterSheet,{types:['character'],makeDefault:true,label:'Boot Hill — Personagem de jogador'});
-  foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',CharacterSheet,{types:['npc'],makeDefault:true,label:'Boot Hill — NPC'});
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item,'boothill',AmmunitionSheet,{types:['ammunition'],makeDefault:true,label:t("Boot Hill — Munição")});
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',HorseSheet,{types:['horse'],makeDefault:true,label:t("Boot Hill — Cavalo")});
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Item,'boothill',WeaponSheet,{types:['weapon'],makeDefault:true,label:t("Boot Hill — Arma")});
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',CharacterSheet,{types:['character'],makeDefault:true,label:t("Boot Hill — Personagem de jogador")});
+  foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor,'boothill',CharacterSheet,{types:['npc'],makeDefault:true,label:t("Boot Hill — NPC")});
 });
 
 registerHealthResource();
@@ -448,7 +449,7 @@ registerMovementRuler();
 Hooks.on('preUpdateItem',(item,changes)=>{
   if(item.type!=='weapon'||!item.parent) return;
   const data=foundry.utils.mergeObject(item.system.toObject(),foundry.utils.expandObject(changes).system??{},{inplace:false});
-  if(!canHold(item.parent.items.filter(i=>i.type==='weapon'),data,item.id)) {ui.notifications.warn('As mãos já estão ocupadas: use até duas armas de uma mão ou uma de duas mãos.');item.sheet.render({force:true});return false;}
+  if(!canHold(item.parent.items.filter(i=>i.type==='weapon'),data,item.id)) {ui.notifications.warn(t("As mãos já estão ocupadas: use até duas armas de uma mão ou uma de duas mãos."));item.sheet.render({force:true});return false;}
 });
 Hooks.on('preCreateItem',(item)=>{
   if(item.type==='weapon'&&item.parent&&!canHold(item.parent.items.filter(i=>i.type==='weapon'),item.system,item.id)) item.updateSource({'system.equipped':false});

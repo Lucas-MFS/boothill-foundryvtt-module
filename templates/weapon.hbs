@@ -1,31 +1,31 @@
 <section class="bh-page">
   <header class="bh-header bh-item-header">
-    <img class="bh-item-image" src="{{item.img}}" alt="Imagem de {{item.name}}" data-edit="img" {{#if editable}}data-action="editImage" role="button" aria-label="Alterar imagem da arma" title="Alterar imagem da arma"{{/if}}>
-    <div class="bh-identity"><label class="bh-name">Nome da arma<input name="name" value="{{item.name}}" {{#unless editable}}disabled{{/unless}}></label><div class="bh-item-meta"><span>{{category}} · {{skill}}</span><label class="bh-handed"><input type="checkbox" name="system.equipped" {{checked system.equipped}} {{#unless editable}}disabled{{/unless}}> Equipada</label></div></div>
+    <img class="bh-item-image" src="{{item.img}}" alt="{{localize 'BOOTHILL.Text.7dbd591c'}} {{item.name}}" data-edit="img" {{#if editable}}data-action="editImage" role="button" aria-label="{{localize 'BOOTHILL.Text.5641e9f8'}}" title="{{localize 'BOOTHILL.Text.5641e9f8'}}"{{/if}}>
+    <div class="bh-identity"><label class="bh-name">{{localize 'BOOTHILL.Text.a2d6d41c'}}<input name="name" value="{{item.name}}" {{#unless editable}}disabled{{/unless}}></label><div class="bh-item-meta"><span>{{category}} · {{skill}}</span><label class="bh-handed"><input type="checkbox" name="system.equipped" {{checked system.equipped}} {{#unless editable}}disabled{{/unless}}> {{localize 'BOOTHILL.Text.eae69435'}}</label></div></div>
   </header>
   <div class="bh-body bh-compact-weapon">
     <fieldset class="bh-weapon-fields bh-weapon-model" {{#unless editable}}disabled{{/unless}}>
-      <label>Modelo<select name="system.model" title="Trocar o modelo aplica os valores da tabela de armas.">{{#each models}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
-      <label>Peso (kg)<input type="number" min="0" step="0.01" name="system.weight" value="{{system.weight}}"></label><label>Calibre<input name="system.caliber" value="{{system.caliber}}" placeholder="Ex.: .45 Colt"></label>
-      <label>Empunhadura<select name="system.hands">{{#each grips}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+      <label>{{localize 'BOOTHILL.Text.dcd228f'}}<select name="system.model" title="{{localize 'BOOTHILL.Text.c33109cc'}}">{{#each models}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+      <label>{{localize 'BOOTHILL.Text.8b23c081'}}<input type="number" min="0" step="0.01" name="system.weight" value="{{system.weight}}"></label><label>{{localize 'BOOTHILL.Text.3305c389'}}<input name="system.caliber" value="{{system.caliber}}" placeholder="{{localize 'BOOTHILL.Text.bb048c19'}}"></label>
+      <label>{{localize 'BOOTHILL.Text.1e519b03'}}<select name="system.hands">{{#each grips}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
     </fieldset>
-    <section class="bh-section bh-weapon-section"><h2>Munição & recarga</h2>
+    <section class="bh-section bh-weapon-section"><h2>{{localize 'BOOTHILL.Text.eae3cc8a'}}</h2>
       <fieldset class="bh-weapon-fields bh-weapon-numbers" {{#unless editable}}disabled{{/unless}}>
-        <label>Capacidade<input type="number" name="system.capacity" aria-label="Capacidade máxima" value="{{system.capacity}}" min="1" step="1"></label>
-        <label>Carregada<input type="number" name="system.ammo" aria-label="Munição carregada" value="{{system.ammo}}" min="0" max="{{system.capacity}}" step="1"></label>
-        <label>Balas / etapa<input type="number" name="system.roundsPerLoad" aria-label="Balas por etapa de recarga" value="{{system.roundsPerLoad}}" min="1" step="1"></label>
-        <label>Turnos / etapa<input type="number" name="system.turnsPerLoad" aria-label="Turnos por etapa" value="{{system.turnsPerLoad}}" min="1" step="1"></label>
+        <label>{{localize 'BOOTHILL.Text.a77f2b4e'}}<input type="number" name="system.capacity" aria-label="{{localize 'BOOTHILL.Text.355c83a5'}}" value="{{system.capacity}}" min="1" step="1"></label>
+        <label>{{localize 'BOOTHILL.Text.cdda471f'}}<input type="number" name="system.ammo" aria-label="{{localize 'BOOTHILL.Text.a3c4a705'}}" value="{{system.ammo}}" min="0" max="{{system.capacity}}" step="1"></label>
+        <label>{{localize 'BOOTHILL.Text.de92a71a'}}<input type="number" name="system.roundsPerLoad" aria-label="{{localize 'BOOTHILL.Text.6b8e8ca0'}}" value="{{system.roundsPerLoad}}" min="1" step="1"></label>
+        <label>{{localize 'BOOTHILL.Text.68c58d66'}}<input type="number" name="system.turnsPerLoad" aria-label="{{localize 'BOOTHILL.Text.2e874016'}}" value="{{system.turnsPerLoad}}" min="1" step="1"></label>
       </fieldset>
-      <div class="bh-reload-summary" title="Recarga desde vazia até a capacidade máxima, em turnos de combate de 6 segundos."><strong>Recarga completa: {{fullTurns}} turno(s)</strong><span>Restante: {{remainingTurns}} · Etapa: {{system.reloadProgress}}/{{system.turnsPerLoad}}</span></div>
-      <div class="bh-weapon-actions"><button type="button" data-action="reload" {{#unless editable}}disabled{{/unless}}><i class="fas fa-rotate" aria-hidden="true"></i> Recarregar 1 turno</button><button type="button" data-action="spend" {{#unless editable}}disabled{{/unless}}>Gastar 1 disparo</button><span>1 turno = 6 s</span></div>
+      <div class="bh-reload-summary" title="{{localize 'BOOTHILL.Text.49ed9ad5'}}"><strong>{{localize 'BOOTHILL.Text.db282e95'}} {{fullTurns}} {{localize 'BOOTHILL.Text.e3502d1'}}</strong><span>{{localize 'BOOTHILL.Text.b58440af'}} {{remainingTurns}} {{localize 'BOOTHILL.Text.12ddd499'}} {{system.reloadProgress}}/{{system.turnsPerLoad}}</span></div>
+      <div class="bh-weapon-actions"><button type="button" data-action="reload" {{#unless editable}}disabled{{/unless}}><i class="fas fa-rotate" aria-hidden="true"></i> {{localize 'BOOTHILL.Text.62f38414'}}</button><button type="button" data-action="spend" {{#unless editable}}disabled{{/unless}}>{{localize 'BOOTHILL.Text.6624f76a'}}</button><span>{{localize 'BOOTHILL.Text.7bbd05d4'}}</span></div>
     </section>
-    <section class="bh-section bh-weapon-section"><h2>Alcances & modificadores</h2>
+    <section class="bh-section bh-weapon-section"><h2>{{localize 'BOOTHILL.Text.8d44f39e'}}</h2>
       <fieldset class="bh-weapon-fields bh-ranges" {{#unless editable}}disabled{{/unless}}>
-        <label>Curto (m)<input type="number" name="system.short" value="{{system.short}}" min="0" step="1"></label><label>Longo (m)<input type="number" name="system.long" value="{{system.long}}" min="0" step="1"></label><label>Extremo (m)<input type="number" name="system.extreme" value="{{system.extreme}}" min="0" step="1"></label>
-        <label>Rapidez<input type="number" name="system.speed" value="{{system.speed}}" min="-2" max="2" step="1"></label><label>Ferimento<input type="number" name="system.wound" value="{{system.wound}}" min="-10" step="1"></label>
+        <label>{{localize 'BOOTHILL.Text.afa17fe'}}<input type="number" name="system.short" value="{{system.short}}" min="0" step="1"></label><label>{{localize 'BOOTHILL.Text.a4bcc3fe'}}<input type="number" name="system.long" value="{{system.long}}" min="0" step="1"></label><label>{{localize 'BOOTHILL.Text.17630b33'}}<input type="number" name="system.extreme" value="{{system.extreme}}" min="0" step="1"></label>
+        <label>{{localize 'BOOTHILL.Text.fc5a17fa'}}<input type="number" name="system.speed" value="{{system.speed}}" min="-2" max="2" step="1"></label><label>{{localize 'BOOTHILL.Text.5f1106d2'}}<input type="number" name="system.wound" value="{{system.wound}}" min="-10" step="1"></label>
       </fieldset>
     </section>
-    {{#if system.malfunction}}<p class="bh-note">Defeito: {{#if system.jamProgress}}{{system.jamProgress}} turno(s) de limpeza concluído(s).{{/if}} <button type="button" data-action="clearDefect" {{#unless editable}}disabled{{/unless}}>Destravar (1 turno) / confirmar limpeza</button></p>{{/if}}
-    <details class="bh-weapon-notes"><summary>Observações</summary><textarea aria-label="Observações" name="system.notes" rows="2" {{#unless editable}}disabled{{/unless}}>{{system.notes}}</textarea></details>
+    {{#if system.malfunction}}<p class="bh-note">{{localize 'BOOTHILL.Text.e05d21d3'}} {{#if system.jamProgress}}{{system.jamProgress}} {{localize 'BOOTHILL.Text.16583efa'}}{{/if}} <button type="button" data-action="clearDefect" {{#unless editable}}disabled{{/unless}}>{{localize 'BOOTHILL.Text.c34f2331'}}</button></p>{{/if}}
+    <details class="bh-weapon-notes"><summary>{{localize 'BOOTHILL.Text.b610a7fb'}}</summary><textarea aria-label="{{localize 'BOOTHILL.Text.b610a7fb'}}" name="system.notes" rows="2" {{#unless editable}}disabled{{/unless}}>{{system.notes}}</textarea></details>
   </div>
 </section>

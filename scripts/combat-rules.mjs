@@ -1,7 +1,8 @@
+import {t,localized} from './localization.mjs';
 import {WEAPON_MODELS} from './weapon-rules.mjs';
-export const LOCATIONS={head:'Cabeça',leftShoulder:'Ombro esq.',rightShoulder:'Ombro dir.',leftArm:'Braço esq.',rightArm:'Braço dir.',chest:'Peito',abdomen:'Abdômen',leftLeg:'Perna esq.',rightLeg:'Perna dir.'};
-export const SHOTS={aimed:{label:'Tiro Mirado',beats:6},steady:{label:'Tiro Firme',beats:3},draw:{label:'Tiro de Saque',beats:2},fan:{label:'Tiro Seguido',beats:1}};
-export const MOVEMENTS={crawl:'Rastejando',still:'Parado',walk:'Andando a pé',dodge:'Esquivando',run:'Correndo',horseWalk:'Montaria: andando',trot:'Montaria: trotando',gallop:'Montaria: galopando'};
+export const LOCATIONS=localized({head:'Cabeça',leftShoulder:'Ombro esq.',rightShoulder:'Ombro dir.',leftArm:'Braço esq.',rightArm:'Braço dir.',chest:'Peito',abdomen:'Abdômen',leftLeg:'Perna esq.',rightLeg:'Perna dir.'});
+export const SHOTS=localized({aimed:{label:'Tiro Mirado',beats:6},steady:{label:'Tiro Firme',beats:3},draw:{label:'Tiro de Saque',beats:2},fan:{label:'Tiro Seguido',beats:1}});
+export const MOVEMENTS=localized({crawl:'Rastejando',still:'Parado',walk:'Andando a pé',dodge:'Esquivando',run:'Correndo',horseWalk:'Montaria: andando',trot:'Montaria: trotando',gallop:'Montaria: galopando'});
 export function movementDistances(health,mountHealth=null,mountStrength=0) {
   const {leftLeg,rightLeg}=health.locations;
   const legWounds=leftLeg.light+rightLeg.light+leftLeg.serious+rightLeg.serious;
@@ -15,7 +16,7 @@ export function movementDistances(health,mountHealth=null,mountStrength=0) {
   const stopped=mountHealth&&healthSummary(mountHealth,mountStrength).unconscious;
   const walkRatio=stopped||seriousPaws>=2?0:1/2**pawWounds;
   const fastRatio=stopped||seriousPaws>0?0:1/2**(pawWounds+otherSerious);
-  return [{label:'Rastejar',combat:2,firefight:.3},{label:'Andar',combat:both?0:6/2**legWounds,firefight:both?0:1/2**legWounds},{label:'Esquivar',combat:legSerious?0:12/2**(legWounds+other),firefight:legSerious?0:3/2**(legWounds+other)},{label:'Correr',combat:legSerious?0:24/2**(legWounds+other),firefight:legSerious?0:4/2**(legWounds+other)},{label:'Montado: andar',combat:8*walkRatio,firefight:walkRatio},{label:'Montado: trotar',combat:16*fastRatio,firefight:3*fastRatio},{label:'Montado: galopar',combat:32*fastRatio,firefight:5*fastRatio}];
+  return [{label:t("Rastejar"),combat:2,firefight:.3},{label:t("Andar"),combat:both?0:6/2**legWounds,firefight:both?0:1/2**legWounds},{label:t("Esquivar"),combat:legSerious?0:12/2**(legWounds+other),firefight:legSerious?0:3/2**(legWounds+other)},{label:t("Correr"),combat:legSerious?0:24/2**(legWounds+other),firefight:legSerious?0:4/2**(legWounds+other)},{label:t("Montado: andar"),combat:8*walkRatio,firefight:walkRatio},{label:t("Montado: trotar"),combat:16*fastRatio,firefight:3*fastRatio},{label:t("Montado: galopar"),combat:32*fastRatio,firefight:5*fastRatio}];
 }
 export function rapidity({coordination,weapon,woundPenalty=0,movement='still',dual=false}) {
   const motion=['walk','horseWalk','trot'].includes(movement)?-1:['run','gallop'].includes(movement)?-3:0;

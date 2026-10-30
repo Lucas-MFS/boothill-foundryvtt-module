@@ -1,6 +1,6 @@
 # Boot Hill para FoundryVTT
 
-Sistema de jogo independente de Boot Hill 3ª edição, em português brasileiro, para **FoundryVTT 14**.
+Sistema de jogo independente de Boot Hill 3ª edição, em português brasileiro e inglês, para **FoundryVTT 14**.
 
 Inclui fichas de personagem, NPC, cavalo e animal selvagem; armas e munição; inventário, ferimentos e rolagens de combate no chat.
 
@@ -11,6 +11,8 @@ Para Foundry 13, use a versão preservada na tag [v0.15.6-foundry13](https://git
 Copie os arquivos para `Data/systems/boothill/`, reinicie o Foundry e escolha Boot Hill ao criar um mundo. As alterações ficam na pasta do sistema, sem modificar o núcleo do Foundry.
 
 ## Uso
+
+Selecione **Português (Brasil)** ou **English** na configuração de idioma do Foundry. Nomes e anotações escritos pelos jogadores são preservados.
 
 Crie os atores e arraste armas e munições da aba Itens para suas fichas. No armamento, clique na linha da arma para abrir as opções e selecionar a reserva de munição.
 

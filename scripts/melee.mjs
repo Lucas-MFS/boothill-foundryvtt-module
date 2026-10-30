@@ -1,3 +1,4 @@
+import {t} from './localization.mjs';
 import {damageAuthority,queueWorldUpdate,supportsHealth} from './damage.mjs';
 import {HOLDS} from './melee-rules.mjs';
 function meleeAuthority() {
@@ -7,12 +8,12 @@ function meleeAuthority() {
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function meleeCard(data) {
  const r=data.result;
- return `<article class="bh-roll-card"><header><span>BOOT HILL</span><h3>${esc(data.title)}</h3></header><div class="bh-rapidity-score">${r.total}</div><small>d20 ${r.die} · Linha ${r.row??'automática'}</small><p class="bh-roll-outcome">${esc(r.label)}</p><small class="bh-roll-modifiers">${(r.modifiers??[]).filter(([,v])=>v).map(([k,v])=>`${esc(k)} ${v>0?'+':''}${v}`).join(' · ')}</small><p>${esc(data.targetName)}: ${r.damage} ponto(s) temporário(s) · Próxima rolagem ${r.opponentEffect>0?'+':''}${r.opponentEffect}</p>${r.selfDamage||r.selfEffect?`<small>Atacante: ${r.selfDamage} ponto(s) temporário(s) · Próxima rolagem ${r.selfEffect}</small>`:''}${data.applied?'<small>Dano e efeitos aplicados.</small>':'<button type="button" data-bh-melee-apply>Aplicar golpe e efeitos</button>'}<small class="bh-roll-note">Corpo a corpo: menos de 2 m; distância conferida pelo Juiz.</small></article>`;
+ return `<article class="bh-roll-card"><header><span>BOOT HILL</span><h3>${esc(data.title)}</h3></header><div class="bh-rapidity-score">${r.total}</div><small>d20 ${r.die} ${t("· Linha")} ${r.row??t("automática")}</small><p class="bh-roll-outcome">${esc(t(r.label))}</p><small class="bh-roll-modifiers">${(r.modifiers??[]).filter(([,v])=>v).map(([k,v])=>`${esc(t(k))} ${v>0?'+':''}${v}`).join(' · ')}</small><p>${esc(data.targetName)}: ${r.damage} ${t("ponto(s) temporário(s) · Próxima rolagem")} ${r.opponentEffect>0?'+':''}${r.opponentEffect}</p>${r.selfDamage||r.selfEffect?`<small>${t("Atacante:")} ${r.selfDamage} ${t("ponto(s) temporário(s) · Próxima rolagem")} ${r.selfEffect}</small>`:''}${data.applied?`<small>${t("Dano e efeitos aplicados.")}</small>`:`<button type="button" data-bh-melee-apply>${t("Aplicar golpe e efeitos")}</button>`}<small class="bh-roll-note">${t("Corpo a corpo: menos de 2 m; distância conferida pelo Juiz.")}</small></article>`;
 }
 export async function requestMelee(message) {
  const gm=meleeAuthority();
- if(!gm) return ui.notifications.warn('Conecte um Juiz para aplicar o golpe e seus efeitos.');
- await ChatMessage.create({content:'Aplicação de golpe solicitada.',whisper:[game.user.id,gm.id],flags:{boothill:{meleeRequest:{messageId:message.id,processorId:gm.id}}}});
+ if(!gm) return ui.notifications.warn(t("Conecte um Juiz para aplicar o golpe e seus efeitos."));
+ await ChatMessage.create({content:t("Aplicação de golpe solicitada."),whisper:[game.user.id,gm.id],flags:{boothill:{meleeRequest:{messageId:message.id,processorId:gm.id}}}});
 }
 export async function consumeMeleeModifier(actor) {
  const {pendingMeleeModifier}=await import('./melee-rules.mjs');
@@ -32,7 +33,7 @@ export function registerMelee() {
   if(!supportsHealth(source)||token?.documentName!=='Token'||!supportsHealth(target)||source.uuid===target.uuid) return;
   if(!request.author.isGM&&!source.testUserPermission(request.author,'OWNER')) return;
   const r=data.result,state=source.getFlag('boothill','meleeState')??{};
-  if(data.maintain&&!target.getFlag('boothill','meleeState')?.holds?.some(h=>h.source===source.uuid&&h.kind===r.hold)) return ui.notifications.warn('A chave já foi desfeita.');
+  if(data.maintain&&!target.getFlag('boothill','meleeState')?.holds?.some(h=>h.source===source.uuid&&h.kind===r.hold)) return ui.notifications.warn(t("A chave já foi desfeita."));
   const stamp={combatId:game.combat?.id??null,round:game.combat?.round??null};
   const changeState=(actor,damage,modifier,holds,outgoing)=>{
    const current=actor.getFlag('boothill','meleeState')??{};
@@ -54,7 +55,7 @@ export function registerMelee() {
    if(old) await old.update({'flags.boothill.meleeState.holds':(old.getFlag('boothill','meleeState')?.holds??[]).filter(h=>h.source!==source.uuid)});
   }
   const next={...data,applied:true};await message.update({'flags.boothill.melee':next,content:meleeCard(next)});
-  await request.update({'flags.boothill.meleeDone':true,content:'Golpe e efeitos aplicados.'});
+  await request.update({'flags.boothill.meleeDone':true,content:t("Golpe e efeitos aplicados.")});
  };
  const schedule=request=>queueWorldUpdate(()=>process(request));
  Hooks.on('createChatMessage',schedule);

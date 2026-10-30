@@ -1,3 +1,4 @@
+import {t} from './localization.mjs';
 export class AmmunitionData extends foundry.abstract.TypeDataModel {
  static defineSchema() {
   const {NumberField,StringField}=foundry.data.fields;
@@ -5,7 +6,7 @@ export class AmmunitionData extends foundry.abstract.TypeDataModel {
  }
 }
 export class AmmunitionSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ItemSheetV2) {
- get title() {return `Munição: ${this.document.name}`;}
+ get title() {return `${t("Munição:")} ${this.document.name}`;}
  static DEFAULT_OPTIONS={classes:['boothill','bh-weapon-sheet'],tag:'form',position:{width:440,height:350},form:{submitOnChange:true,closeOnSubmit:false}};
  static PARTS={main:{template:'systems/boothill/templates/ammunition.hbs'}};
  async _prepareContext(options) {return {...await super._prepareContext(options),item:this.document,system:this.document.system,editable:this.isEditable};}

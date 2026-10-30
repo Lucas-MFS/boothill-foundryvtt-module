@@ -1,5 +1,8 @@
 # Histórico resumido
 
+## 0.16.1
+- Traduções nativas em português brasileiro e inglês para fichas, configurações, diálogos e mensagens do sistema.
+
 ## 0.16.0
 - Régua de movimento verde/vermelha conforme deslocamento declarado, ferimentos e montaria; escolha de combate ou tiroteio nas configurações.
 - Recurso calculado de saúde restante e configuração automática das barras de tokens e do rastreador de combate.

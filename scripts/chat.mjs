@@ -1,3 +1,4 @@
+import {t} from './localization.mjs';
 import {promptDamageAdjustment} from './damage-adjustment.mjs';
 import {animalAttackCard} from './animal-attack.mjs';
 import {playWeaponSound} from './weapon-audio.mjs';
@@ -10,7 +11,7 @@ import {needsLuck,succeeds} from './rules.mjs';
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function modifierText(entries=[]) {
   const rows=entries.filter(([,value])=>Number.isFinite(value)&&value!==0);
-  return rows.length?`<small class="bh-roll-modifiers">${rows.map(([label,value])=>`${escape(label)} ${value>0?'+':''}${value}`).join(' · ')}</small>`:'';
+  return rows.length?`<small class="bh-roll-modifiers">${rows.map(([label,value])=>`${escape(t(label))} ${value>0?'+':''}${value}`).join(' · ')}</small>`:'';
 }
 export function rollCard(data) {
   if(data.animalAttack) return animalAttackCard(data);
@@ -20,7 +21,7 @@ export function rollCard(data) {
   const pending=!blocked&&!data.bladeHit&&needsLuck(die,target)&&!Number.isInteger(luckDie);
   const success=!blocked&&(data.bladeHit||succeeds(die,target,luckDie,luck));
   const state=pending||defectPending?'pending':success?'success':'failure';
-  return `<article class="bh-roll-card bh-roll-${state}"><header><span>BOOT HILL</span><div class="bh-roll-title">${data.shot?.img?`<img class="bh-roll-weapon" src="${escape(data.shot.img)}" alt="${escape(data.shot.weaponName??title)}" width="48" height="48">`:''}<h3>${escape(title)}</h3></div></header><div class="bh-roll-score" aria-label="Chance ${target}; rolagem ${die}"><strong>${target}</strong><span>/</span><strong>${die}</strong></div><div class="bh-roll-captions"><span>${data.bladeHit?'Total ajustado':'Chance de acerto'}</span><span>Rolagem · d20</span></div><p class="bh-roll-outcome">${defectPending?'Aguardando verificação de defeito':pending?'Aguardando Sorte':success?'Sucesso':'Falha'}</p>${pelletContext(data)}${modifierText(modifiers)}${defectCard(data)}${pending?`<button type="button" data-bh-luck><i class="fas fa-clover" aria-hidden="true"></i> Rolar Sorte <span>${luck}</span></button>`:''}${Number.isInteger(luckDie)?`<div class="bh-luck-result">Sorte <strong>${luck} / ${luckDie}</strong> · ${luckDie<=luck?'Sucesso':'Falha'}</div>`:''}${!defectPending&&!pending&&success?(isShotgun(data)&&!data.pelletChild?pelletsCard(data):injuryCard(data)):''}${!defectPending&&!blocked?spreadCard(data):''}${note?`<small class="bh-roll-note">${escape(note)}</small>`:''}</article>`;
+  return `<article class="bh-roll-card bh-roll-${state}"><header><span>BOOT HILL</span><div class="bh-roll-title">${data.shot?.img?`<img class="bh-roll-weapon" src="${escape(data.shot.img)}" alt="${escape(data.shot.weaponName??title)}" width="48" height="48">`:''}<h3>${escape(title)}</h3></div></header><div class="bh-roll-score" aria-label="Chance ${target}${t("; rolagem")} ${die}"><strong>${target}</strong><span>/</span><strong>${die}</strong></div><div class="bh-roll-captions"><span>${data.bladeHit?t("Total ajustado"):t("Chance de acerto")}</span><span>${t("Rolagem · d20")}</span></div><p class="bh-roll-outcome">${defectPending?t("Aguardando verificação de defeito"):pending?t("Aguardando Sorte"):success?t("Sucesso"):t("Falha")}</p>${pelletContext(data)}${modifierText(modifiers)}${defectCard(data)}${pending?`<button type="button" data-bh-luck><i class="fas fa-clover" aria-hidden="true"></i> ${t("Rolar Sorte")} <span>${luck}</span></button>`:''}${Number.isInteger(luckDie)?`<div class="bh-luck-result">${t("Sorte")} <strong>${luck} / ${luckDie}</strong> · ${luckDie<=luck?t("Sucesso"):t("Falha")}</div>`:''}${!defectPending&&!pending&&success?(isShotgun(data)&&!data.pelletChild?pelletsCard(data):injuryCard(data)):''}${!defectPending&&!blocked?spreadCard(data):''}${note?`<small class="bh-roll-note">${escape(note)}</small>`:''}</article>`;
 }
 export async function postCheck(actor,{title,target,roll,modifiers=[],note='',shot=null,whisper=null}) {
   const check={title,target,die:roll.total,luck:actor.system.attributes.luck,modifiers,note,shot};
@@ -50,17 +51,17 @@ export function registerChatCards() {
             if(!item&&!current.shot.weaponUuid) {
               const actor=game.actors.get(message.speaker.actor);
               const weapons=actor?.items.filter(i=>i.type==='weapon')??[];
-              if(!weapons.length) return ui.notifications.warn('Arma original indisponível.');
-              const choice=await foundry.applications.api.DialogV2.prompt({window:{title:'Disparo antigo · identificar arma'},content:`<label>Arma <select name="weapon">${weapons.map(w=>`<option value="${escape(w.id)}">${escape(w.name)}</option>`).join('')}</select></label><label>Balas antes deste tiro <input type="number" name="ammo" min="1" step="1" value="2"></label>`,ok:{label:'Verificar defeito',callback:(e,b,d)=>({id:d.element.querySelector('[name=weapon]').value,ammo:Number(d.element.querySelector('[name=ammo]').value)})},rejectClose:false});
+              if(!weapons.length) return ui.notifications.warn(t("Arma original indisponível."));
+              const choice=await foundry.applications.api.DialogV2.prompt({window:{title:t("Disparo antigo · identificar arma")},content:`<label>${t("Arma")} <select name="weapon">${weapons.map(w=>`<option value="${escape(w.id)}">${escape(w.name)}</option>`).join('')}</select></label><label>${t("Balas antes deste tiro")} <input type="number" name="ammo" min="1" step="1" value="2"></label>`,ok:{label:t("Verificar defeito"),callback:(e,b,d)=>({id:d.element.querySelector('[name=weapon]').value,ammo:Number(d.element.querySelector('[name=ammo]').value)})},rejectClose:false});
               if(!choice||!Number.isInteger(choice.ammo)||choice.ammo<1) return;
               item=actor.items.get(choice.id);
               if(!item) return;
               current.shot={...current.shot,weaponUuid:item.uuid,actorUuid:actor.uuid,ammoBefore:choice.ammo,model:item.system.model};
             }
-            if(!item||!item.isOwner) return ui.notifications.warn('É necessário ter acesso à arma original para resolver seu defeito.');
+            if(!item||!item.isOwner) return ui.notifications.warn(t("É necessário ter acesso à arma original para resolver seu defeito."));
             const roll=await new Roll('1d20').evaluate();
             const defect=defectResult(current.shot.model,roll.total,current.shot.ammoBefore??2);
-            const next={...current,defect,defectCleared:defect.fired,note:current.note?.startsWith('20 natural:')?'':current.note};
+            const next={...current,defect,defectCleared:defect.fired,note:current.note?.startsWith(t("20 natural:"))?'':current.note};
             await message.update({content:rollCard(next),'flags.boothill.check':next,rolls:[...message.rolls,roll]});
             if(defect.fired||defect.kind==='explosion') await playWeaponSound(current.shot.audio??item.system);
             if(defect.blocked) await item.update({'system.malfunction':defect.blocked,'system.jamProgress':0});
@@ -69,15 +70,15 @@ export function registerChatCards() {
             if(current.defect?.kind!=='explosion'||current.explosionMessage) return;
             const actor=await fromUuid(current.shot.actorUuid);
             if(!actor?.isOwner) return;
-            const hand=await foundry.applications.api.DialogV2.prompt({window:{title:'Mão atingida pela explosão'},content:'<label>Mão <select name="hand"><option value="rightArm">Direita</option><option value="leftArm">Esquerda</option></select></label>',ok:{label:'Rolar gravidade',callback:(e,b,d)=>d.element.querySelector('[name=hand]').value},rejectClose:false});
+            const hand=await foundry.applications.api.DialogV2.prompt({window:{title:t("Mão atingida pela explosão")},content:`<label>${t("Mão")} <select name="hand"><option value="rightArm">${t("Direita")}</option><option value="leftArm">${t("Esquerda")}</option></select></label>`,ok:{label:t("Rolar gravidade"),callback:(e,b,d)=>d.element.querySelector('[name=hand]').value},rejectClose:false});
             if(!['leftArm','rightArm'].includes(hand)) return;
             const roll=await new Roll('1d6').evaluate();
-            const next={title:'Explosão · Ferimento na mão',target:1,die:1,luck:actor.system.attributes.luck,bladeHit:true,defectCleared:true,shot:{wound:current.defect.bonus},injury:injuryResult(roll.total,hand,current.defect.bonus),note:'Mão representada pela região do braço. Aplique ao token do atirador.'};
+            const next={title:t("Explosão · Ferimento na mão"),target:1,die:1,luck:actor.system.attributes.luck,bladeHit:true,defectCleared:true,shot:{wound:current.defect.bonus},injury:injuryResult(roll.total,hand,current.defect.bonus),note:t("Mão representada pela região do braço. Aplique ao token do atirador.")};
             const created=await ChatMessage.create({speaker:ChatMessage.getSpeaker({actor}),whisper:message.whisper,blind:message.blind,style:CONST.CHAT_MESSAGE_STYLES.ROLL,rolls:[roll],content:rollCard(next),flags:{boothill:{check:next}}});
             const updated={...current,explosionMessage:created.id};
             await message.update({content:rollCard(updated),'flags.boothill.check':updated});
           }
-        } catch(error) {console.error(error);ui.notifications.error('Não foi possível resolver o defeito.');}
+        } catch(error) {console.error(error);ui.notifications.error(t("Não foi possível resolver o defeito."));}
         finally {resolving.delete(message.id);}
       });
     }
@@ -93,11 +94,11 @@ export function registerChatCards() {
           if(kind==='secondary') {
             const info=spreadInfo(current);if(!info) return;
             if(current.die===20&&!current.defectCleared) {
-              if(!game.user.isGM||!await foundry.applications.api.DialogV2.confirm({window:{title:'Defeito da arma'},content:'<p>A verificação confirmou ausência de defeito no disparo original?</p>'})) return;
+              if(!game.user.isGM||!await foundry.applications.api.DialogV2.confirm({window:{title:t("Defeito da arma")},content:`<p>${t("A verificação confirmou ausência de defeito no disparo original?")}</p>`})) return;
               current.defectCleared=true;await message.update({'flags.boothill.check.defectCleared':true});
             }
             const roll=await new Roll('1d20').evaluate();
-            const next={title:`${current.title} · Alvo secundário`,target:info.target,die:roll.total,luck:current.luck,shot:{...current.shot,skill:0,mode:'fan'},secondary:true,defectCleared:true,modifiers:[],note:'Alvo secundário: sem ajuste de localização; dano manual pelo Juiz.'};
+            const next={title:`${current.title} ${t("· Alvo secundário")}`,target:info.target,die:roll.total,luck:current.luck,shot:{...current.shot,skill:0,mode:'fan'},secondary:true,defectCleared:true,modifiers:[],note:t("Alvo secundário: sem ajuste de localização; dano manual pelo Juiz.")};
             await ChatMessage.create({speaker:message.speaker,whisper:message.whisper,blind:message.blind,style:CONST.CHAT_MESSAGE_STYLES.ROLL,rolls:[roll],content:rollCard(next),flags:{boothill:{check:next}}});
             return;
           }
@@ -105,7 +106,7 @@ export function registerChatCards() {
           let next={...current},roll;
           if(kind==='count'&&current.pelletsDie===undefined) {
             if(current.die===20&&!current.defectCleared) {
-              if(!game.user.isGM||!await foundry.applications.api.DialogV2.confirm({window:{title:'Defeito da arma'},content:'<p>A verificação manual confirmou que a arma disparou sem defeito?</p>'})) return;
+              if(!game.user.isGM||!await foundry.applications.api.DialogV2.confirm({window:{title:t("Defeito da arma")},content:`<p>${t("A verificação manual confirmou que a arma disparou sem defeito?")}</p>`})) return;
               next.defectCleared=true;
             }
             roll=await new Roll('1d6').evaluate();next.pelletsDie=roll.total;next.pelletsCount=pelletCount(roll.total,current.shot.range);next.pelletMessages={};
@@ -116,13 +117,13 @@ export function registerChatCards() {
           } else if(kind==='wound') {
             const index=Number(action.dataset.index);
             if(!Number.isInteger(index)||index<0||index>=current.pelletsCount||current.pelletMessages?.[index]) return;
-            const child={title:`${current.title} · Ferimento ${index+1}/${current.pelletsCount}`,target:current.target,die:current.die,luck:current.luck,...(current.luckDie!==undefined?{luckDie:current.luckDie}:{}),shot:{...current.shot},pelletChild:true,secondary:!!current.secondary,targetTokenUuid:current.targetTokenUuid??null,defectCleared:current.defectCleared??false,modifiers:[],note:current.secondary?'Ferimento do mesmo alvo adicional desta rolagem. Ao aplicar, a regra de montaria pode transferi-lo ao cavalo.':''};
+            const child={title:`${current.title} ${t("· Ferimento")} ${index+1}/${current.pelletsCount}`,target:current.target,die:current.die,luck:current.luck,...(current.luckDie!==undefined?{luckDie:current.luckDie}:{}),shot:{...current.shot},pelletChild:true,secondary:!!current.secondary,targetTokenUuid:current.targetTokenUuid??null,defectCleared:current.defectCleared??false,modifiers:[],note:current.secondary?t("Ferimento do mesmo alvo adicional desta rolagem. Ao aplicar, a regra de montaria pode transferi-lo ao cavalo."):''};
             const resolved=await resolveSecondaryPellet(child);
             const created=await ChatMessage.create({speaker:message.speaker,whisper:message.whisper,blind:message.blind,style:CONST.CHAT_MESSAGE_STYLES.ROLL,rolls:resolved.rolls,content:rollCard(resolved.data),flags:{boothill:{check:resolved.data}}});
             next.pelletMessages={...current.pelletMessages,[index]:created.id};
           } else return;
           await message.update({content:rollCard(next),'flags.boothill.check':next,...(roll?{rolls:[...message.rolls,roll]}:{})});
-        } catch(error) {console.error(error);ui.notifications.error('Não foi possível resolver a dispersão.');}
+        } catch(error) {console.error(error);ui.notifications.error(t("Não foi possível resolver a dispersão."));}
         finally {resolving.delete(message.id);}
       });
     }
@@ -139,7 +140,7 @@ export function registerChatCards() {
         try {
           let next={...current},roll;
           if(kind==='defect'&&current.die===20&&!current.defectCleared) {
-            if(!game.user.isGM) return ui.notifications.warn('O Juiz deve confirmar o resultado da verificação de defeito.');
+            if(!game.user.isGM) return ui.notifications.warn(t("O Juiz deve confirmar o resultado da verificação de defeito."));
             next.defectCleared=true;
           } else {
             if(current.die===20&&!current.defectCleared) return;
@@ -147,14 +148,14 @@ export function registerChatCards() {
               const target=await fromUuid(next.targetTokenUuid);next.animalTarget=['horse','wildAnimal'].includes(target?.actor?.type);next.wildTarget=target?.actor?.type==='wildAnimal';
               const mount=target?.actor?.system.mount;
               next.riderMounted=!!mount?.mounted;
-              next.mountedHint=mount?.uuid?(mount.mounted?'Alvo montado: perna ou abdômen com localização ímpar transfere o tiro ao cavalo.':'O alvo tem cavalo vinculado, mas está marcado como Desmontado. Confira a ficha do token alvo.'):!next.animalTarget?'O token alvo não está marcado como montado. Em tokens desvinculados, confira o vínculo na ficha do próprio token.':'';
-            }if(targets.length>1) ui.notifications.warn('Mais de um alvo marcado: use Aplicar dano em um token selecionado.');}
+              next.mountedHint=mount?.uuid?(mount.mounted?t("Alvo montado: perna ou abdômen com localização ímpar transfere o tiro ao cavalo."):t("O alvo tem cavalo vinculado, mas está marcado como Desmontado. Confira a ficha do token alvo.")):!next.animalTarget?t("O token alvo não está marcado como montado. Em tokens desvinculados, confira o vínculo na ficha do próprio token."):'';
+            }if(targets.length>1) ui.notifications.warn(t("Mais de um alvo marcado: use Aplicar dano em um token selecionado."));}
             else if(kind==='horse') {
               const choice=horseLocationChoice(current);
               if(!choice) return;
               const token=await fromUuid(current.targetTokenUuid);
               const recipient=await mountedRecipient(token,choice.id,choice.value);
-              if(!recipient||recipient.actor?.type!=='horse') return ui.notifications.warn('O alvo não está montado em um cavalo válido. Confira a ficha do token.');
+              if(!recipient||recipient.actor?.type!=='horse') return ui.notifications.warn(t("O alvo não está montado em um cavalo válido. Confira a ficha do token."));
               roll=await new Roll('1d20').evaluate();
               next={...next,locationDie:roll.total,locationValue:roll.total,animalTarget:true,riderMounted:false,targetTokenUuid:recipient.uuid,mountResolution:{fromTokenUuid:token.uuid,toTokenUuid:recipient.uuid,fromName:token.name,toName:recipient.name,originalLocation:choice.value,newLocation:roll.total}};
             }
@@ -171,15 +172,15 @@ export function registerChatCards() {
           }
           await message.update({content:rollCard(next),'flags.boothill.check':next,...(roll?{rolls:[...message.rolls,roll]}:{})});
           if(next.injury&&next.targetTokenUuid&&!next.secondary) await requestDamage(message,next.targetTokenUuid);
-        } catch(error) {console.error(error);ui.notifications.error(error.message||'Não foi possível registrar o ferimento.');}
+        } catch(error) {console.error(error);ui.notifications.error(error.message||t("Não foi possível registrar o ferimento."));}
         finally {resolving.delete(message.id);}
       });
     }
     const damageButton=content.querySelector('[data-bh-damage]');
-    if(damageButton) damageButton.title='Aplicar dano · Shift+clique para ajustar a gravidade';
+    if(damageButton) damageButton.title=t("Aplicar dano · Shift+clique para ajustar a gravidade");
     damageButton?.addEventListener('click',async event=>{
       const selected=canvas.tokens.controlled;
-      if(selected.length!==1) return ui.notifications.warn('Selecione exatamente um token (não apenas um alvo).');
+      if(selected.length!==1) return ui.notifications.warn(t("Selecione exatamente um token (não apenas um alvo)."));
       damageButton.disabled=true;
       try {
         if(event.shiftKey) {
@@ -200,7 +201,7 @@ export function registerChatCards() {
         const roll=await new Roll('1d20').evaluate();
         const next={...current,luckDie:roll.total};
         await message.update({content:rollCard(next),'flags.boothill.check':next,rolls:[...message.rolls,roll]});
-      } catch(error) {ui.notifications.error('Não foi possível registrar o teste de Sorte.');console.error(error);button.disabled=false;}
+      } catch(error) {ui.notifications.error(t("Não foi possível registrar o teste de Sorte."));console.error(error);button.disabled=false;}
       finally {resolving.delete(message.id);}
     });
   });
