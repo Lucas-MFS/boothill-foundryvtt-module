@@ -616,5 +616,22 @@
   "TYPES.Item.weapon": "Arma",
   "TYPES.Item.ammunition": "Munição",
   "BOOTHILL.Text.cce52d97": ". Nova localização:",
-  "BOOTHILL.Text.35f95cd": ". Escolha a região indicada para rolar a gravidade."
+  "BOOTHILL.Text.35f95cd": ". Escolha a região indicada para rolar a gravidade.",
+  "BOOTHILL.Text.b8054ada": "Tamanho do alvo",
+  "BOOTHILL.Text.63fe565e": "Alvo obscuro",
+  "BOOTHILL.Text.c66782c6": "Escuridão",
+  "BOOTHILL.Text.1ad22942": "Espreita",
+  "BOOTHILL.Text.becbb834": "Movimento do alvo",
+  "BOOTHILL.Text.6949170a": "Muito grande (+4)",
+  "BOOTHILL.Text.13371e80": "Grande (+2)",
+  "BOOTHILL.Text.41b99c15": "Normal (0)",
+  "BOOTHILL.Text.e559ddfb": "Pequeno (−2)",
+  "BOOTHILL.Text.986839d9": "Muito pequeno (−4)",
+  "BOOTHILL.Text.cde53d29": "Alvo obscuro (−2)",
+  "BOOTHILL.Text.cfd88aab": "Escuridão (−4)",
+  "BOOTHILL.Text.acb28317": "Espreita com apoio sólido (+2, somente primeiro tiro)",
+  "BOOTHILL.Text.c11d87ff": "Movimento do alvo (automático)",
+  "BOOTHILL.Text.bcf02361": "Sem penalidade",
+  "BOOTHILL.Text.aa0b8aa6": "Correndo / trotando (−2)",
+  "BOOTHILL.Text.2312eb2b": "Esquivando / galopando (−4)"
 }

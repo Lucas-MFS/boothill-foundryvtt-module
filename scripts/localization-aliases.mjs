@@ -1,5 +1,6 @@
 // Recognize stored English rule labels when rendering a chat card in another language.
 export const aliases={
+  "8525916": "BOOTHILL.Text.acb28317",
   "8867343": "BOOTHILL.Text.d226f254",
   "11836432": "BOOTHILL.Text.1af2e5e6",
   "31348414": "BOOTHILL.Text.7c84a1ba",
@@ -600,5 +601,21 @@ export const aliases={
   "be2897d3": "BOOTHILL.Text.e54ec649",
   "28305ee": "BOOTHILL.Text.3a257f37",
   "d14af2f8": "BOOTHILL.Text.cce52d97",
-  "42ad3164": "BOOTHILL.Text.35f95cd"
+  "42ad3164": "BOOTHILL.Text.35f95cd",
+  "f1740fe9": "BOOTHILL.Text.b8054ada",
+  "7263f5d": "BOOTHILL.Text.63fe565e",
+  "381b330a": "BOOTHILL.Text.c66782c6",
+  "c3331838": "BOOTHILL.Text.1ad22942",
+  "8430a1ed": "BOOTHILL.Text.becbb834",
+  "9a6b8ed0": "BOOTHILL.Text.6949170a",
+  "2ce6e7e4": "BOOTHILL.Text.13371e80",
+  "41b99c15": "BOOTHILL.Text.41b99c15",
+  "8c71363b": "BOOTHILL.Text.e559ddfb",
+  "a927d557": "BOOTHILL.Text.986839d9",
+  "826031c": "BOOTHILL.Text.cde53d29",
+  "5d57dff": "BOOTHILL.Text.cfd88aab",
+  "c5848aff": "BOOTHILL.Text.c11d87ff",
+  "2d151da3": "BOOTHILL.Text.bcf02361",
+  "996a8c95": "BOOTHILL.Text.aa0b8aa6",
+  "6fea3408": "BOOTHILL.Text.2312eb2b"
 };

@@ -1,6 +1,8 @@
 # Histórico resumido
 
 ## 0.16.1
+- Modificadores de tiro para tamanho, alvo obscuro, escuridão e espreita; movimento do alvo marcado aplicado automaticamente.
+- Modificadores de tiro para tamanho, alvo obscuro, escuridão e espreita; movimento do alvo marcado aplicado automaticamente.
 - Traduções nativas em português brasileiro e inglês para fichas, configurações, diálogos e mensagens do sistema.
 
 ## 0.16.0

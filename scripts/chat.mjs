@@ -110,7 +110,7 @@ export function registerChatCards() {
               next.defectCleared=true;
             }
             roll=await new Roll('1d6').evaluate();next.pelletsDie=roll.total;next.pelletsCount=pelletCount(roll.total,current.shot.range);next.pelletMessages={};
-            const targets=[...game.user.targets];next.targetTokenUuid=!current.secondary&&targets.length===1?targets[0].document.uuid:null;
+            const targets=[...game.user.targets];next.targetTokenUuid=current.secondary?null:(current.shot?.targetTokenUuid??(targets.length===1?targets[0].document.uuid:null));
           } else if(kind==='manual'&&current.pelletsCount===null&&game.user.isGM) {
             const value=Number(content.querySelector('[data-bh-pellets-count]').value);if(!Number.isInteger(value)||value<0||value>4) return;
             next.pelletsCount=value;next.pelletsManual=true;
@@ -144,7 +144,7 @@ export function registerChatCards() {
             next.defectCleared=true;
           } else {
             if(current.die===20&&!current.defectCleared) return;
-            if(kind==='location'&&!current.locationDie) {roll=await new Roll('1d20').evaluate();next.locationDie=roll.total;const targets=[...game.user.targets];next.targetTokenUuid=current.secondary?null:(current.pelletChild||current.bladeHit)?(current.targetTokenUuid??null):targets.length===1?targets[0].document.uuid:null;if(next.targetTokenUuid) {
+            if(kind==='location'&&!current.locationDie) {roll=await new Roll('1d20').evaluate();next.locationDie=roll.total;const targets=[...game.user.targets];next.targetTokenUuid=current.secondary?null:(current.pelletChild||current.bladeHit)?(current.targetTokenUuid??null):(current.shot?.targetTokenUuid??(targets.length===1?targets[0].document.uuid:null));if(next.targetTokenUuid) {
               const target=await fromUuid(next.targetTokenUuid);next.animalTarget=['horse','wildAnimal'].includes(target?.actor?.type);next.wildTarget=target?.actor?.type==='wildAnimal';
               const mount=target?.actor?.system.mount;
               next.riderMounted=!!mount?.mounted;

@@ -616,5 +616,22 @@
   "TYPES.Item.weapon": "Weapon",
   "TYPES.Item.ammunition": "Ammunition",
   "BOOTHILL.Text.cce52d97": ". New location:",
-  "BOOTHILL.Text.35f95cd": ". Choose the indicated location to roll severity."
+  "BOOTHILL.Text.35f95cd": ". Choose the indicated location to roll severity.",
+  "BOOTHILL.Text.b8054ada": "Target size",
+  "BOOTHILL.Text.63fe565e": "Obscured target",
+  "BOOTHILL.Text.c66782c6": "Darkness",
+  "BOOTHILL.Text.1ad22942": "Braced ambush",
+  "BOOTHILL.Text.becbb834": "Target movement",
+  "BOOTHILL.Text.6949170a": "Very large (+4)",
+  "BOOTHILL.Text.13371e80": "Large (+2)",
+  "BOOTHILL.Text.41b99c15": "Normal (0)",
+  "BOOTHILL.Text.e559ddfb": "Small (−2)",
+  "BOOTHILL.Text.986839d9": "Very small (−4)",
+  "BOOTHILL.Text.cde53d29": "Obscured target (−2)",
+  "BOOTHILL.Text.cfd88aab": "Darkness (−4)",
+  "BOOTHILL.Text.acb28317": "Braced ambush (+2, first shot only)",
+  "BOOTHILL.Text.c11d87ff": "Target movement (automatic)",
+  "BOOTHILL.Text.bcf02361": "No penalty",
+  "BOOTHILL.Text.aa0b8aa6": "Running / trotting (−2)",
+  "BOOTHILL.Text.2312eb2b": "Dodging / galloping (−4)"
 }

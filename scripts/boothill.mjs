@@ -1,4 +1,5 @@
 import {t,localized} from './localization.mjs';
+import {promptShootingModifiers} from './shooting-modifiers.mjs';
 import {remainingHealth,registerHealthResource} from './health-resource.mjs';
 import {registerMovementRuler} from './movement-ruler.mjs';
 import {attackAnimal} from './animal-attack.mjs';
@@ -248,19 +249,22 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
       if(!chance) return ui.notifications.warn(t("Empunhadura inválida ou tipo de tiro indisponível para esta arma."));
       if(item.system.malfunction) return ui.notifications.warn(t("A arma precisa ser destravada ou limpa pela ficha do item."));
       if(!item.system.ammo) return ui.notifications.warn(t("A arma está descarregada."));
-      const modifier=await judgeModifier(event,`${SHOTS[mode].label} — ${item.name}`);
-      if(modifier===null||modifier===undefined||!Number.isInteger(modifier)) return;
+      const targets=[...game.user.targets];
+      if(targets.length>1) return ui.notifications.warn(t('Marque apenas um alvo.'));
+      const targetToken=targets[0]?.document??null;
+      const adjustments=await promptShootingModifiers(event,`${SHOTS[mode].label} — ${item.name}`,{actor:targetToken?.actor});
+      if(!adjustments) return;
       if(!item.system.ammo||!item.system.equipped) return;
       const current=this.chanceFor(item,mode);
       if(!current||healthSummary(this.actor.system.health,this.actor.system.attributes.strength).unconscious) return;
       const ammoBefore=item.system.ammo;
-      const target=current.total+modifier,roll=await new Roll('1d20').evaluate();
+      const target=current.total+adjustments.total,roll=await new Roll('1d20').evaluate();
       await consumeMeleeModifier(this.actor);
       await item.update({'system.ammo':item.system.ammo-1,'system.reloadProgress':0});
       if(roll.total!==20) await playWeaponSound(item.system);
       await postCheck(this.actor,{title:`${item.name} · ${SHOTS[mode].label}`,target,roll,
-        modifiers:[[t("Perícia"),current.training],[t("Duas armas"),current.twoWeapons],[t("Mão inábil"),current.offhand],[t("Ferimentos"),current.woundPenalty],[t("Alcance"),current.distance],[t("Dispersão"),current.spread],[t("Movimento"),current.movementPenalty],[t("Efeito de briga"),current.effect],[t("Juiz"),modifier]],
-        shot:{img:item.img,weaponName:item.name,audio:shotAudio(item.system),weaponUuid:item.uuid,actorUuid:this.actor.uuid,ammoBefore,model:item.system.model,mode,range:this.actor.system.combat.range,skill:this.actor.system.skills[weaponSummary(item.system).skill==='Rifle'?'rifle':'pistola'],wound:item.system.wound},note:''});
+        modifiers:[[t("Perícia"),current.training],[t("Duas armas"),current.twoWeapons],[t("Mão inábil"),current.offhand],[t("Ferimentos"),current.woundPenalty],[t("Alcance"),current.distance],[t("Dispersão"),current.spread],[t("Movimento"),current.movementPenalty],[t("Efeito de briga"),current.effect],...adjustments.entries],
+        shot:{targetTokenUuid:targetToken?.uuid??null,img:item.img,weaponName:item.name,audio:shotAudio(item.system),weaponUuid:item.uuid,actorUuid:this.actor.uuid,ammoBefore,model:item.system.model,mode,range:this.actor.system.combat.range,skill:this.actor.system.skills[weaponSummary(item.system).skill==='Rifle'?'rifle':'pistola'],wound:item.system.wound},note:''});
     } finally {this._firing=false;}
   }
   rapidityFor(item) {
