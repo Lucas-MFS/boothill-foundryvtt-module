@@ -152,7 +152,10 @@ export class CharacterSheet extends foundry.applications.api.HandlebarsApplicati
     await this.actor.update({'system.mount.mounted':!this.actor.system.mount.mounted});
   }
   static async removeMount() {
-    if(this.isEditable) await this.actor.update({'system.mount':{uuid:'',tokenUuid:'',mounted:false}});
+    if(!this.isEditable) return;
+    const changes={'system.mount':{uuid:'',tokenUuid:'',mounted:false}};
+    if(['horseWalk','trot','gallop'].includes(this.actor.system.combat.movement)) Object.assign(changes,{'system.combat.movement':'still','system.combat.movementRound':null,'system.combat.movementCombat':''});
+    await this.actor.update(changes);
   }
   static async chooseMountToken() {
     if(!this.isEditable) return;

@@ -7,8 +7,9 @@ test('movimento do alvo: esquiva/galopar −4, correr/trotar −2; rodada expira
  for(const [movement,expected]of [['gallop',-4],['run',-2],['trot',-2],['walk',0],['still',0]]){actor.system.combat.movement=movement;assert.equal(targetMovementPenalty(actor,combat),expected);}
  actor.system.combat.movement='dodge';assert.equal(targetMovementPenalty(actor,{...combat,round:3}),0);assert.equal(targetMovementPenalty(actor,null),0);assert.equal(targetMovementPenalty(null,combat),0);
 });
-test('Tabela 4: tamanho, obscuridade, escuridão e espreita acumulam sem duplicar outros ajustes',()=>{
- assert.equal(shootingModifiers({size:-4,obscured:true,darkness:true,ambush:true,modifier:1,movement:-4}).total,-11);
+test('visibilidade usa uma única penalidade, acumulada com tamanho, espreita e movimento',()=>{
+ assert.equal(shootingModifiers({size:-4,visibility:-4,ambush:true,modifier:1,movement:-4}).total,-9);
+ assert.equal(shootingModifiers({visibility:-2}).total,-2);assert.equal(shootingModifiers({visibility:-6}),null);
  assert.equal(shootingModifiers({size:4}).total,4);assert.equal(shootingModifiers({size:3}),null);assert.equal(shootingModifiers({modifier:1.5}),null);
 });
 test('clique normal aplica esquiva automaticamente e cancelar o Shift não confirma o tiro',async()=>{
@@ -17,6 +18,7 @@ test('clique normal aplica esquiva automaticamente e cancelar o Shift não confi
  assert.equal((await promptShootingModifiers({shiftKey:false},'Tiro',{actor})).total,-4);
  let config;globalThis.foundry={utils:{escapeHTML:s=>s},applications:{api:{DialogV2:{prompt:async c=>{config=c;return null;}}}}};
  assert.equal(await promptShootingModifiers({shiftKey:true},'Tiro',{actor}),null);
- assert.match(config.content,/name="size"/);assert.match(config.content,/name="obscured"/);assert.doesNotMatch(config.content,/name="movement"/);
+ assert.ok(config.content.indexOf('name="modifier"')<config.content.indexOf('name="size"'));
+ assert.match(config.content,/<select name="visibility">/);assert.doesNotMatch(config.content,/name="(?:obscured|darkness|movement)"/);
  assert.equal((await promptShootingModifiers({shiftKey:false},'Tiro')).total,0);
 });

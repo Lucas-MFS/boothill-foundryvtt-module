@@ -633,5 +633,8 @@
   "BOOTHILL.Text.c11d87ff": "Target movement (automatic)",
   "BOOTHILL.Text.bcf02361": "No penalty",
   "BOOTHILL.Text.aa0b8aa6": "Running / trotting (−2)",
-  "BOOTHILL.Text.2312eb2b": "Dodging / galloping (−4)"
+  "BOOTHILL.Text.2312eb2b": "Dodging / galloping (−4)",
+  "BOOTHILL.Text.8c23fafa": "Visibility",
+  "BOOTHILL.Text.e081cb37": "Unlink",
+  "BOOTHILL.Text.2c0ed665": "Unlink horse"
 }

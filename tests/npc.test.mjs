@@ -24,6 +24,15 @@ test('modelos NPC e personagem são independentes e NPC compartilha saúde e com
  game.user.isGM=false;assert.equal((await sheet._prepareContext({})).extraAttributes.length,0);
 });
 
+test('desvincular montaria remove só o vínculo e encerra movimento montado',async()=>{
+ const {CharacterSheet}=await import('../scripts/boothill.mjs');let changes;
+ const sheet=new CharacterSheet();sheet.isEditable=true;
+ sheet.actor={system:{combat:{movement:'gallop'}},update:async value=>{changes=value;}};
+ await CharacterSheet.removeMount.call(sheet);
+ assert.deepEqual(changes['system.mount'],{uuid:'',tokenUuid:'',mounted:false});assert.equal(changes['system.combat.movement'],'still');
+ changes=null;sheet.isEditable=false;await CharacterSheet.removeMount.call(sheet);assert.equal(changes,null);
+});
+
 test('Cavalo tem atributos próprios, inventário e regiões compatíveis com dano',async()=>{
  const {HorseSheet,HORSE_ATTRIBUTES,HORSE_SKILLS}=await import('../scripts/boothill.mjs');
  const schema=CONFIG.Actor.dataModels.horse.defineSchema();
